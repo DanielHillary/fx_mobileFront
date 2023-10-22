@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
 import { loadCustomFont } from '../../components/exits/exitlevelcard.style'
 import { loadThemeCustomFont } from '../../constants/theme';
@@ -15,14 +15,17 @@ const TradeDetails = () => {
   }, []);
 
   return (
-    
-      <GestureHandlerRootView style={{ flex: 1 }}>
-          <View style={styles.container}>
-            <StatusBar style="dark" />
-            <Text style={{ color: "white" }}> I am really really tired</Text>
-            <BottomSlide />
-          </View>     
-      </GestureHandlerRootView> 
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#111" }}>
+      <StatusBar style="light" />
+      <View style={styles.container}>
+        <Text style={{ color: "white" }}> I am really really tired</Text>
+
+        <Text style={{ alignContent: "flex-end", color: "white" }}>This is part  page</Text>
+        <Text style={{ alignContent: "flex-end", color: "white" }}>This is part  page</Text>
+
+        <BottomSlide />
+      </View>
+    </SafeAreaView>
   );
 }
 
