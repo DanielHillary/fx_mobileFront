@@ -8,33 +8,38 @@ import ActiveTradeCard from './ActiveTradeCard';
 
 
 
-const ActiveTrade = () => {
+const ActiveTrade = ({ trades }) => {
 
   const data = [
     {
       name: 'John',
       age: 30,
       city: 'New York',
+      active: false,
     },
     {
       name: 'Alice',
       age: 25,
       city: 'Los Angeles',
+      active: true,
     },
     {
       name: 'Bob',
       age: 35,
       city: 'Chicago',
+      active: true,
     },
     {
       name: 'Bob',
       age: 34,
       city: 'Chicago',
+      active: true,
     },
     {
       name: 'Bob',
       age: 33,
       city: 'Chicago',
+      active: false
     },
 
   ]
@@ -60,18 +65,18 @@ const ActiveTrade = () => {
       </View>
       <View style={styles.cardsContainer}>
         {isLoading ? (
-          <ActivityIndicator size="large" colors={COLORS.primary}/>
+          <ActivityIndicator size="large" colors={COLORS.darkyellow}/>
         ) : error ? (
           <Text>Something Went wrong</Text>
         ) : (
           <FlatList 
-            data={data}
+            data={trades}
             renderItem={({ item }) => (
               <ActiveTradeCard 
                 item={item}
               />
             )}
-            keyExtractor={item => item?.age}
+            keyExtractor={item => item?.id}
             contentContainerStyle={{ rowGap: SIZES.small }}
             vertical
             showsHorizontalScrollIndicator={false}

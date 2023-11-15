@@ -5,10 +5,11 @@ import ActiveAlertCard from './ActiveAlertCard';
 import LinearGradient from 'expo-linear-gradient'
 
 import styles from './activealert.style'
+import { useNavigation } from '@react-navigation/native';
 
 
 
-const ActiveAlert = () => {
+const ActiveAlert = ({ alerts }) => {
 
   const data = [
     {
@@ -40,37 +41,40 @@ const ActiveAlert = () => {
   ]
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [isEmpty, setIsEmpty] = useState(false);
 
-  // const handleCardPress = (item) => {
-  //   router.push(`/job-details/${item.job_id}`);
-  //   setSelectedJob(item.job_id);
-  // }
+  const { navigate } = useNavigation();
 
-  // console.log(data);
+  let text1 = "History"
+  let text2 = "Show all"
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Active Alerts</Text>
-        <TouchableOpacity>
-           <Text style={styles.headerBtn}>Show all</Text>
+        <TouchableOpacity onPress={() => {navigate("PriceAlert")}}>
+           <Text style={styles.headerBtn}>{isEmpty ? text1 : text2}</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.cardsContainer}>
         {isLoading ? (
-          <ActivityIndicator size="large" colors={COLORS.primary}/>
-        ) : error ? (
+          <ActivityIndicator size="large" colors={COLORS.darkyellow}/>
+        ) : error ? ( 
           <Text>Something Went wrong</Text>
-        ) : (
+        ) : isEmpty ? (
+          <View>
+            <Text>No active Alerts</Text>
+          </View>
+        ) :(
           <FlatList 
-            data={data}
+            data={alerts}
             renderItem={({ item }) => (
               <ActiveAlertCard 
                 item={item}
-                handleCardPress={() => {}}
+                handleCardPress={() => {navigate("AlertDetails")}}
               />
             )}
-            keyExtractor={item => item?.age}
+            keyExtractor={item => item?.id}
             contentContainerStyle={{ columnGap: SIZES.medium }}
             horizontal
             showsHorizontalScrollIndicator={false}

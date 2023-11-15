@@ -12,65 +12,24 @@ const ExitLevel = () => {
 
   const data = [
     {
-      name: 'John',
-      age: 30,
-      city: 'New York',
+      name: '12332.576',
+      age: 1.5665,
+      city: 4,
+      count: 1,
     },
     {
-      name: 'Alice',
-      age: 25,
-      city: 'Los Angeles',
+      name: '24523.029',
+      age: 2.5323,
+      city: 3.4,
+      count: 2,
     },
     {
-      name: 'Bob',
-      age: 35,
-      city: 'Chicago',
+      name: '02323.566',
+      age: 0.5650,
+      city: 0.4,
+      count: 3,
     },
-    {
-      name: 'Bob',
-      age: 34,
-      city: 'Chicago',
-    },
-    {
-      name: 'Bob',
-      age: 33,
-      city: 'Chicago',
-    },
-    {
-      name: 'Bob',
-      age: 32,
-      city: 'Chicago',
-    },
-    {
-      name: 'Bob',
-      age: 31,
-      city: 'Chicago',
-    },
-    {
-      name: 'Bob',
-      age: 40,
-      city: 'Chicago',
-    },
-    {
-      name: 'Bob',
-      age: 41,
-      city: 'Chicago',
-    },
-    {
-      name: 'Bob',
-      age: 42,
-      city: 'Chicago',
-    },
-    {
-      name: 'Bob',
-      age: 43,
-      city: 'Chicago',
-    },
-    {
-      name: 'Bob',
-      age: 44,
-      city: 'Chicago',
-    },
+   
 
   ]
   const [isLoading, setIsLoading] = useState(false)
@@ -80,7 +39,7 @@ const ExitLevel = () => {
   return (
     
     <View style={styles.container}>
-      <ScrollView>
+      <ScrollView >
         <View style={styles.cardsContainer}>
           {isLoading ? (
             <ActivityIndicator size="large" colors={COLORS.primary}/>

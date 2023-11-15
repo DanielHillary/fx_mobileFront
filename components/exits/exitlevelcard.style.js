@@ -17,11 +17,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "space-between",
     alignItems: "center",
-    flexDirection: "row",
-    padding: SIZES.medium,
-    borderRadius: SIZES.small,
-    backgroundColor: "black",
-    ...SHADOWS.medium,
+    height: 80,
+    columnGap: SIZES.medium,
+    padding: SIZES.small,
+    marginTop: SIZES.xSmall,
+    // borderRadius: SIZES.small,
+    backgroundColor: "#111",
+    // ...SHADOWS.medium,
     shadowColor: COLORS.white,
   },
   logoContainer: {
@@ -39,10 +41,12 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
-    marginHorizontal: SIZES.medium,
+    flexDirection: 'row',
+    // marginHorizontal: SIZES.small,
+    gap: SIZES.large
   },
-  jobName: {
-    fontSize: SIZES.medium,
+  at: {
+    fontSize: SIZES.small,
     fontFamily: "DMBold",
     color: COLORS.lightWhite,
   },
@@ -51,6 +55,7 @@ const styles = StyleSheet.create({
     fontFamily: "DMRegular",
     color: COLORS.lightWhite,
     textTransform: "capitalize",
+    // marginLeft: 20
   },
 });
 

@@ -2,29 +2,43 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Button } from "react-native";
 
 import styles from "./exitlevelcard.style";
+import { COLORS, SIZES } from "../../constants";
 
 const ExitLevelCard = ({ item, handleNavigate }) => {
   return (
-    <TouchableOpacity style={styles.container} onPress={
+    <View style={styles.container} onPress={
       handleNavigate()
     }>
-      <TouchableOpacity style={styles.logoContainer}>
-        <Image
-          source={{
-            uri: "https://t4.ftcdn.net/jpg/05/05/61/73/360_F_505617309_NN1CW7diNmGXJfMicpY9eXHKV4sqzO5H.jpg",
-          }}
-          resizeMode='contain'
-          style={styles.logImage}
-        />
-      </TouchableOpacity>
-
       <View style={styles.textContainer}>
-        <Text style={styles.jobName} numberOfLines={1}>
-          {item?.name}
-        </Text>
-        <Text style={styles.jobType}>{item?.city}</Text>
-      </View>
-    </TouchableOpacity>
+        <View style={{height: 20, width: 20, borderRadius: 10, borderColor: COLORS.white, borderWidth: 0.5}}>
+          <Text style={{color: COLORS.lightWhite, textAlign: 'center'}}>{item.count}</Text>
+        </View>
+        <View>
+          <Text style={styles.at} numberOfLines={1}>
+            At
+          </Text>
+          <Text style={{color: COLORS.darkyellow, fontSize: SIZES.xLarge}}>{item?.name}</Text>
+        </View>
+
+        
+        <View>
+          <Text style={styles.jobType}>Reduce lotSize</Text>
+          <View style={{flexDirection: 'row',}}>
+             <Text style={{color: COLORS.lightWhite, marginTop: 10}}>by</Text>
+             <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large + 2, marginTop: 5, marginLeft: 6, alignSelf: 'flex-end'}}>{item?.city}</Text>
+          </View>
+        </View>
+
+        <View>
+          <Text style={styles.jobType}>Set stopLoss</Text>
+          <View style={{flexDirection: 'row'}}>
+             <Text style={{color: COLORS.lightWhite,  marginTop: 10}}>at</Text>
+             <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large + 2, marginTop: 5, marginLeft: 6, alignSelf: 'flex-end'}}>{item?.age}</Text>
+          </View>
+        </View>
+      </View> 
+      <View style={{backgroundColor: COLORS.white, height: 0.5, width: "100%"}} />
+    </View>
   );
 };
 

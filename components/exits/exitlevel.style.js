@@ -5,7 +5,8 @@ import { COLORS, FONT, SIZES } from "../../constants";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: SIZES.small,
+    // borderRadius: 15,
+    backgroundColor: "#111"
   },
   header: {
     flexDirection: "row-reverse",
@@ -26,7 +27,9 @@ const styles = StyleSheet.create({
   },
   cardsContainer: {
     flex: 1,
-    gap: SIZES.small - 5,
+    borderRadius: 15,
+    alignContent: 'center'
+    // gap: SIZES.small - 5,
   },
 });
 

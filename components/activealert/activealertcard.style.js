@@ -4,39 +4,44 @@ import { COLORS, FONT, SHADOWS, SIZES } from "../../constants";
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: 'row',
     width: 300,
-    padding: SIZES.xLarge,
-    backgroundColor: "#1a1918",
+    height: 90,
+    padding: SIZES.large - 5 ,
+    backgroundColor: COLORS.componentbackground,
     borderRadius: SIZES.medium,
     justifyContent: "space-between",
+    alignItems: "center",
     // ...SHADOWS.medium,
     shadowColor: COLORS.white,
   },
   logoContainer: {
     width: 50,
     height: 50,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.componentbackground,
     borderRadius: SIZES.medium,
     justifyContent: "center",
     alignItems: "center",
   },
   logoImage: {
-    width: "70%",
-    height: "70%",
+    width: "100%",
+    height: "100%",
   },
-  companyName: {
+  assetName: {
     fontSize: SIZES.medium,
-    fontFamily: FONT.regular,
-    color: "#B3AEC6",
-    marginTop: SIZES.small / 1.5,
+    fontFamily: FONT.bold,
+    color: COLORS.darkyellow,
+    marginRight: SIZES.xLarge,
+    // marginHorizontal: SIZES.xLarge
   },
   infoContainer: {
-    marginTop: SIZES.large,
+    // paddingHorizontal: SIZES.large
   },
-  jobName: {
-    fontSize: SIZES.large,
+  position: {
+    fontSize: SIZES.small,
     fontFamily: FONT.medium,
-    color: COLORS.primary,
+    color: COLORS.lightWhite,
+    alignSelf: 'flex-end'
   },
   infoWrapper: {
     flexDirection: "row",
@@ -49,11 +54,15 @@ const styles = StyleSheet.create({
     fontFamily: FONT.bold,
     color: selectedJob === item.job_id ? COLORS.white : COLORS.primary,
   }),
-  location: {
-    fontSize: SIZES.medium - 2,
-    fontFamily: FONT.regular,
-    color: "#B3AEC6",
+  alertprice: {
+    fontSize: SIZES.large - 2,
+    fontFamily: FONT.bold,
+    color: COLORS.lightWhite,
   },
+  broker: {
+    color: COLORS.lightWhite,
+    fontSize: SIZES.small
+  }
 });
 
 export default styles;

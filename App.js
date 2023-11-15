@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -8,6 +8,7 @@ import { loadThemeCustomFont } from './constants/theme';
 import BottomSlide from './components/BottomSlide';
 import { COLORS, SIZES } from './constants/theme';
 import Navigation from './Navigation';
+import { AuthContext, AuthProvider } from './context/AuthContext';
 
 const App = () => {
 
@@ -17,7 +18,11 @@ const App = () => {
   }, []);
 
   return (
-      <Navigation /> 
+    <AuthProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>        
+        <Navigation />
+      </GestureHandlerRootView>
+    </AuthProvider>
   );
 }
 

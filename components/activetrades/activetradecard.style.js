@@ -5,9 +5,9 @@ import { COLORS, FONT, SHADOWS, SIZES } from "../../constants";
 const styles = StyleSheet.create({
   container: {
     width: "auto",
-    height: 140,
-    padding: SIZES.medium - 5,
-    backgroundColor: "#1a1918",
+    height: 125,
+    padding: SIZES.medium - 3,
+    backgroundColor: COLORS.componentbackground,
     borderRadius: SIZES.xSmall,
     flexDirection: "column",
     justifyContent: "space-between",
@@ -33,12 +33,18 @@ const styles = StyleSheet.create({
     marginTop: SIZES.small / 1.5,
   },
   infoContainer: {
-    flexDirection: "row",
-    width: 'auto',
+    // width: 'auto',
     justifyContent: 'space-between',
-    marginTop: SIZES.medium
+    marginTop: SIZES.small
   },
-  asset: {
+  asset: (symbol) => ({
+    color: COLORS.lightWhite,
+    fontFamily: FONT.bold,
+    fontSize: symbol == "Synthetic" ? SIZES.medium : SIZES.xLarge
+    // fontSize: SIZES.medium
+
+  }),
+  assets:{
     color: COLORS.lightWhite,
     fontFamily: FONT.bold,
     fontSize: SIZES.xLarge
@@ -48,10 +54,15 @@ const styles = StyleSheet.create({
     fontFamily: FONT.bold,
     fontSize: SIZES.small
   },
-  jobName: {
-    fontSize: SIZES.large,
+  desc: {
+    fontSize: SIZES.medium,
     fontFamily: FONT.medium,
-    color: COLORS.primary,
+    color: COLORS.lightWhite,
+  },
+  value: {
+    color: COLORS.darkyellow,
+    fontFamily: FONT.medium,
+    fontSize: SIZES.medium
   },
   infoWrapper: {
     flexDirection: "row",

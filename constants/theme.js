@@ -18,7 +18,9 @@ const COLORS = {
 
   white: "#F3F4F8",
   lightWhite: "#EFF0F6",
-  darkyellow: "#DAA520"
+  darkyellow: "#DAA520",
+  appBackground: "#101213",
+  componentbackground: "#212121"
 
 };
 
