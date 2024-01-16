@@ -17,7 +17,7 @@ const ExitLevelCard = ({ item, handleNavigate }) => {
           <Text style={styles.at} numberOfLines={1}>
             At
           </Text>
-          <Text style={{color: COLORS.darkyellow, fontSize: SIZES.xLarge}}>{item?.name}</Text>
+          <Text style={{color: COLORS.darkyellow, fontSize: SIZES.xLarge}}>{item.inTradeLossLevelPrice}</Text>
         </View>
 
         
@@ -25,19 +25,19 @@ const ExitLevelCard = ({ item, handleNavigate }) => {
           <Text style={styles.jobType}>Reduce lotSize</Text>
           <View style={{flexDirection: 'row',}}>
              <Text style={{color: COLORS.lightWhite, marginTop: 10}}>by</Text>
-             <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large + 2, marginTop: 5, marginLeft: 6, alignSelf: 'flex-end'}}>{item?.city}</Text>
+             <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large + 2, marginTop: 5, marginLeft: 6, alignSelf: 'flex-end'}}>{item?.lotSize}</Text>
           </View>
         </View>
 
-        <View>
+        {/* <View>
           <Text style={styles.jobType}>Set stopLoss</Text>
           <View style={{flexDirection: 'row'}}>
              <Text style={{color: COLORS.lightWhite,  marginTop: 10}}>at</Text>
-             <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large + 2, marginTop: 5, marginLeft: 6, alignSelf: 'flex-end'}}>{item?.age}</Text>
+             <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large + 2, marginTop: 5, marginLeft: 6, alignSelf: 'flex-end'}}>{item?.slplacementPriceAfterProfit}</Text>
           </View>
-        </View>
+        </View> */}
       </View> 
-      <View style={{backgroundColor: COLORS.white, height: 0.5, width: "100%"}} />
+      {/* <View style={{backgroundColor: COLORS.white, height: 0.5, width: "100%"}} /> */}
     </View>
   );
 };

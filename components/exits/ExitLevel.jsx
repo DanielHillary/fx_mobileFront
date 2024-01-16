@@ -1,37 +1,15 @@
 import { useState } from 'react'
-import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, SafeAreaView, FlatList } from 'react-native'
-import { COLORS, SIZES } from '../../constants';
+import { View, Text, ActivityIndicator, ScrollView, StyleSheet } from 'react-native'
+import { COLORS, FONT, SIZES } from '../../constants';
 import ExitLevelCard from './ExitLevelCard';
-
+import EmptyList from '../EmptyList'
 import styles from './exitlevel.style'
-import { DrawerContentScrollView } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 
 
-const ExitLevel = () => {
+const ExitLevel = ({ details }) => {
 
-  const data = [
-    {
-      name: '12332.576',
-      age: 1.5665,
-      city: 4,
-      count: 1,
-    },
-    {
-      name: '24523.029',
-      age: 2.5323,
-      city: 3.4,
-      count: 2,
-    },
-    {
-      name: '02323.566',
-      age: 0.5650,
-      city: 0.4,
-      count: 3,
-    },
-   
 
-  ]
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -39,17 +17,20 @@ const ExitLevel = () => {
   return (
     
     <View style={styles.container}>
+      <View style={styling.options}>
+        <Text style={styling.text}> Loss Levels</Text>
+      </View>
       <ScrollView >
         <View style={styles.cardsContainer}>
           {isLoading ? (
             <ActivityIndicator size="large" colors={COLORS.primary}/>
           ) : error ? (
-            <Text>Something Went wrong</Text>
+            <EmptyList message={"Something went wrong"}/>
           ) : (
-            data?.map((item) => (
+            details?.map((item) => (
               <ExitLevelCard
                 item={item}
-                key={item.age}
+                key={item.exitId}
                 handleNavigate={()=> {}}
               />
             ))
@@ -62,3 +43,18 @@ const ExitLevel = () => {
 }
 
 export default ExitLevel;
+
+const styling = StyleSheet.create({
+  text: {
+    color: COLORS.white,
+    fontFamily: FONT.medium,
+    fontSize: SIZES.medium,
+  },
+  options: {
+    padding: SIZES.xSmall,
+    borderWidth: 0.3,
+    borderColor: COLORS.darkyellow,
+    borderRadius: SIZES.medium,
+    margin: SIZES.medium
+  }
+})

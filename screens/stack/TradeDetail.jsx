@@ -9,37 +9,48 @@ import { View, Text, StyleSheet, Button, TouchableOpacity } from "react-native";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
+  BottomSheetScrollView,
   BottomSheetFooter,
 } from "@gorhom/bottom-sheet";
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { COLORS, SIZES, FONT } from "../../constants";
 import ExitLevel from "../../components/exits/ExitLevel";
 import TradeOutline from "./TradeOutline";
+import ExitLevelForProfit from "../../components/exits/ExitLevelForProfit";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { getExitLevelsForTrade } from "../../api/exitLevelsApi";
 
-const TopTab = createMaterialTopTabNavigator();
 
-const TopTabGroup = () => {
-  return (
-    <TopTab.Navigator
-      screenOptions={{
-        tabBarStyle: styles.tabBar,
-        tabBarIndicatorStyle: {
-          backgroundColor: COLORS.darkyellow,
-          borderRadius: 5,
-        },
-        tabBarActiveTintColor: COLORS.darkyellow,
-        tabBarInactiveTintColor: COLORS.gray,
-      }}
-    >
-      <TopTab.Screen name="Profit" component={ExitLevel} />
-      <TopTab.Screen name="Loss" component={ExitLevel} />
-    </TopTab.Navigator>
-  );
-};
 
 const TradeDetail = () => {
   const [snapPoint, setSnapPoint] = useState(false);
   const [position, setPosition] = useState();
+  const [hasFetched, setHasFetched] = useState(false);
+  const [exitLevels, setExitLevels] = useState({});
+
+  const route = useRoute();
+
+  const navigation = useNavigation();
+
+  const tradeDetails = route.params?.data || null;
+
+  const getExitLevels = async () => {
+    const response = await getExitLevelsForTrade(tradeDetails.id).then((res) => {
+      return res.data
+    })
+
+    if(response.status){
+      setExitLevels(response.data);
+      setHasFetched(true);
+    }else{
+      console.log(response.message);
+    }
+  }
+
+  useEffect(() => {
+    if(!hasFetched){
+      getExitLevels();
+    }
+  }, [])
 
   const snapPoints = useMemo(() => ["12%", "75%"], []);
 
@@ -55,7 +66,9 @@ const TradeDetail = () => {
   const renderFooter = useCallback(
     (props) => (
       <BottomSheetFooter {...props} bottomInset={0}>
-        <TouchableOpacity style={styles.footerContainer}>
+        <TouchableOpacity style={styles.footerContainer} onPress={() => {
+          navigation.navigate("Plan");
+        }}>
           <Text style={styles.footerText}>View Strategy</Text>
         </TouchableOpacity>
       </BottomSheetFooter>
@@ -96,12 +109,14 @@ const TradeDetail = () => {
             setSnapPoint(true);
           }
         }}
+        onClose={() => {
+          handleOpenPress(0);
+        }}
       >
-        <BottomSheetView
+        <BottomSheetScrollView
           style={{
             backgroundColor: COLORS.componentbackground,
             flex: 1,
-            justifyContent: "center",
           }}
         >
           <Text
@@ -117,7 +132,18 @@ const TradeDetail = () => {
           </Text>
           {snapPoint ? (
             <>
-              <Text>Monitor your trade for these levels</Text>
+              <Text
+                style={{
+                  color: COLORS.lightWhite,
+                  fontFamily: FONT.regular,
+                  fontSize: SIZES.small,
+                  textAlign: "center",
+                  paddingTop: SIZES.xSmall - 5,
+                  marginBottom: SIZES.medium,
+                }}
+              >
+                Monitor your trades for these levels
+              </Text>
             </>
           ) : (
             <Text
@@ -133,8 +159,9 @@ const TradeDetail = () => {
               Slide up to see your exit levels
             </Text>
           )}
-          <TopTabGroup />
-        </BottomSheetView>
+          <ExitLevelForProfit details={exitLevels.profitLevels}/>
+          <ExitLevel details={exitLevels.lossLevels}/>
+        </BottomSheetScrollView>
       </BottomSheet>
     </View>
   );

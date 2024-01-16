@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
         // alignContent: "center",
     },
     accountcontainer: {
-        paddingLeft: 10,
+        // paddingLeft: 10,
         marginTop: 10
     },
     balance : {

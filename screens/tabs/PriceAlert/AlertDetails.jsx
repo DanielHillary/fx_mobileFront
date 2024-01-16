@@ -9,7 +9,7 @@ import {
 import { COLORS, FONT, SIZES } from "../../../constants";
 import React, { useState } from "react";
 import DropDownPicker from "react-native-dropdown-picker";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const AlertDetails = () => {
   const [asset, setAsset] = useState("");
@@ -20,21 +20,32 @@ const AlertDetails = () => {
   const [isAssetOpen, setIsAssetOpen] = useState(false);
   const [currentValue, setCurrentValue] = useState();
   const [currentAsset, setCurrentAsset] = useState();
+
+  const route = useRoute();
+
+  const alert = route.params?.alertDetails || null;
+
   return (
     <View style={styles.base}>
-      <View style={{ flexDirection: "row", margin: 15, marginLeft: 40 }}>
-        <Text style={[styles.text, { marginTop: 25 }]}>When the price of</Text>
-        <View style={styles.inputcontainer}></View>
+      <View style={{ flexDirection: "row", marginTop: 15 }}>
+        <Text style={[styles.text, { marginTop: 6 }]}>When the price of</Text>
+        <Text style={styles.asset}>{`  ${alert.symbol}`}</Text>
       </View>
 
-      <View style={{ flexDirection: "row", margin: 15, marginLeft: 40 }}>
-        <Text style={styles.text}>goes</Text>
-        <View style={[styles.inputcontainer, { width: 50 }]}></View>
+      <View style={{ flexDirection: "row", marginTop: 15 }}>
+        <Text style={[styles.text, { marginTop: 6 }]}>goes</Text>
+        <Text style={styles.asset}>{`  ${alert.position}`}</Text>
       </View>
 
-      <View style={{ alignSelf: "center" }}>
+      <View
+        style={{
+          alignSelf: "center",
+          borderBottomWidth: 0.5,
+          borderBottomColor: COLORS.white,
+        }}
+      >
         <Text style={[styles.text, { fontSize: SIZES.large * 2 }]}>
-          $12,323
+          {alert.watchPrice}
         </Text>
       </View>
 
@@ -42,20 +53,18 @@ const AlertDetails = () => {
         style={{
           flexDirection: "row",
           marginTop: 30,
-          marginLeft: 40,
           width: 150,
         }}
       >
-        <Text style={[styles.text]}>send me</Text>
-        <View style={styles.alertOptions}></View>
+        <Text style={[styles.text, { marginTop: 6 }]}>send me</Text>
+        <Text style={styles.asset}> an Email</Text>
       </View>
 
       <View
         style={{
           flexDirection: "row",
           marginTop: 30,
-          marginLeft: 40,
-          width: 200,
+          width: 100,
         }}
       >
         <Text style={[styles.text]}>Note</Text>
@@ -63,11 +72,15 @@ const AlertDetails = () => {
           style={[
             styles.alertOptions,
             {
-              height: 100,
-              marginLeft: 35,
+              height: 70,
+              marginLeft: 15,
             },
           ]}
-        ></View>
+        >
+          <Text style={[styles.text, { padding: 7, fontSize: SIZES.small }]}>
+            {alert.remark}
+          </Text>
+        </View>
       </View>
 
       {/* conditionally render this guy based on the alert details */}
@@ -116,6 +129,13 @@ const styles = StyleSheet.create({
   base: {
     flexGrow: 1,
     backgroundColor: "#111",
+    paddingHorizontal: SIZES.medium + 4,
+  },
+  asset: {
+    color: COLORS.darkyellow,
+    fontFamily: FONT.bold,
+    fontSize: SIZES.medium,
+    marginTop: 7
   },
   text: {
     color: COLORS.lightWhite,
@@ -129,9 +149,7 @@ const styles = StyleSheet.create({
     color: COLORS.tertiary,
   },
   inputcontainer: {
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.lightWhite,
-    width: 100,
+    width: 150,
     marginLeft: 8,
   },
   logImage: {

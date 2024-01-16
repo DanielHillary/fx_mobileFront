@@ -4,95 +4,124 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
   FlatList,
   Image,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import { COLORS, FONT, SIZES } from "../../constants";
-import NoteBottom from "./NoteBottom";
 import { useNavigation } from "@react-navigation/native";
+import { AuthContext } from "../../context/AuthContext";
+import { getNotifications, removeFromList } from "../../api/notificationApi";
+import { getTradeAnalysis } from "../../api/tradeAnalysisApi";
+import EmptyList from "../../components/EmptyList";
 
-const NotificationCard = () => {
-
+const NotificationCard = ({ item, updateNoteList }) => {
   const navigation = useNavigation();
+
+  const checkTradeNotification = async () => {
+    let response = await getTradeAnalysis(item.responseId).then((res) => {
+      return res.data;
+    });
+    if (response.status) {
+      let resp = await removeFromList(item.id).then((res) => {
+        return res.data;
+      });
+      updateNoteList(item);
+      console.log(resp.message);
+      navigation.navigate("TradeReport", { data: response.data });
+    } else {
+      console.log(response.message);
+    }
+  };
+
+  const markAsRead = async () => {
+    let resp = await removeFromList(item.id).then((res) => {
+      return res.data;
+    });
+    if(resp.status){
+      console.log("All is well");
+    }
+    updateNoteList(item);
+  }
 
   return (
     <View
       style={{
-        flexDirection: "row",
+        // flexDirection: "row",
         backgroundColor: COLORS.componentbackground,
         width: "100%",
         gap: SIZES.xSmall,
         padding: SIZES.xSmall,
-        borderRadius: SIZES.small
+        borderRadius: SIZES.small,
       }}
     >
-      <Image
-        source={require("../../assets/icons/notif.png")}
-        resizeMode="contain"
-        style={{ height: 20, width: 20, opacity: 0.7 }}
-      />
-
-      <View style={{ width: "70%" }}>
-        <View style={{flexDirection: 'column'}}>
-          <Text style={{fontFamily: FONT.bold, color: COLORS.lightWhite, fontSize: SIZES.medium}}>Title:</Text>
-          <Text style={{ color: COLORS.lightWhite }}>
-            The standard chunk of Lorem Ipsum used since the 1500s is reproduced.
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        <Image
+          source={require("../../assets/icons/notif.png")}
+          resizeMode="contain"
+          style={{ height: 20, width: 20, opacity: 0.7 }}
+        />
+        <View style={{ flexDirection: "row", width: "70%" }}>
+          <Text
+            style={{
+              fontFamily: FONT.bold,
+              color: COLORS.lightWhite,
+              fontSize: SIZES.medium - 3,
+            }}
+          >
+            Title:
+          </Text>
+          <Text
+            style={{
+              fontFamily: FONT.bold,
+              color: COLORS.darkyellow,
+              fontSize: SIZES.medium,
+              marginLeft: 4,
+            }}
+          >
+            {item.title}
           </Text>
         </View>
+        <Text style={{ color: COLORS.lightWhite, fontSize: SIZES.xSmall }}>
+          12:23 PM
+        </Text>
+      </View>
+
+      <Text style={{ color: COLORS.lightWhite, marginLeft: 28 }}>
+        {item.content}
+      </Text>
+      <View style={{ flexDirection: "row", justifyContent: 'space-between', paddingHorizontal: SIZES.small }}>
+        <TouchableOpacity
+          style={styles.read}
+          onPress={() => {
+              markAsRead();
+          }}
+        >
+          <Text style={{ color: COLORS.darkyellow }}>Mark as read</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.viewing}
           onPress={() => {
-            navigation.navigate('Notify');
+            if (item.notificationCategory == "Trades") {
+              checkTradeNotification();
+            }
+            if (item.notificationCategory == "Entry"){
+              navigation.navigate("ConfirmEntry");
+            }
+            if(item.notificationCategory == "Price Alert"){
+
+            }
           }}
         >
           <Text style={{ color: COLORS.darkyellow }}>View</Text>
         </TouchableOpacity>
       </View>
-
-      <Text style={{ color: COLORS.lightWhite }}>34m ago</Text>
     </View>
   );
 };
-
-const data = [
-  {
-    name: "John",
-    age: 30,
-    city: "New York",
-  },
-  {
-    name: "Alice",
-    age: 25,
-    city: "Los Angeles",
-  },
-  {
-    name: "Bob",
-    age: 35,
-    city: "Chicago",
-  },
-  {
-    name: "Bob",
-    age: 34,
-    city: "Chicago",
-  },
-  {
-    name: "Bob",
-    age: 33,
-    city: "Chicago",
-  },
-  {
-    name: "Bob",
-    age: 37,
-    city: "Chicago",
-  },
-  {
-    name: "Bob",
-    age: 39,
-    city: "Chicago",
-  },
-];
 
 const Notification = () => {
   const [allPressed, setAllPressed] = useState(true);
@@ -101,8 +130,51 @@ const Notification = () => {
   const [exitPressed, setExitPressed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [notification, setNotification] = useState([]);
+  const [analysisPressed, setAnalysisPressed] = useState(false);
 
-  
+  const { accountDetails, updateNotification } = useContext(AuthContext);
+
+  const id = accountDetails.accountId;
+
+  const updateList = (item) => {
+    const newArray = notification.filter((obj) => obj.id !== item.id);
+    setNotification(newArray);
+    if (newArray.length == 0) {
+      setError(true);
+      updateNotification(false);
+    }
+  };
+
+  const getAllNotification = async (id) => {
+    const response = await getNotifications(id).then((res) => {
+      return res.data;
+    });
+    if (response.status) {
+      if (response.data.length == 0) {
+        setError(true);
+        updateNotification(false);
+      } else {
+        setNotification(response.data);
+      }
+    } else {
+      console.log(response.message);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    setIsLoading(true);
+    getAllNotification(accountDetails.accountId);
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    // Set refreshing to true to show the loading indicator
+    setRefreshing(true);
+    getAllNotification(accountDetails.accountId);
+    setRefreshing(false);
+  }, []);
 
   const setRestInActive = (item) => {
     let search = "All";
@@ -111,23 +183,32 @@ const Notification = () => {
       setAlertPressed(false);
       setOngoingPressed(false);
       setAllPressed(false);
+      setAnalysisPressed(false);
     } else if (item == "All") {
       search = item;
       setAlertPressed(false);
       setOngoingPressed(false);
       setExitPressed(false);
-    } else if (item == "ongoing") {
+      setAnalysisPressed(false);
+    } else if (item == "Trades") {
       search = item;
       setExitPressed(false);
       setAlertPressed(false);
       setAllPressed(false);
+      setAnalysisPressed(false);
     } else if (item == "alerts") {
       search = item;
       setExitPressed(false);
       setOngoingPressed(false);
       setAllPressed(false);
+      setAnalysisPressed(false);
+    } else if (item == "Entry") {
+      search = item;
+      setExitPressed(false);
+      setOngoingPressed(false);
+      setAllPressed(false);
+      setAlertPressed(false);
     }
-
     return search;
   };
 
@@ -135,7 +216,6 @@ const Notification = () => {
     <View style={styles.base}>
       <View>
         <ScrollView styles={styles.container} horizontal={true}>
-        
           <View style={{ flexDirection: "row", gap: SIZES.small - 2 }}>
             <TouchableOpacity
               style={{
@@ -182,7 +262,27 @@ const Notification = () => {
                 borderColor: COLORS.darkyellow,
                 borderWidth: 0.5,
                 borderRadius: SIZES.medium,
-                width: 120,
+                width: 80,
+                padding: SIZES.small - 3,
+                backgroundColor: analysisPressed
+                  ? COLORS.darkyellow
+                  : COLORS.appBackground,
+                alignItems: "center",
+              }}
+              onPress={() => {
+                setAnalysisPressed(true);
+                setRestInActive("Entry");
+              }}
+            >
+              <Text style={{ color: COLORS.lightWhite }}>Entry</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                borderColor: COLORS.darkyellow,
+                borderWidth: 0.5,
+                borderRadius: SIZES.medium,
+                width: 80,
                 padding: SIZES.small - 3,
                 backgroundColor: ongoingPressed
                   ? COLORS.darkyellow
@@ -191,10 +291,10 @@ const Notification = () => {
               }}
               onPress={() => {
                 setOngoingPressed(true);
-                setRestInActive("ongoing");
+                setRestInActive("Trades");
               }}
             >
-              <Text style={{ color: COLORS.lightWhite }}>Ongoing Trades</Text>
+              <Text style={{ color: COLORS.lightWhite }}>Trades</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -224,13 +324,22 @@ const Notification = () => {
         {isLoading ? (
           <ActivityIndicator size="large" colors={COLORS.darkyellow} />
         ) : error ? (
-          <Text>Something Went wrong</Text>
+          <EmptyList message={"No notifications at this time"} />
         ) : (
           <FlatList
-            data={data}
-            renderItem={({ item }) => <NotificationCard item={item} />}
-            keyExtractor={(item) => item?.age}
+            data={notification}
+            renderItem={({ item }) => (
+              <NotificationCard item={item} updateNoteList={updateList} />
+            )}
+            keyExtractor={(item) => item?.id}
             contentContainerStyle={{ rowGap: SIZES.small }}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={["#0000ff"]} // Set the color of the refresh indicator
+              />
+            }
             vertical
             showsHorizontalScrollIndicator={false}
           />
@@ -257,15 +366,18 @@ const styles = StyleSheet.create({
     padding: SIZES.xSmall - 6,
     alignSelf: "center",
   },
+  read:{
+    color: "green",
+    alignSelf: 'center'
+  },
   viewing: {
-    marginTop: SIZES.medium,
-    flex: 1,
     justifyContent: "center",
+    alignSelf: "center",
     alignItems: "center",
     height: 30,
-    width: 70,
+    width: 120,
     borderColor: COLORS.darkyellow,
     borderRadius: SIZES.small - 4,
     borderWidth: 1,
-  }
+  },
 });

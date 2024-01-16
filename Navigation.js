@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, Image, ActivityIndicator, TouchableOpacity } from "react-native";
 import { useState, useEffect, useContext } from "react";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -13,7 +13,12 @@ import Dashboard from "./screens/tabs/dashboard/Dashboard";
 import TradeAnalysis from "./screens/tabs/TradeAnalysis";
 import PriceAlert from "./screens/tabs/PriceAlert/PriceAlert";
 import Profile from "./screens/tabs/Profile";
-import { Ionicons, MaterialCommunityIcons, Entypo } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  Entypo,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import TradeDetails from "./screens/stack/TradeDetails";
 import ScreenHeaderBtn from "./components/header/ScreenHeaderBtn";
 import menu from "./assets/icons/menu.png";
@@ -27,11 +32,25 @@ import Account from "./screens/drawer/Account";
 import Pricing from "./screens/drawer/Pricing/Pricing";
 import TradingJournal from "./screens/drawer/TradingJournal";
 import SignIn from "./components/onboarding/SignIn";
-import SignUn from "./components/onboarding/SignUp";
 import { AuthContext } from "./context/AuthContext";
-import Notification from "./screens/stack/Notification";
 import NoteBottom from "./screens/stack/NoteBottom";
 import TradeDetail from "./screens/stack/TradeDetail";
+import TradingBot from "./screens/drawer/TradingBot";
+import AddAccount from "./screens/stack/AddAccount";
+import SetUpTradingPlan from "./screens/stack/SetUpTradingPlan";
+import EntryStrategy from "./components/tradingsystem/EntryStrategy";
+import ExitStrategy from "./components/tradingsystem/ExitStrategy";
+import RiskManager from "./components/tradingsystem/RiskManager";
+import TradingPlan from "./screens/drawer/tradingplan/TradingPlan";
+import CreateExit from "./components/tradingsystem/CreateExit";
+import SignUp from "./components/onboarding/SignUp";
+import AlertHistory from "./screens/tabs/PriceAlert/AlertHistory";
+import Notification from "./screens/stack/Notification";
+import RecordDetails from "./screens/drawer/RecordDetails";
+import ChangePassword from "./components/onboarding/ChangePassword";
+import HeaderNotify from "./components/header/HeaderNotify";
+import ConfirmEntry from "./screens/stack/ConfirmEntry";
+import TradeReport from "./screens/stack/TradeReport";
 
 const Tab = createBottomTabNavigator();
 
@@ -48,7 +67,51 @@ const AuthStack = () => {
       }}
     >
       <Stack.Screen name="SignIn" component={SignIn} />
-      <Stack.Screen name="SignUp" component={SignUn} />
+      <Stack.Screen name="SignUp" component={SignUp} />
+      <Stack.Screen name="AddAccount" component={AddAccount} />
+      <Stack.Screen
+        name="EntryStrategy"
+        component={EntryStrategy}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="ExitStrategy"
+        component={ExitStrategy}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="RiskManager"
+        component={RiskManager}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="SetUpTradingPlan"
+        component={SetUpTradingPlan}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
       <Stack.Screen
         name="Home"
         component={StackNavigation}
@@ -122,6 +185,44 @@ const DrawerNavigation = () => {
       />
 
       <Drawer.Screen
+        name="AutoTrade"
+        component={TradingBot}
+        options={{
+          headerShown: true,
+          headerStyle: styles.header,
+          drawerIcon: ({ color, focused, size }) => {
+            let iconName = "flash-auto";
+            return (
+              <MaterialIcons
+                name={iconName}
+                size={size}
+                color={COLORS.lightWhite}
+              />
+            );
+          },
+        }}
+      />
+
+      <Drawer.Screen
+        name="TradePlan"
+        component={TradingPlan}
+        options={{
+          headerShown: true,
+          headerStyle: styles.header,
+          drawerIcon: ({ color, focused, size }) => {
+            let iconName = "floor-plan";
+            return (
+              <MaterialCommunityIcons
+                name={iconName}
+                size={size}
+                color={COLORS.lightWhite}
+              />
+            );
+          },
+        }}
+      />
+
+      <Drawer.Screen
         name="Pricing"
         component={Pricing}
         options={{
@@ -145,6 +246,7 @@ const StackNavigation = () => {
     <Stack.Navigator
       screenOptions={{
         headerTintColor: COLORS.lightWhite,
+        headerTitle: "",
       }}
     >
       <Stack.Screen
@@ -179,8 +281,41 @@ const StackNavigation = () => {
       />
 
       <Stack.Screen
+        name="TradeJournal"
+        component={TradingJournal}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePassword}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
         name="SetAlert"
         component={SetAlert}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="AlertHistory"
+        component={AlertHistory}
         options={{
           presentation: "modal",
           headerStyle: styles.header,
@@ -202,7 +337,95 @@ const StackNavigation = () => {
 
       <Stack.Screen
         name="Notifications"
-        component={NoteBottom}
+        component={Notification}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="AddAccount"
+        component={AddAccount}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="EntryStrategy"
+        component={EntryStrategy}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="ExitStrategy"
+        component={ExitStrategy}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="RiskManager"
+        component={RiskManager}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="Plan"
+        component={TradingPlan}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="RecordDetails"
+        component={RecordDetails}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="CreateExit"
+        component={CreateExit}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="SetUpTradingPlan"
+        component={SetUpTradingPlan}
         options={{
           presentation: "modal",
           headerStyle: styles.header,
@@ -221,7 +444,7 @@ const StackNavigation = () => {
           headerTitleAlign: "center",
         }}
       /> */}
-      
+
       <Stack.Screen
         name="AutoTrader"
         component={AutoTrader}
@@ -236,6 +459,28 @@ const StackNavigation = () => {
       <Stack.Screen
         name="Accounts"
         component={Account}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="ConfirmEntry"
+        component={ConfirmEntry}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="TradeReport"
+        component={TradeReport}
         options={{
           presentation: "modal",
           headerStyle: styles.header,
@@ -276,6 +521,7 @@ const BottomTab = () => {
         headerTitleStyle: styles.headertitle,
         headerTitleAlign: "center",
         headerShadowVisible: false,
+        headerTitle: "",
       })}
     >
       <Tab.Screen
@@ -290,7 +536,7 @@ const BottomTab = () => {
             />
           ),
           headerRight: () => (
-            <ScreenHeaderBtn
+            <HeaderNotify
               iconUrl={notification}
               dimension="60%"
               handlePress={() => {
@@ -298,6 +544,7 @@ const BottomTab = () => {
               }}
             />
           ),
+          headerTitle: "Dashboard",
         }}
       />
       <Tab.Screen
@@ -319,7 +566,7 @@ const BottomTab = () => {
         component={Profile}
         options={{
           headerRight: () => (
-            <ScreenHeaderBtn
+            <HeaderNotify
               iconUrl={notification}
               dimension="60%"
               handlePress={() => {
@@ -334,7 +581,7 @@ const BottomTab = () => {
 };
 const Navigation = () => {
   const { isLoading, userToken } = useContext(AuthContext);
-  console.log(userToken);
+  // console.log(userToken);
 
   if (isLoading) {
     return (

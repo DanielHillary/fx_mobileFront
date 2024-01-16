@@ -5,11 +5,13 @@ import {
   View,
   Image,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
-import { COLORS, FONT, SIZES } from "../../../constants";
-import React, { useContext, useState } from "react";
+import { COLORS, Currencies, FONT, SIZES, Synthetics } from "../../../constants";
+import React, { useContext, useEffect, useState } from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 import { AuthContext } from "../../../context/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const DownArrow = () => {
   return (
@@ -24,71 +26,84 @@ const DownArrow = () => {
 
 const SetAlert = () => {
   const categories = [
-    { label: "Synthetics", value: "Synthetics" },
+    { label: "Synthetics", value: "Synthetic" },
     { label: "Currencies", value: "Currencies" },
   ];
 
   const options = [
-    { label: "Email", value: "Email"},
-    { label: "Push", value: "PushNotification"},
-    { label: "Call", value: "Call"}
-  ]
+    { label: "Email", value: "Email" },
+    { label: "Push Notification", value: "PushNotification" },
+    { label: "Call", value: "Call" },
+  ];
 
-  const assetlist = [
-    { label: "EUR/USD", value: "EURUSD" },
-    { label: "USD/JPY", value: "USDJPY" },
-    { label: "GBP/USD", value: "GBPUSD" },
-    { label: "AUD/USD", value: "AUDUSD" },
-    { label: "USD/CAD", value: "USDCAD" },
-    { label: "GBP/JPY", value: "GBPJPY" },
-    { label: "USD/CHF", value: "USDCHF" },
-    { label: "EUR/GBP", value: "EURGBP" },
+  const positions = [
+    { label: "above", value: "above" },
+    { label: "below", value: "below" },
   ];
 
   const [asset, setAsset] = useState("");
-  const [postion, setPosition] = useState("");
+  const [positionOpen, setPositionOpen] = useState(false);
+  const [position, setPosition] = useState("");
   const [isPressed, setIsPressed] = useState(true);
-  const [watchPrice, setWatchPrice] = useState(0);
+  const [watchPrice, setWatchPrice] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [optionOpen, setOptionOpen] = useState(false);
   const [isAssetOpen, setIsAssetOpen] = useState(false);
   const [currentValue, setCurrentValue] = useState();
   const [option, setOption] = useState(false);
   const [currentAsset, setCurrentAsset] = useState();
+  const [accountInfo, setAccountInfo] = useState({});
+  const [isCurrencies, setIsCurrencies] = useState(false);
 
-  const { accountInfo } = useContext(AuthContext);
+  const getAccountInfo = async () => {
+    const account = AsyncStorage.getItem("accountInfo").then((res) => {
+      return JSON.parse(res);
+    });
+    setAccountInfo(account);
+  };
+  useEffect(() => {
+    getAccountInfo();
+  }, []);
 
   const body = {
     accountId: accountInfo.accountId,
     active: true,
     alertMedium: option,
-    "alertType": "string",
-    "fireBaseToken": "string",
-    "forATrade": true,
-    "id": 0,
-    "journalId": "string",
-    "metaOrderId": "string",
-    "planId": 0,
-    "position": "string",
-    "reason": "string",
-    "recurrent": true,
-    "remark": "string",
-    "symbol": "string",
-    "symbolCategory": "string",
-    "systemId": "string",
-    "watchId": "string",
-    "watchPrice": 0
-  }
+    alertType: "string",
+    fireBaseToken: "string",
+    forATrade: true,
+    id: 0,
+    journalId: "string",
+    metaOrderId: "string",
+    planId: 0,
+    position: "string",
+    reason: "string",
+    recurrent: true,
+    remark: "string",
+    symbol: "string",
+    symbolCategory: "string",
+    systemId: "string",
+    watchId: "string",
+    watchPrice: 0,
+  };
   return (
-    <View style={styles.base}>
+    <ScrollView style={styles.base}>
       <View style={{ paddingHorizontal: 80 }}>
         <DropDownPicker
+          listMode="SCROLLVIEW"
           items={categories}
           open={isOpen}
           setOpen={() => setIsOpen(!isOpen)}
           value={currentValue}
-          setValue={(val) => setCurrentValue(val)}
-          placeholder="Currency"
+          setValue={(val) => {
+            setCurrentValue(val)
+            if(val() == "Synthetic"){
+              setIsCurrencies(false);
+            }else {
+              setIsCurrencies(true);
+            }
+          }}
+          placeholder="Synthetics"
           placeholderStyle={{ fontSize: 20, fontWeight: "bold" }}
           style={{
             backgroundColor: "#111",
@@ -110,7 +125,8 @@ const SetAlert = () => {
         <Text style={[styles.text, { marginTop: 25 }]}>When the price of</Text>
         <View style={styles.inputcontainer}>
           <DropDownPicker
-            items={assetlist}
+            listMode="SCROLLVIEW"
+            items={isCurrencies ? Currencies : Synthetics}
             open={isAssetOpen}
             setOpen={() => setIsAssetOpen(!isAssetOpen)}
             value={currentAsset}
@@ -121,6 +137,7 @@ const SetAlert = () => {
               backgroundColor: COLORS.appBackground,
               borderColor: COLORS.darkyellow,
               marginBottom: 10,
+              zIndex: -1,
             }}
             disableBorderRadius={false}
             textStyle={{ color: COLORS.darkyellow, fontSize: 14 }}
@@ -135,21 +152,43 @@ const SetAlert = () => {
         </View>
       </View>
 
-      <View style={{ flexDirection: "row", margin: 15, marginLeft: 40 }}>
-        <Text style={styles.text}>goes</Text>
-        <View style={[styles.inputcontainer, { width: 50 }]}>
-          <TextInput
-            placeholderTextColor={"gray"}
+      <View
+        style={{
+          flexDirection: "row",
+          margin: 15,
+          marginLeft: 40,
+          alignItems: "center",
+          height: 50,
+        }}
+      >
+        <Text style={[styles.text, { alignSelf: "flex-end" }]}>goes</Text>
+
+        <View style={styles.inputcontainer}>
+          <DropDownPicker
+            listMode="SCROLLVIEW"
+            items={positions}
+            open={positionOpen}
+            setOpen={() => setPositionOpen(!positionOpen)}
+            value={position}
+            setValue={(val) => setPosition(val)}
             placeholder="above"
-            numberOfLines={1}
-            style={[
-              styles.input,
-              {
-                width: 50,
-              },
-            ]}
-            onChangeText={(text) => setPosition(text)}
-            value={postion}
+            placeholderStyle={{ fontSize: 14, fontWeight: "bold" }}
+            style={{
+              backgroundColor: COLORS.appBackground,
+              borderColor: COLORS.darkyellow,
+              marginBottom: 10,
+              zIndex: -1,
+              width: 80,
+            }}
+            disableBorderRadius={false}
+            textStyle={{ color: COLORS.darkyellow, fontSize: 14 }}
+            labelStyle={{ color: COLORS.darkyellow, fontSize: 14 }}
+            // arrowIconStyle={{backgroundColor: COLORS.darkyellow}}
+            ArrowDownIconComponent={DownArrow}
+            dropDownContainerStyle={{
+              backgroundColor: COLORS.appBackground,
+              borderColor: COLORS.darkyellow,
+            }}
           />
         </View>
       </View>
@@ -164,11 +203,10 @@ const SetAlert = () => {
             style={[
               styles.input,
               {
-                textAlign: "center",
                 width: 190,
                 height: 50,
                 marginTop: 20,
-                fontSize: SIZES.xLarge * 2,
+                fontSize: SIZES.xLarge * 1.5,
                 alignSelf: "center",
                 borderBottomColor: "white",
                 borderBottomWidth: 0.5,
@@ -189,8 +227,9 @@ const SetAlert = () => {
         }}
       >
         <Text style={[styles.text]}>send me a</Text>
-        <View style={{ width: 200, marginLeft: SIZES.large}}>
+        <View style={{ width: "60%", marginLeft: SIZES.large }}>
           <DropDownPicker
+            listMode="SCROLLVIEW"
             items={options}
             open={optionOpen}
             setOpen={() => setOptionOpen(!optionOpen)}
@@ -202,6 +241,8 @@ const SetAlert = () => {
               backgroundColor: "#111",
               borderColor: COLORS.darkyellow,
               marginBottom: 10,
+              zIndex: -1,
+              width: "auto",
             }}
             disableBorderRadius={false}
             textStyle={{ color: COLORS.darkyellow, fontSize: 20 }}
@@ -212,7 +253,6 @@ const SetAlert = () => {
               backgroundColor: "#111",
               borderColor: COLORS.darkyellow,
             }}
-            
           />
         </View>
       </View>
@@ -230,12 +270,19 @@ const SetAlert = () => {
           style={[
             styles.alertOptions,
             {
-              height: 100,
+              height: 70,
               marginLeft: 35,
             },
           ]}
         >
-          <TextInput style={{ color: COLORS.white}}/>
+          <TextInput
+            style={{
+              color: COLORS.white,
+              fontFamily: FONT.medium,
+              paddingHorizontal: SIZES.small - 4,
+              height: '50%',
+            }}
+          />
         </View>
       </View>
 
@@ -274,7 +321,7 @@ const SetAlert = () => {
       >
         <Text style={styles.buttonText}>Create alert</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 

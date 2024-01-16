@@ -14,44 +14,56 @@ import { ScrollView } from "react-native-gesture-handler";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../context/AuthContext";
+import AwesomeAlert from "react-native-awesome-alerts";
 
-
-const assetlist = [
-  { label: "EUR", value: "EUR" },
-  { label: "USD", value: "USD" },
-  { label: "GBP", value: "GBP" },
-  { label: "AUD", value: "AUD" },
-  { label: "CAD", value: "CAD" },
-];
-
-
-
-const DownArrow = () => {
+const AlertModal = ({
+  title,
+  isAlert,
+  handleConfirm,
+  handleCancel,
+  showCancelButton,
+  showConfirmButton,
+  message,
+}) => {
   return (
     <View>
-      <Image
-        source={require("../../assets/icons/dropdown.png")}
-        style={{ height: 5, width: 5 }}
+      <AwesomeAlert
+        show={isAlert}
+        title={title}
+        titleStyle={styles.title}
+        contentContainerStyle={styles.alertContainer}
+        showConfirmButton={showConfirmButton}
+        showCancelButton={showCancelButton}
+        cancelButtonColor={COLORS.darkyellow}
+        cancelButtonTextStyle={styles.alertText}
+        cancelText="Cancel"
+        confirmButtonColor={COLORS.darkyellow}
+        confirmButtonTextStyle={styles.alertText}
+        confirmText="LogOut"
+        onCancelPressed={handleCancel}
+        onConfirmPressed={handleConfirm}
+        closeOnTouchOutside={true}
+        onDismiss={handleCancel}
+        message={message}
+        messageStyle={styles.alertMessage}
       />
     </View>
   );
 };
 
-const Options = ({ image, option, nav }) => {
-
+const Options = ({ image, option, nav, checkOut }) => {
   const navigation = useNavigation();
   const { logout } = useContext(AuthContext);
 
   return (
-    <TouchableOpacity 
-    onPress={() => {
-      if(nav == "SignIn"){
-        logout();
-      }else{
-        navigation.navigate(nav)
-      }
-      
-    }}
+    <TouchableOpacity
+      onPress={() => {
+        if (nav == "SignOut") {
+          checkOut(true);
+        } else {
+          navigation.navigate(nav);
+        }
+      }}
     >
       <View style={{ flexDirection: "row", gap: 5 }}>
         <Image source={image} resizeMethod="auto" style={styles.optionimg} />
@@ -117,15 +129,21 @@ const AccountAction = () => {
 };
 const Profile = () => {
   const [isComplete, setIsComplete] = useState(true);
-  const [isAssetOpen, setIsAssetOpen] = useState(false);
-  const [currency, setCurrency] = useState("");
+  const [checkSignOut, setCheckSignOut] = useState(false);
+  const [account, setAccount] = useState({});
 
-  
+  const { accountDetails, userInfo, logout } = useContext(AuthContext);
+
+  const checkOut = (value) => {
+    setCheckSignOut(value);
+  };
 
   return (
-    <ScrollView style={styles.base}>
+    <ScrollView style={styles.base} nestedScrollEnabled={true}>
       <Text style={styles.text}>Profile</Text>
-      <View style={{ flexDirection: "row", marginTop: 20 }}>
+      <View
+        style={{ flexDirection: "row", marginTop: 20, alignContent: "center" }}
+      >
         <Image
           source={require("../../assets/icons/profile.png")}
           resizeMethod="auto"
@@ -133,8 +151,8 @@ const Profile = () => {
         />
 
         <View>
-          <Text style={[styles.text, { marginHorizontal: 10, marginTop: 10 }]}>
-            Ronald Richards
+          <Text style={[styles.text, { marginHorizontal: 10, marginTop: 5 }]}>
+            {userInfo.user.firstName} {userInfo.user.lastName}
           </Text>
           <Text
             style={{
@@ -143,12 +161,25 @@ const Profile = () => {
               marginLeft: 10,
             }}
           >
-            232222223
+            {accountDetails.accountNumber}
+          </Text>
+          <Text
+            style={{
+              fontFamily: FONT.regular,
+              color: COLORS.lightWhite,
+              marginLeft: 10,
+            }}
+          >
+            {accountDetails.server}
           </Text>
         </View>
       </View>
 
-      {isComplete ? <ProgressBar /> : <AccountAction />}
+      {isComplete ? (
+        <ProgressBar status={accountDetails.completionStatus} />
+      ) : (
+        <AccountAction />
+      )}
 
       <View style={{ marginTop: 30 }}>
         <Text
@@ -167,32 +198,6 @@ const Profile = () => {
             borderRadius: 15,
           }}
         >
-          {/* <View style={{ paddingRight: 255, alignSelf: "flex-start" }}>
-            <DropDownPicker
-              items={assetlist}
-              open={isAssetOpen}
-              setOpen={() => setIsAssetOpen(!isAssetOpen)}
-              value={currency}
-              setValue={(val) => setCurrency(val)}
-              placeholder="EUR"
-              placeholderStyle={{ fontSize: 16, fontWeight: "300" }}
-              style={{
-                backgroundColor: "#212121",
-                borderColor: "#212121",
-                alignSelf: "flex-start",
-              }}
-              disableBorderRadius={false}
-              textStyle={{ color: COLORS.darkyellow, fontSize: 14 }}
-              labelStyle={{ color: COLORS.darkyellow, fontSize: 14 }}
-              // arrowIconStyle={{backgroundColor: COLORS.darkyellow}}
-              ArrowDownIconComponent={DownArrow}
-              dropDownContainerStyle={{
-                backgroundColor: "black",
-                borderColor: COLORS.darkyellow,
-              }}
-            />
-          </View> */}
-
           <Text
             style={{
               padding: 10,
@@ -219,12 +224,12 @@ const Profile = () => {
             <Text
               style={{
                 color: COLORS.lightWhite,
-                fontFamily: FONT.medium,
+                fontFamily: FONT.bold,
                 fontSize: SIZES.large * 2,
                 marginLeft: 3,
               }}
             >
-              69,980,404
+              {accountDetails.formattedBalance}
             </Text>
             <Text
               style={{
@@ -233,31 +238,65 @@ const Profile = () => {
                 marginTop: 18,
               }}
             >
-              .56
+              .{accountDetails.fraction}
             </Text>
           </View>
         </View>
 
-        <View style={{ flex: 1, marginTop: 20, marginBottom: 30 }}>
-          <FlatList
-            data={optionData}
-            renderItem={({ item }) => (
-              <Options image={item.imageUrl} option={item.comm} nav={item.nav}/>
-            )}
-            keyExtractor={(item) => item?.id}
-            contentContainerStyle={{ rowGap: SIZES.medium + 5 }}
-            vertical
-            showsHorizontalScrollIndicator={false}
+        <View
+          style={{
+            flex: 1,
+            marginTop: 30,
+            marginBottom: 30,
+            gap: SIZES.medium,
+          }}
+        >
+          <Options
+            image={images.switchAccount}
+            option={"Switch Accounts"}
+            nav={"Accounts"}
           />
-          {/* <Options image={images.switchAccount} option={"Switch Accounts"} />
-          <Options image={images.tradingPlan} option={"Trading Plan"} />
-          <Options image={images.changePassword} option={"Change Password"} />
-          <Options image={images.logout} option={"Log Out"} />
-          <Options image={images.switchAccount} option={"Switch Accounts"} />
-          <Options image={images.tradingPlan} option={"Trading Plan"} />
-          <Options image={images.changePassword} option={"Change Password"} />
-          <Options image={images.logout} option={"Log Out"} /> */}
+          <Options
+            image={images.tradingPlan}
+            option={"Trading Plan"}
+            nav={"Plan"}
+          />
+          <Options
+            image={images.changePassword}
+            option={"Change Password"}
+            nav={"ChangePassword"}
+          />
+          <Options
+            image={images.reporting}
+            option={"Account Report"}
+            nav={"TradeJournal"}
+          />
+          <Options
+            image={images.upgrade}
+            option={"Upgrade Account"}
+            nav={"Pricing"}
+          />
+          <Options
+            image={images.logout}
+            option={"Log Out"}
+            nav={"SignOut"}
+            checkOut={checkOut}
+          />
         </View>
+
+        <AlertModal
+          isAlert={checkSignOut}
+          showCancelButton={true}
+          showConfirmButton={true}
+          message={"Are you sure you want to log out? You would have to log in again"}
+          handleCancel={() => {
+            setCheckSignOut(false);
+          }}
+          handleConfirm={() => {
+            setCheckSignOut(false);
+            logout();
+          }}
+        />
       </View>
     </ScrollView>
   );
@@ -267,47 +306,11 @@ const images = {
   switchAccount: require("../../assets/icons/switch.png"),
   changePassword: require("../../assets/icons/password.png"),
   tradingPlan: require("../../assets/icons/planning.png"),
+  reporting: require("../../assets/icons/reporting.png"),
+  upgrade: require("../../assets/icons/upgrade.png"),
   logout: require("../../assets/icons/logout1.png"),
 };
 
-const optionData = [
-  {
-    id: 1,
-    imageUrl: require("../../assets/icons/change2.png"),
-    comm: "Switch Accounts",
-    nav: "Accounts"
-  },
-  {
-    id: 2,
-    imageUrl: require("../../assets/icons/planning.png"),
-    comm: "Trading Plan",
-    nav: "TradingPlan"
-  },
-  {
-    id: 3,
-    imageUrl: require("../../assets/icons/password.png"),
-    comm: "Change Password",
-    nav: "ResetPassword"
-  },
-  {
-    id: 5,
-    imageUrl: require("../../assets/icons/reporting.png"),
-    comm: "Account report",
-    nav: "TradingPlan"
-  },
-  {
-    id: 11,
-    imageUrl: require("../../assets/icons/upgrade.png"),
-    comm: "Upgrade Account",
-    nav: "Pricing"
-  },
-  {
-    id: 4,
-    imageUrl: require("../../assets/icons/logout1.png"),
-    comm: "Log Out",
-    nav: "SignIn"
-  },
-];
 
 export default Profile;
 
@@ -327,6 +330,19 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: SIZES.medium + 3,
     margin: 5,
+  },
+  alertMessage: {
+    color: COLORS.white,
+    textAlign: "center",
+  },
+  alertText: {
+    color: "black",
+    fontFamily: FONT.bold,
+  },
+  alertContainer: {
+    backgroundColor: "black",
+    borderRadius: SIZES.medium,
+    width: 200,
   },
   image: {
     height: 60,

@@ -4,13 +4,15 @@ import { FONT, SIZES, COLORS } from "../../constants";
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: SIZES.small,
-    padding: SIZES.small
+    // marginTop: SIZES.small,
+    // padding: SIZES.small,
+    // marginBottom: SIZES.medium
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: SIZES.small
   },
   headerTitle: {
     fontSize: SIZES.large,
@@ -23,7 +25,7 @@ const styles = StyleSheet.create({
     color: COLORS.lightWhite,
   },
   cardsContainer: {
-    marginTop: SIZES.medium,
+    marginBottom: 10,
   },
 });
 

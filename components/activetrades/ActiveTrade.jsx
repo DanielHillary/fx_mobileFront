@@ -1,90 +1,84 @@
-import { useState } from 'react'
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native'
-import { COLORS, SIZES } from '../../constants/theme'
-import LinearGradient from 'expo-linear-gradient'
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
+import { COLORS, SIZES } from "../../constants/theme";
+import LinearGradient from "expo-linear-gradient";
+import { useFocusEffect } from "@react-navigation/native";
+import styles from "./activetrade.style";
+import ActiveTradeCard from "./ActiveTradeCard";
+import { getAllActiveTrades } from "../../api/dashboardApi";
+import EmptyList from "../EmptyList";
 
-import styles from './activetrade.style'
-import ActiveTradeCard from './ActiveTradeCard';
+const ActiveTrade = ({ trades, empty}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isEmpty, setIsEmpty] = useState(false);
+  const [tradeList, setTradeList] = useState([]);
 
-
-
-const ActiveTrade = ({ trades }) => {
-
-  const data = [
-    {
-      name: 'John',
-      age: 30,
-      city: 'New York',
-      active: false,
-    },
-    {
-      name: 'Alice',
-      age: 25,
-      city: 'Los Angeles',
-      active: true,
-    },
-    {
-      name: 'Bob',
-      age: 35,
-      city: 'Chicago',
-      active: true,
-    },
-    {
-      name: 'Bob',
-      age: 34,
-      city: 'Chicago',
-      active: true,
-    },
-    {
-      name: 'Bob',
-      age: 33,
-      city: 'Chicago',
-      active: false
-    },
-
-  ]
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
-
-  
-
-  // const handleCardPress = (item) => {
-  //   router.push(`/job-details/${item.job_id}`);
-  //   setSelectedJob(item.job_id);
-  // }
-
-  // console.log(data);
+  useEffect(() => {
+    // setIsLoading(true);
+    setIsEmpty(false);
+    // getAllActiveTrades(account.metaApiAccountId)
+    //   .then((res) => {
+    //     let alerts = res.data.data;
+    //     console.log(res.data);
+    //     if (res.data.status) {
+    //       if (alerts.activeTrades.length == 0) {
+    //         setIsEmpty(true);
+    //         setIsLoading(false)
+    //       } else {
+    //         setIsLoading(false);
+    //         setIsEmpty(false);
+    //         setTradeList(alerts.activeTrades);
+    //       }
+    //     }else{
+    //       setIsLoading(false)
+    //       setError(true);
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //     setError(true)
+    //   });
+    // if(trades.length == 0){
+    //   setIsEmpty(true)
+    // }else{
+    //   setTradeList(trades);
+    // }
+    // setIsLoading(false);
+  }, []);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Trades</Text>
-        {/* <TouchableOpacity>
-           <Text style={styles.headerBtn}>Show all</Text>
-        </TouchableOpacity> */}
       </View>
       <View style={styles.cardsContainer}>
-        {isLoading ? (
-          <ActivityIndicator size="large" colors={COLORS.darkyellow}/>
-        ) : error ? (
-          <Text>Something Went wrong</Text>
+        {empty ? (
+          <EmptyList message={"No active Trades"} />
         ) : (
-          <FlatList 
-            data={trades}
-            renderItem={({ item }) => (
-              <ActiveTradeCard 
-                item={item}
-              />
-            )}
-            keyExtractor={item => item?.id}
-            contentContainerStyle={{ rowGap: SIZES.small }}
-            vertical
-            showsHorizontalScrollIndicator={false}
-          />
+          // <FlatList
+          //   data={tradeList}
+          //   renderItem={({ item }) => <ActiveTradeCard item={item} />}
+          //   keyExtractor={(item) => item?.id}
+          //   contentContainerStyle={{ rowGap: SIZES.small }}
+          //   vertical
+          //   showsHorizontalScrollIndicator={false}
+          // />
+          <View style={{gap: SIZES.small, marginTop: SIZES.small}}>
+            {trades?.map((item) => (
+              <ActiveTradeCard key={item.id} item={item}/>
+            ))}
+          </View>
         )}
       </View>
     </View>
-  )
-}
+  );
+};
 
 export default ActiveTrade;

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import React, { useContext, useState } from "react";
 import { COLORS, FONT, SIZES } from "../../constants";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AuthContext, AuthProvider } from "../../context/AuthContext";
 
@@ -24,6 +24,8 @@ const SignIn = () => {
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
   const [hide, setHide] = useState(true);
+
+  const { userInfo } = useContext(AuthContext);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -126,14 +128,10 @@ const SignIn = () => {
 
       <TouchableOpacity
         onPress={() => {
-          setIsClicked(true)
-          const check = login(email, password);
-          if(check){
-            navigation.navigate("Home");
-            setIsClicked(!check);
-          }else{
-            setIsClicked(check);
-          } 
+          setIsClicked(true);
+          const user = login(email, password);
+          navigation.navigate("Home");
+          setIsClicked(false);
         }}
         style={styles.button}
       >

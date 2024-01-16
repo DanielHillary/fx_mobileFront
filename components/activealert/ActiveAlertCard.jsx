@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import Ionicons from "@expo/vector-icons";
-import { COLORS, SIZES } from "../../constants";
+import { COLORS, FONT, SIZES } from "../../constants";
 import LinearGradient from "react-native-linear-gradient";
 
 import styles from "./activealertcard.style";
@@ -13,12 +13,21 @@ const ActiveAlertCard = ({ item, handleCardPress }) => {
     // <LinearGradient
     //   colors={[ "rgba(184, 159, 27, 0.2)", "rgba(184, 159, 27, 0.03"]}
     // >
-    <TouchableOpacity style={{ backgroundColor: COLORS.componentbackground, borderRadius: SIZES.medium }} onPress={() => handleCardPress()}>
-      <View
-        style={styles.container}
-        
-      >
-        <View style={{flexDirection: 'row', alignItems: 'center', gap: SIZES.xSmall}}>
+    <TouchableOpacity
+      style={{
+        backgroundColor: COLORS.componentbackground,
+        borderRadius: SIZES.medium,
+      }}
+      onPress={() => handleCardPress()}
+    >
+      <View style={styles.container}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: SIZES.xSmall,
+          }}
+        >
           <TouchableOpacity style={styles.logoContainer}>
             <Image
               source={require("../../assets/icons/dollar.png")}
@@ -46,7 +55,16 @@ const ActiveAlertCard = ({ item, handleCardPress }) => {
       </View>
       <View style={{ padding: SIZES.large }}>
         <Text style={styles.position} numberOfLines={1}>
-          Last price: ${item.watchPrice}
+          Alert type:{" "}
+          <Text
+            style={{
+              color: COLORS.darkyellow,
+              fontFamily: FONT.medium,
+              fontSize: SIZES.small + 2,
+            }}
+          >
+            {item.alertType}
+          </Text>
           {/* Resistance zone */}
         </Text>
         <Text style={styles.broker}>

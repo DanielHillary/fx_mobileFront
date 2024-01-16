@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "757969159105",
+    "project_id": "psydtrader",
+    "storage_bucket": "psydtrader.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:757969159105:android:8b8b43f5fdc83103f92540",
+        "android_client_info": {
+          "package_name": "com.dannyhills.fx_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "757969159105-k9vnfn9iio9i36dklr6ajh8c9dd825dv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuDBqgCXwzjq3jo75odG-L5BlYCuBrEFg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "757969159105-k9vnfn9iio9i36dklr6ajh8c9dd825dv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

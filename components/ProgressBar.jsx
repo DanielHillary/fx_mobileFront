@@ -3,13 +3,15 @@ import CircularProgress from "react-native-circular-progress-indicator";
 import React, { useState } from "react";
 import { COLORS, FONT, SIZES } from "../constants";
 
-const ProgressBar = () => {
-  const [status, setStatus] = useState(0);
+const ProgressBar = ({ status }) => {
+  
+  let complete = "Complete Account";
+  let incomplete = "Setup Your Account";
   return (
     <View style={styles.progress}>
-      <View style={{ flexDirection: "row" }}>
+      <View style={{ flexDirection: "row", alignItems: 'center' }}>
         <CircularProgress
-          value={50}
+          value={status}
           radius={35}
           progressValueColor={COLORS.darkyellow}
           inActiveStrokeColor={"grey"}
@@ -18,12 +20,39 @@ const ProgressBar = () => {
         />
 
         <View style={styles.text}>
-          <Text style={{fontFamily: FONT.bold, color: COLORS.lightWhite, fontSize: SIZES.large}}>Setup your Account</Text>
-          <Text style={{color: COLORS.lightWhite,
-    fontFamily: FONT.regular,
-    fontSize: SIZES.small,}}>
-           You have 2 more steps to go. Please endeavor to complete your trading plan. 
+          <Text
+            style={{
+              fontFamily: FONT.bold,
+              color: COLORS.lightWhite,
+              fontSize: SIZES.large,
+            }}
+          >
+            {status != 100 ? incomplete : complete}
           </Text>
+          {status != 100 ? (
+            <Text
+              style={{
+                color: COLORS.lightWhite,
+                fontFamily: FONT.regular,
+                fontSize: SIZES.small,
+              }}
+            >
+              You have 2 more steps to go. Please endeavor to complete your
+              trading plan.
+            </Text>
+          ) : (
+            <Text
+              style={{
+                color: COLORS.lightWhite,
+                fontFamily: FONT.regular,
+                fontSize: SIZES.small,
+              }}
+            >
+              You have completed the onboarding process. Do well to stick to
+              your trading plan to achieve maximum results in your trading
+              journey.
+            </Text>
+          )}
         </View>
       </View>
     </View>
@@ -37,7 +66,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 15,
     borderRadius: 15,
-    backgroundColor: "#212121"
+    backgroundColor: "#212121",
   },
   text: {
     width: 200,

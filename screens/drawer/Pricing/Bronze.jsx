@@ -36,53 +36,65 @@ const Details = ({ item }) => {
 const Bronze = () => {
   const data = [
     {
+      id: 1,
       stat: true,
       detail: "Risk Analyzer",
     },
     {
+      id: 2,
       stat: true,
       detail: "Open Single Trade",
     },
     {
+      id: 3,
       stat: true,
       detail: "Trade Appraisal",
     },
     {
+      id: 4,
       stat: true,
       detail: "Alerts: Push Notification, email",
     },
     {
+      id: 5,
       stat: false,
       detail: "Monthly account reporting",
     },
     {
+      id: 6,
       stat: false,
       detail: "Automatic Trade journaling",
+    },
+    {
+      id: 7,
+      stat: true,
+      detail: "Risk Analyzer",
+    },
+    {
+      id: 8,
+      stat: true,
+      detail: "Open Single Trade",
+    },
+    {
+      id: 9,
+      stat: true,
+      detail: "Trade Appraisal",
     },
   ];
 
   return (
     <View style={styles.container}>
       <View>
-        <Text style={styles.price}>$5/Month</Text>
+        <Text style={styles.price}>$10/Month</Text>
       </View>
 
       <FlatList
         data={data}
         renderItem={({ item }) => <Details item={item} />}
-        keyExtractor={(item) => item?.detail}
+        keyExtractor={(item) => item?.id}
         contentContainerStyle={{ columnGap: SIZES.small - 5 }}
         showsVerticalScrollIndicator={false}
       />
-
-      <TouchableOpacity
-        onPress={() => {
-          //   navigate("AutoTrader");
-        }}
-        style={styles.button}
-      >
-        <Text style={styles.buttonText}>Make payment</Text>
-      </TouchableOpacity>
     </View>
   );
 };

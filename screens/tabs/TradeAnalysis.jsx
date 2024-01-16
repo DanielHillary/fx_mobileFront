@@ -9,13 +9,15 @@ import {
   ActivityIndicator,
   Button,
 } from "react-native";
-import React from "react";
-import { useState } from "react";
-import { COLORS, FONT, SIZES } from "../../constants";
+import React, { useContext, useEffect } from "react";
+import { useState, useRef } from "react";
+import { COLORS, Currencies, FONT, SIZES, Synthetics } from "../../constants";
 import DropDownPicker from "react-native-dropdown-picker";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import apiAxios from "../../api/axios.config";
 import AwesomeAlert from "react-native-awesome-alerts";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthContext } from "../../context/AuthContext";
 
 const DownArrow = () => {
   return (
@@ -28,7 +30,13 @@ const DownArrow = () => {
   );
 };
 
-const AlertModal = ({ title, isAlert, handleConfirm, handleCancel, showCancelButton = true }) => {
+const AlertModal = ({
+  title,
+  isAlert,
+  handleConfirm,
+  handleCancel,
+  showCancelButton = true,
+}) => {
   return (
     <View>
       <AwesomeAlert
@@ -48,7 +56,7 @@ const AlertModal = ({ title, isAlert, handleConfirm, handleCancel, showCancelBut
 };
 
 const TradeAnalysis = ({ screenProps }) => {
-  const [value, setAssetValue] = useState("");
+  const [assetValue, setAssetValue] = useState("");
   const [entry, setEntry] = useState("");
   const [stopLoss, setStopLoss] = useState("");
   const [takeProfit, setTakeProfit] = useState("");
@@ -61,26 +69,55 @@ const TradeAnalysis = ({ screenProps }) => {
   const [isCheckField, setIsCheckField] = useState(false);
   const [checkCategory, setCheckCategory] = useState(false);
   const [forError, setForError] = useState(false);
+  const [accountInfo, setAccountInfo] = useState({});
+  const [editMode, setEditMode] = useState(false);
+  const [accountBalance, setAccountBalance] = useState("");
+  const [isAssetOpen, setIsAssetOpen] = useState(false);
+  const [isCurrencies, setIsCurrencies] = useState(false);
+
+  const { accountDetails } = useContext(AuthContext);
+
+  const getAccountInfo = async () => {
+    try {
+      setAccountInfo(accountDetails);
+      setBalance(accountDetails.accountBalance);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getAccountInfo();
+  }, []);
+
+  const inputRef = useRef(null);
 
   const body = {
     entryPrice: entry,
     lotSize: volume,
     stopLossPrice: stopLoss,
     takeProfitPrice: takeProfit,
-    accountBalance: 10000,
+    accountBalance: balance,
     currency: "USD",
     assetCategory: assetType,
-    symbol: value,
-    tradingPlanId: 1
+    symbol: assetValue,
+    tradingPlanId: accountInfo.planId,
+    userAccountId: accountInfo.accountId,
   };
 
   const checkCat = (body = {}) => {
     let check = false;
-      if (body.assetCategory == "") {
-        check = true;
-      } 
+    if (body.assetCategory == "") {
+      check = true;
+    }
     return check;
   };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setBalance(accountDetails.accountBalance)
+    }, [accountDetails.metaApiAccountId])
+  );
 
   const checkField = (body = {}) => {
     let check = false;
@@ -94,7 +131,7 @@ const TradeAnalysis = ({ screenProps }) => {
       check = true;
     }
     return check;
-  }
+  };
 
   const postAPI = async () => {
     let response = {
@@ -122,22 +159,28 @@ const TradeAnalysis = ({ screenProps }) => {
   ];
 
   return (
-    <View style={styles.base}>
+    <ScrollView style={styles.base}>
       <Text style={styles.baseText}>Risk Analyzer</Text>
       <Text style={styles.desc}>
-        Lorem Ipsum is simply dummy text of the printing and typesetting
-        industry. Lorem Ipsum has been the industry's standard dummy text ever
-        since the 1500s
+        Our Risk Analyzer don't just calculate the figures for you. We give you
+        insight into the trade you are about to take from the safety of your
+        trading plan.
       </Text>
 
       <View style={{ paddingHorizontal: 80, marginTop: 30 }}>
         <DropDownPicker
+          listMode="SCROLLVIEW"
           items={categories}
           open={isOpen}
           setOpen={() => setIsOpen(!isOpen)}
           value={assetType}
           setValue={(val) => {
             setAssetType(val);
+            if(val() == "Synthetic"){
+              setIsCurrencies(false);
+            }else {
+              setIsCurrencies(true);
+            }
             body.assetCategory = assetType;
           }}
           placeholder="Please choose"
@@ -162,20 +205,40 @@ const TradeAnalysis = ({ screenProps }) => {
       <View>
         <View style={styles.infocontainer}>
           <View style={styles.infoEntry}>
-            <Text style={{ color: "white", width: 80 }}>Asset/Symbol</Text>
+            {/* <Text style={{ color: "white", width: 80 }}>Asset/Symbol</Text> */}
 
-            <TextInput
-              placeholderTextColor={"gray"}
-              placeholder="v10 Index"
-              numberOfLines={1}
-              style={[styles.input]}
-              onChangeText={(text) => {
-                setAssetValue(text);
-                body.symbol = value;
+            <DropDownPicker
+              listMode="SCROLLVIEW"
+              items={isCurrencies ? Currencies : Synthetics}
+              open={isAssetOpen}
+              setOpen={() => setIsAssetOpen(!isAssetOpen)}
+              value={assetValue}
+              setValue={(val) => {
+                setAssetValue(val);
               }}
-              value={value}
+              // placeholder={
+              //   details.tradeType == "SELL" ? "INSTANT SELL" : "INSTANT BUY"
+              // }
+              placeholder="Step"
+              placeholderStyle={{ fontSize: SIZES.large, fontWeight: "bold" }}
+              style={{
+                backgroundColor: "#111",
+                borderColor: COLORS.darkyellow,
+                height: 10,
+                zIndex: -1,
+              }}
+              dropDownDirection="bottom"
+              disableBorderRadius={false}
+              textStyle={{ color: COLORS.darkyellow, fontSize: SIZES.large }}
+              labelStyle={{ color: COLORS.darkyellow, fontSize: SIZES.large }}
+              // arrowIconStyle={{backgroundColor: COLORS.darkyellow}}
+              ArrowDownIconComponent={DownArrow}
+              dropDownContainerStyle={{
+                backgroundColor: "black",
+                height: 300,
+                borderColor: COLORS.darkyellow,
+              }}
             />
-            <View style={styles.line} />
           </View>
           <View style={[styles.infoEntry, { marginLeft: 15 }]}>
             <Text style={{ color: "white", width: 80 }}>Entry</Text>
@@ -236,18 +299,50 @@ const TradeAnalysis = ({ screenProps }) => {
 
         <View style={styles.infocontainer}>
           <View style={styles.infoEntry}>
-            <Text style={{ color: "white", width: 80 }}>Act balance</Text>
-
-            <TextInput
-              editable={true}
-              placeholderTextColor={"gray"}
-              placeholder="10,000"
-              numberOfLines={1}
-              style={[styles.input]}
-              onChangeText={(text) => setBalance(text)}
-              value={balance}
-            />
-            <View style={styles.line} />
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                width: 120,
+              }}
+            >
+              <Text style={{ color: "white", width: 80 }}>Act balance</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setEditMode(!editMode);
+                  inputRef.current?.focus();
+                }}
+              >
+                <Image
+                  source={require("../../assets/icons/EditFirst.png")}
+                  style={{ height: 20, width: 20 }}
+                />
+              </TouchableOpacity>
+            </View>
+            <View>
+              {editMode ? (
+                <TextInput
+                  ref={inputRef}
+                  editable={true}
+                  placeholderTextColor={"gray"}
+                  numberOfLines={1}
+                  keyboardType="numeric"
+                  style={[styles.input, { marginTop: 4 }]}
+                  onChangeText={(text) => {
+                    setBalance(text);
+                  }}
+                  value={balance}
+                  selection={{
+                    start: balance.length,
+                    end: balance.length,
+                  }}
+                />
+              ) : (
+                <Text style={styles.textInput}>{balance}</Text>
+              )}
+            </View>
+            <View style={styles.lineText(editMode)} />
           </View>
           <View style={[styles.infoEntry, { marginLeft: 15 }]}>
             <Text style={{ color: "white", width: 80 }}>Volume</Text>
@@ -284,7 +379,7 @@ const TradeAnalysis = ({ screenProps }) => {
             setIsClicked(true);
             if (checkCat(body)) {
               setCheckCategory(true);
-            }else if (checkField(body)) {
+            } else if (checkField(body)) {
               setIsCheckField(true);
             } else {
               postAPI().then((res) => {
@@ -344,7 +439,7 @@ const TradeAnalysis = ({ screenProps }) => {
         handleCancel={() => {}}
         handleConfirm={() => {}}
       />
-    </View>
+    </ScrollView>
   );
 };
 
@@ -365,14 +460,14 @@ const styles = StyleSheet.create({
     color: COLORS.lightWhite,
     padding: 5,
     marginHorizontal: 15,
-    fontSize: SIZES.large + 5,
-    fontWeight: "500",
+    fontSize: SIZES.large * 1.5,
+    fontFamily: FONT.bold,
   },
 
   desc: {
     color: COLORS.lightWhite,
     fontSize: SIZES.medium - 2,
-    fontWeight: "300",
+    fontFamily: FONT.medium,
     width: "80%",
     paddingLeft: 5,
     marginHorizontal: 15,
@@ -407,7 +502,7 @@ const styles = StyleSheet.create({
   infoEntry: {
     padding: 15,
     marginTop: 10,
-    width: "50%",
+    width: "45%",
     height: 60,
     // borderBottomColor: "#FFF",
   },
@@ -422,6 +517,12 @@ const styles = StyleSheet.create({
     height: 0.4,
     width: 120,
   },
+  lineText: (edit) => ({
+    backgroundColor: !edit ? "white" : COLORS.darkyellow,
+    height: 0.5,
+    width: "80%",
+    marginTop: edit ? 1 : 3,
+  }),
   infocontainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -437,6 +538,13 @@ const styles = StyleSheet.create({
     width: 300,
     marginTop: 70,
     alignSelf: "center",
+  },
+  textInput: {
+    color: COLORS.white,
+    fontSize: SIZES.medium - 2,
+    fontFamily: FONT.regular,
+    marginTop: SIZES.small,
+    // padding: SIZES.medium,
   },
   buttonText: {
     flex: 1,

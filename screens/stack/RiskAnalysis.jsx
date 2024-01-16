@@ -92,7 +92,6 @@ const RiskAnalysis = () => {
             {tradeDetails.asset}
           </Text>
         </View>
-        <Text style={styles.tradeID}>Profitability: High</Text>
       </View>
       <View>
         <View style={[styles.headingInfo, { marginTop: 0 }]}>
@@ -162,8 +161,10 @@ const RiskAnalysis = () => {
           </View>
 
           <View>
-            <Text style={styles.info}>Currency</Text>
-            <Text style={[styles.infodetail, { textAlign: "right" }]}>USD</Text>
+            <Text style={styles.info}>Recom. Volume</Text>
+            <Text style={[styles.infodetail, { textAlign: "right" }]}>
+              {tradeDetails.recommendedLotSize}
+            </Text>
           </View>
         </View>
 
@@ -179,15 +180,7 @@ const RiskAnalysis = () => {
                   fontSize: SIZES.large,
                 }}
               >
-                $55,904.{" "}
-                <Text
-                  style={{
-                    margin: 0,
-                    fontSize: SIZES.medium,
-                  }}
-                >
-                  89
-                </Text>
+                ${tradeDetails.accountBalance}
               </Text>
             </Text>
           </View>
@@ -197,6 +190,8 @@ const RiskAnalysis = () => {
           status={tradeDetails.hasRiskManagement}
           hasTradingPlan={tradeDetails.hasTradingPlan}
         />
+
+        <Text style={styles.tradeID}>Profitability: High</Text>
 
         <TouchableOpacity
           onPress={() => {

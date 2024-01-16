@@ -64,6 +64,15 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: SIZES.medium,
   },
+  desc: {
+    color: COLORS.lightWhite,
+    fontSize: SIZES.medium - 2,
+    fontFamily: FONT.medium,
+    textAlign: 'justify',
+    width: "70%",
+    paddingLeft: 5,
+    marginHorizontal: 15,
+  },
   email: (focused) => ({
     borderColor: focused ? COLORS.darkyellow : COLORS.gray,
     borderWidth: 0.5,

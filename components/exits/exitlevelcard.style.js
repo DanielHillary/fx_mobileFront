@@ -17,14 +17,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "space-between",
     alignItems: "center",
-    height: 80,
+    height: 70,
     columnGap: SIZES.medium,
     padding: SIZES.small,
-    marginTop: SIZES.xSmall,
-    // borderRadius: SIZES.small,
+    borderRadius: SIZES.small,
     backgroundColor: "#111",
     // ...SHADOWS.medium,
     shadowColor: COLORS.white,
+    alignSelf: "flex-start"
   },
   logoContainer: {
     width: 30,

@@ -5,7 +5,7 @@ import styles from './accountdetails.style'
 
 
 
-const AccountDetails = ({ account }) => {
+const AccountDetails = ({ account, dataArrived }) => {
 
     const accountDetails = account;
     return (

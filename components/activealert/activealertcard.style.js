@@ -41,7 +41,8 @@ const styles = StyleSheet.create({
     fontSize: SIZES.small,
     fontFamily: FONT.medium,
     color: COLORS.lightWhite,
-    alignSelf: 'flex-end'
+    alignItems: 'center',
+    
   },
   infoWrapper: {
     flexDirection: "row",
@@ -55,13 +56,15 @@ const styles = StyleSheet.create({
     color: selectedJob === item.job_id ? COLORS.white : COLORS.primary,
   }),
   alertprice: {
-    fontSize: SIZES.large - 2,
+    fontSize: SIZES.small,
     fontFamily: FONT.bold,
     color: COLORS.lightWhite,
   },
   broker: {
     color: COLORS.lightWhite,
-    fontSize: SIZES.small
+    fontSize: SIZES.small,
+    fontFamily: FONT.medium,
+    marginTop: SIZES.xSmall
   }
 });
 

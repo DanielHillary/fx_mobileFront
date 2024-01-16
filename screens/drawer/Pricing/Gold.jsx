@@ -59,12 +59,20 @@ const Gold = () => {
       stat: false,
       detail: "Automatic Trade journaling",
     },
+    {
+      stat: false,
+      detail: "Monthly account reporting...",
+    },
+    {
+      stat: false,
+      detail: "Automatic Trade journaling.",
+    },
   ];
 
   return (
     <View style={styles.container}>
       <View>
-        <Text style={styles.price}>$12/Month</Text>
+        <Text style={styles.price}>$14/Month</Text>
       </View>
 
       <FlatList
@@ -74,15 +82,6 @@ const Gold = () => {
         contentContainerStyle={{ columnGap: SIZES.small - 5 }}
         showsVerticalScrollIndicator={false}
       />
-
-      <TouchableOpacity
-        onPress={() => {
-          //   navigate("AutoTrader");
-        }}
-        style={styles.button}
-      >
-        <Text style={styles.buttonText}>Make payment</Text>
-      </TouchableOpacity>
     </View>
   );
 };

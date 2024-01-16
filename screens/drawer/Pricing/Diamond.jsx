@@ -74,15 +74,6 @@ const Diamond = () => {
         contentContainerStyle={{ columnGap: SIZES.small - 5 }}
         showsVerticalScrollIndicator={false}
       />
-
-      <TouchableOpacity
-        onPress={() => {
-          //   navigate("AutoTrader");
-        }}
-        style={styles.button}
-      >
-        <Text style={styles.buttonText}>Make payment</Text>
-      </TouchableOpacity>
     </View>
   );
 };

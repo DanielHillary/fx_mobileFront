@@ -1,39 +1,70 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import { COLORS, SIZES, FONT } from "../../constants";
+import { useNavigation } from "@react-navigation/native";
+import { AuthContext } from "../../context/AuthContext";
+import { getAllUserAccounts } from "../../api/accountApi";
 
-const AccountCard = ({ item }) => {
+const AccountCard = ({ item, currentAccount }) => {
+  const [hasTrade, setHasTrade] = useState(true);
 
-  const [hasTrade, setHasTrade] = useState(true)
+  let accountDesc =
+    "An account for the big big people in our midst. Top Priority";
 
   return (
     <View style={styles.accountCard}>
-      <View style={{ flexDirection: "row", justifyContent: 'space-between', alignItems: 'center' }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
           <Image
             source={require("../../assets/icons/profile.png")}
             style={styles.image}
           />
 
-          <Text style={styles.id}>ID: {item.id}</Text>
-          <Text style={{fontSize: SIZES.small, color: COLORS.lightWhite}}>{item.broker}</Text>
+          <Text style={styles.id}>ID: {item.accountNumber}</Text>
+          <Text style={{ fontSize: SIZES.small, color: COLORS.lightWhite }}>
+            {item.broker}
+          </Text>
         </View>
 
-        <View
-          style={{
-            height: 10,
-            width: 10,
-            backgroundColor: item.active ? "#32CD32" : "#FF0000",
-            borderRadius: 5,
-            marginRight: 10
-          }}
-        />
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View
+            style={{
+              height: 10,
+              width: 10,
+              backgroundColor: item.inUse
+                ? "#32CD32"
+                : COLORS.componentbackground,
+              borderRadius: 5,
+              marginRight: 10,
+            }}
+          />
+          <TouchableOpacity>
+            <Image source={require("../../assets/icons/delete.png")} style={{height: 25, width: 25}}/>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <Text style={{ color: COLORS.lightWhite, margin: 10 }}>{item.desc}</Text>
+      <Text style={{ color: COLORS.lightWhite, margin: 10 }}>
+        {item.accountDescription == null && accountDesc}
+      </Text>
 
-      <View style={{marginVertical: 10, backgroundColor: COLORS.white, opacity: 0.5, width: 280, height: 0.5, alignSelf: 'center' }}/>
+      <View
+        style={{
+          marginVertical: 10,
+          backgroundColor: COLORS.white,
+          opacity: 0.5,
+          width: 280,
+          height: 0.5,
+          alignSelf: "center",
+        }}
+      />
 
       <View style={styles.amount}>
         <Text
@@ -44,9 +75,9 @@ const AccountCard = ({ item }) => {
             padding: 7,
           }}
         >
-          {item.balance}
+          ${item.formattedBalance}.{item.fraction}
         </Text>
-        <TouchableOpacity
+        {currentAccount.accountId != item.accountId && <TouchableOpacity
           style={{ flexDirection: "row", gap: 4, alignItems: "center" }}
         >
           <Text
@@ -58,49 +89,38 @@ const AccountCard = ({ item }) => {
             source={require("../../assets/icons/ChevRight.png")}
             style={{ height: 10, width: 10, tintColor: COLORS.darkyellow }}
           />
-        </TouchableOpacity>
+        </TouchableOpacity>}
       </View>
     </View>
   );
 };
 const Account = () => {
-  const accounts = [
-    {
-      id: 23433232,
-      desc: "An account for the big big people in our midst. Utmost priority",
-      balance: "$100",
-      broker: "Deriv-demo",
-      active: false,
-    },
-    {
-      id: 23222211,
-      desc: "An account for the big big people in our midst. Utmost priority",
-      broker: "Deriv-real",
-      balance: "$300",
-      active: true,
-    },
-    {
-      id: 30985711,
-      desc: "An account for the big big people in our midst. Utmost priority",
-      balance: "$150",
-      broker: "Deriv-demo",
-      active: true,
-    },
-    {
-      id: 30455711,
-      desc: "An account for the big big people in our midst. Utmost priority",
-      balance: "$4,450.90",
-      broker: "Exness-real",
-      active: false,
-    },
-    {
-      id: 30455700,
-      desc: "An account for the big big people in our midst. Utmost priority",
-      broker: "Deriv-real",
-      balance: "$4,450.90",
-      active: true,
-    },
-  ];
+  const [userAccounts, setUserAccounts] = useState([]);
+  const [totalBalance, setTotalBalance] = useState("");
+
+  const navigation = useNavigation();
+
+  const { accountDetails } = useContext(AuthContext);
+
+  const getUserAccounts = async () => {
+    const response = await getAllUserAccounts(accountDetails.userId).then(
+      (res) => {
+        return res.data;
+      }
+    );
+
+    if (response.status) {
+      setUserAccounts(response.data.accountList);
+      setTotalBalance(response.data.totalBalance);
+    } else {
+      console.log(response.message);
+    }
+  };
+
+  useEffect(() => {
+    getUserAccounts();
+  }, []);
+
   const [isClicked, setIsClicked] = useState(false);
   return (
     <ScrollView style={styles.base}>
@@ -112,10 +132,15 @@ const Account = () => {
         }}
       >
         <Text style={styles.balanceText}>Total Balance</Text>
-        <Text style={styles.text}>$100.00</Text>
+        <Text style={styles.text}>${totalBalance}</Text>
       </View>
 
-      <TouchableOpacity onPress={() => {}} style={styles.button}>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("AddAccount");
+        }}
+        style={styles.button}
+      >
         {isClicked ? (
           <ActivityIndicator size="large" color={"black"} />
         ) : (
@@ -124,8 +149,13 @@ const Account = () => {
       </TouchableOpacity>
 
       <View style={{ marginTop: 30, gap: SIZES.large, padding: 20 }}>
-        {accounts?.map((item) => (
-          <AccountCard item={item} key={item.id} handleNavigate={() => {}} />
+        {userAccounts?.map((item) => (
+          <AccountCard
+            item={item}
+            currentAccount={accountDetails}
+            key={item.accountId}
+            handleNavigate={() => {}}
+          />
         ))}
       </View>
     </ScrollView>
