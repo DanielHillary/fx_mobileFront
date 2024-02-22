@@ -92,6 +92,23 @@ const styles = StyleSheet.create({
     fontFamily: FONT.medium,
     color: activeJobType === item ? COLORS.secondary : COLORS.gray2,
   }),
+  button: {
+    // margin: 80,
+    height: 40,
+    backgroundColor: COLORS.darkyellow,
+    borderRadius: 10,
+    width: 300,
+    marginVertical: 30,
+    marginBottom: 40,
+    alignSelf: "center",
+  },
+  buttontext: {
+    color: "black",
+    fontSize: SIZES.large,
+    fontFamily: FONT.bold,
+    textAlign: "center",
+    padding: SIZES.small - 2
+  },
 });
 
 export default styles;

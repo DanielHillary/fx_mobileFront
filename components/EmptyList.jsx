@@ -21,7 +21,8 @@ const styles = StyleSheet.create({
         borderRadius: SIZES.medium,
         width: 250,
         height: 80,
-        marginTop: SIZES.medium
+        marginTop: SIZES.medium * 1.5,
+        padding: SIZES.medium,
     },
     text: {
         color: COLORS.lightWhite,

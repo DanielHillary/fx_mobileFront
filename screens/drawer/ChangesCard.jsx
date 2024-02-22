@@ -16,25 +16,25 @@ const ChangesCard = ({ item, handleNavigate }) => {
           <Text style={styles.at} numberOfLines={1}>
             At
           </Text>
-          <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large}}>{item.takeProfitChange}</Text>
+          <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large}}>{item.priceAtChange}</Text>
         </View>
 
         
-        <View>
+        {item.lotSizeChange != 0 && <View>
           <Text style={styles.jobType}>Reduce lotSize</Text>
           <View style={{flexDirection: 'row',}}>
              <Text style={{color: COLORS.lightWhite, marginTop: 3}}>by</Text>
              <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large, marginLeft: 6, alignSelf: 'flex-end'}}>{item?.lotSizeChange}</Text>
           </View>
-        </View>
+        </View>}
 
-        <View>
+        {item.stopLossChange != 0 && <View>
           <Text style={styles.jobType}>Set stopLoss</Text>
           <View style={{flexDirection: 'row'}}>
              <Text style={{color: COLORS.lightWhite,  marginTop: 3}}>at</Text>
-             <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large, marginLeft: 6, alignSelf: 'flex-end'}}>{item?.stopLoss}</Text>
+             <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large, marginLeft: 6, alignSelf: 'flex-end'}}>{item?.stopLossChange}</Text>
           </View>
-        </View>
+        </View>}
       </View> 
       {/* <View style={{backgroundColor: COLORS.white, height: 0.5, width: "100%"}} /> */}
     </View>

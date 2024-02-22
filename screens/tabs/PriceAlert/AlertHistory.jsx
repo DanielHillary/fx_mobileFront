@@ -9,21 +9,53 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { COLORS, FONT, SIZES } from "../../../constants";
 import React, { useEffect, useState, useCallback, useContext } from "react";
-import { getAllUserAlert } from "../../../api/priceAlertApi";
+import { getAlertsByDateRange, getAlertsByRagne, getAlertsForTheDay, getAllUserAlert, searchForSymbol } from "../../../api/priceAlertApi";
 import EmptyList from "../../../components/EmptyList";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { AuthContext } from "../../../context/AuthContext";
 
-const CustomDate = () => {
+const CustomDate = ({ getStartDate, getEndDate, getAlertsByRagne }) => {
   const [startDate, setStartDate] = useState(false);
   const [endDate, setEndDate] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
+  const [startValue, setStartValue] = useState("")
+  const [endValue, setEndValue] = useState("")
   const [isNFocused, setIsNFocused] = useState(false);
   const [isUNFocused, setIsUNFocused] = useState(false);
+  const [isStartValidFormat, setIsStartValidFormat] = useState(false);
+  const [isEndValidFormat, setIsEndValidFormat] = useState(false);
+
+  const validateStartDateFormat = (input) => {
+    
+    const dateFormatRegex = /^\d{4}-\d{2}-\d{2}$/;
+    const isValid = dateFormatRegex.test(input);
+    if(input.length === 0){
+      setIsStartValidFormat(false);
+    }else {
+      setIsStartValidFormat(!isValid);
+    }
+
+    return isValid;
+  };
+
+  const validateEndDateFormat = (input) => {
+  
+    const dateFormatRegex = /^\d{4}-\d{2}-\d{2}$/;
+    const isValid = dateFormatRegex.test(input);
+
+    if(input.length === 0){
+      setIsEndValidFormat(false);
+    }else {
+      setIsEndValidFormat(!isValid);
+    }
+
+    return isValid;
+  };
 
   return (
     <View style={{ paddingHorizontal: SIZES.medium }}>
@@ -32,7 +64,7 @@ const CustomDate = () => {
           Start Date
         </Text>
         <TextInput
-          placeholder="10-03-2023"
+          placeholder="yyyy-mm-dd"
           placeholderTextColor={COLORS.gray}
           style={styles.email(startDate)}
           onFocus={() => {
@@ -41,7 +73,16 @@ const CustomDate = () => {
           onBlur={() => {
             setStartDate(false);
           }}
+          onChangeText={(val) => {
+            setStartValue(val);
+            validateStartDateFormat(val);
+            getStartDate(val);
+          }}
+          value={startValue}
         />
+        {isStartValidFormat && <Text style={{ color: "red", paddingLeft: SIZES.small - 4}}>
+          Invalid date format
+        </Text>}
       </View>
 
       <View style={{ width: "80%", marginTop: SIZES.medium }}>
@@ -49,7 +90,7 @@ const CustomDate = () => {
           End Date
         </Text>
         <TextInput
-          placeholder="11-3-2023"
+          placeholder="yyyy-mm-dd"
           placeholderTextColor={COLORS.gray}
           style={styles.email(endDate)}
           onFocus={() => {
@@ -58,12 +99,21 @@ const CustomDate = () => {
           onBlur={() => {
             setEndDate(false);
           }}
+          onChangeText={(val) => {
+            setEndValue(val);
+            getEndDate(val);
+            validateEndDateFormat(val)
+          }}
+          value={endValue}
         />
+        {isEndValidFormat && <Text style={{ color: "red", paddingLeft: SIZES.small - 4}}>
+          Invalid date format
+        </Text>}
       </View>
       <TouchableOpacity
         onPress={() => {
           //   navigate("AutoTrader");
-          // getRangeData();
+          getAlertsByRagne()
         }}
         style={styles.button}
       >
@@ -82,7 +132,7 @@ const Alerts = ({ alerts }) => {
   return (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate("AlertDetails", { alertDetails: alerts });
+        navigation.navigate("AlertDetails", { alertDetails: alerts, fromhistory: true });
       }}
     >
       <View style={styles.alertlist}>
@@ -110,7 +160,7 @@ const Alerts = ({ alerts }) => {
               <Text
                 style={[styles.text, { marginLeft: 10, fontSize: SIZES.small }]}
               >
-                Trigger date: Oct 20, 2020
+                Trigger date: {alerts.alertTriggerTime}
               </Text>
             </View>
           </View>
@@ -145,15 +195,92 @@ const Alerts = ({ alerts }) => {
   );
 };
 
-const SearchFilter = () => {
+const SearchFilter = ({ id, updateList, updateLoading, updateEmpty }) => {
   const [allPressed, setAllPressed] = useState(true);
   const [alertPressed, setAlertPressed] = useState(false);
   const [ongoingPressed, setOngoingPressed] = useState(false);
   const [exitPressed, setExitPressed] = useState(false);
   const [custom, setCustom] = useState(false);
   const [todayPressed, setTodayPressed] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const setStart = (val) => {
+    setStartDate(val);
+  }
+  const setEnd = (val) => {
+    setEndDate(val);
+  }
+  
+  const { accountDetails } = useContext(AuthContext);
+
+  const getAlertsForToday = async() => {
+    updateLoading(true);
+    const response = await getAlertsForTheDay(id).then((res) => {
+      return res.data;
+    })
+    if (response.status) {
+      if (response.data.length == 0) {
+        updateEmpty(true);
+      } else {
+        updateList(response.data);
+        updateEmpty(false);
+      }
+    } else {
+      console.log(response.message);
+    }
+    updateLoading(false);
+  }
+
+  const getByTimeRange = async(range) => {
+    updateLoading(true);
+    const response = await getAlertsByRagne(id, range).then((res) => {
+      return res.data;
+    })
+    if (response.status) {
+      if (response.data.length == 0) {
+        updateEmpty(true);
+      } else {
+        updateList(response.data);
+        updateEmpty(false);
+      }
+    } else {
+      console.log(response.message);
+    }
+    updateLoading(false);
+  }
+
+  const getAssetsByDateRange = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getAlertsByDateRange(
+        startDate,
+        endDate,
+        accountDetails.accountId
+      ).then((res) => {
+        return res.data;
+      });
+      if (response.status) {
+        if (response.data.length == 0) {
+          updateEmpty(true);
+        } else {
+          updateList(response.data);
+          updateEmpty(false);
+        }
+      } else {
+        console.log(response.message);
+      }
+      updateLoading(false);
+      setCustom(false);
+    } catch (error) {
+      console.log(error);
+      setError(true);
+      updateLoading(false);
+      setCustom(false);
+    }
+  };
 
   const setRestInActive = (item) => {
     let search = "All";
@@ -163,13 +290,6 @@ const SearchFilter = () => {
       setOngoingPressed(false);
       setAllPressed(false);
       setTodayPressed(false);
-    } else if (item == "All") {
-      search = item;
-      setAlertPressed(false);
-      setOngoingPressed(false);
-      setExitPressed(false);
-      setCustom(false);
-      setTodayPressed(false);
     } else if (item == "Today") {
       search = item;
       setAlertPressed(false);
@@ -177,25 +297,57 @@ const SearchFilter = () => {
       setExitPressed(false);
       setCustom(false);
       setAllPressed(false);
-    } else if (item == "ongoing") {
+      getAlertsForToday();
+    } else if (item == "Last Week") {
       search = item;
       setExitPressed(false);
-      setAlertPressed(false);
       setAllPressed(false);
       setCustom(false);
       setTodayPressed(false);
-    } else if (item == "alerts") {
-      search = item;
-      setExitPressed(false);
       setOngoingPressed(false);
+      getByTimeRange(7);
+    } else if (item == "Month") {
+      search = item;
+      setExitPressed(false);
       setAllPressed(false);
       setCustom(false);
+      setAlertPressed(false);
       setTodayPressed(false);
+      getByTimeRange(30);
     }
 
     return search;
   };
   const [searchTerm, setSearchTerm] = useState("");
+
+  const searchByAssetName = async () => {
+    try {
+      if (searchTerm.length === 0) {
+        Alert.alert("", "Please enter a valid asset/symbol to search");
+      } else {
+        updateLoading(true)
+        const response = await searchForSymbol(
+          accountDetails.accountId,
+          searchTerm,
+          false
+        ).then((res) => {
+          return res.data;
+        });
+        if (response.status) {
+          updateList(response.data);
+          updateLoading(false)
+        }else{
+          updateLoading(false);
+          Alert.alert("Empty", "No alerts with this symbol");
+          console.log(response.message);
+        }
+      }
+    } catch (error) {
+      updateLoading(false)
+      Alert.alert("Failed transaction", "Something went wrong, please try again");
+      console.log(error);
+    }
+  };
   return (
     <View style={styles.base}>
       <View style={styles.searchContainer}>
@@ -210,7 +362,11 @@ const SearchFilter = () => {
           ></TextInput>
         </View>
 
-        <TouchableOpacity style={styles.searchBtn}>
+        <TouchableOpacity style={styles.searchBtn}
+          onPress={() => {
+            searchByAssetName();
+          }}
+        >
           <Image
             source={require("../../../assets/icons/search.png")}
             resizeMode="contain"
@@ -226,7 +382,7 @@ const SearchFilter = () => {
           showsHorizontalScrollIndicator={false}
         >
           <View style={{ flexDirection: "row", gap: SIZES.small - 2 }}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={{
                 borderColor: COLORS.darkyellow,
                 borderWidth: 0.5,
@@ -244,7 +400,7 @@ const SearchFilter = () => {
               }}
             >
               <Text style={{ color: COLORS.lightWhite }}>All</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <TouchableOpacity
               style={{
@@ -280,7 +436,7 @@ const SearchFilter = () => {
               }}
               onPress={() => {
                 setAlertPressed(true);
-                setRestInActive("alerts");
+                setRestInActive("Last Week");
               }}
             >
               <Text style={{ color: COLORS.lightWhite }}>Last Week</Text>
@@ -300,7 +456,7 @@ const SearchFilter = () => {
               }}
               onPress={() => {
                 setOngoingPressed(true);
-                setRestInActive("ongoing");
+                setRestInActive("Month");
               }}
             >
               <Text style={{ color: COLORS.lightWhite }}>Last Month</Text>
@@ -330,7 +486,7 @@ const SearchFilter = () => {
         </ScrollView>
       </View>
 
-      {custom && <CustomDate />}
+      {custom && <CustomDate getStartDate={setStart} getEndDate={setEnd} getAlertsByRagne={getAssetsByDateRange} />}
     </View>
   );
 };
@@ -342,6 +498,7 @@ const AlertHistory = () => {
   const [error, setError] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [useCurrentList, setUseCurrentList] = useState(false);
 
   const route = useRoute();
 
@@ -357,33 +514,42 @@ const AlertHistory = () => {
     }
   }, []);
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
+  const updateList = (value) => {
+    setAlertList(value)
+    setUseCurrentList(true)
+  }
 
-    setIsLoading(true);
-    setError(false);
-    getAllUserAlert(accountDetails.accountId)
-      .then((res) => {
-        let alerts = res.data.data;
-        if (res.data.status) {
-          setIsEmpty(false);
-          setIsLoading(false);
-          setAlertList(alerts.inactiveAlertList);
-          // console.log(alerts.inactiveAlertList);
-        }
-        setRefreshing(false);
-      })
-      .catch((error) => {
-        console.log(error);
-        setError(true);
-        setRefreshing(false);
-        setIsLoading(false);
-      });
-  }, []);
+  const updateLoading = (value) => {
+    setIsLoading(value);
+  }
+
+  // const onRefresh = useCallback(() => {
+  //   setRefreshing(true);
+
+  //   setIsLoading(true);
+  //   setError(false);
+  //   getAllUserAlert(accountDetails.accountId)
+  //     .then((res) => {
+  //       let alerts = res.data.data;
+  //       if (res.data.status) {
+  //         setIsEmpty(false);
+  //         setIsLoading(false);
+  //         setAlertList(alerts.inactiveAlertList);
+  //         // console.log(alerts.inactiveAlertList);
+  //       }
+  //       setRefreshing(false);
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //       setError(true);
+  //       setRefreshing(false);
+  //       setIsLoading(false);
+  //     });
+  // }, []);
 
   return (
     <View style={styles.baseContainer}>
-      <SearchFilter />
+      <SearchFilter id={accountDetails.accountId} updateLoading={updateLoading} updateList={updateList} updateEmpty={setIsEmpty}/>
       {isLoading ? (
         <ActivityIndicator size="large" color={COLORS.darkyellow} />
       ) : error ? (
@@ -392,15 +558,15 @@ const AlertHistory = () => {
         <EmptyList message={"No History on alerts"} />
       ) : (
         <FlatList
-          data={inactiveAlertList.length == 0 ? alertList : inactiveAlertList}
+          data={useCurrentList ? alertList : inactiveAlertList}
           renderItem={({ item }) => <Alerts alerts={item} />}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={["#0000ff"]}
-            />
-          }
+          // refreshControl={
+          //   <RefreshControl
+          //     refreshing={refreshing}
+          //     onRefresh={onRefresh}
+          //     colors={["#0000ff"]}
+          //   />
+          // }
           keyExtractor={(item) => item?.id}
           contentContainerStyle={{ rowGap: SIZES.medium + 5 }}
           vertical
@@ -439,7 +605,7 @@ const styles = StyleSheet.create({
     gap: 30,
   },
   btc: {
-    fontSize: SIZES.large,
+    fontSize: SIZES.medium,
     fontWeight: "400",
     marginLeft: 10,
   },

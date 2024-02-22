@@ -13,7 +13,7 @@ import React, { useContext, useEffect, useState, useCallback } from "react";
 import { COLORS, FONT, SIZES } from "../../constants";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../context/AuthContext";
-import { getNotifications, removeFromList } from "../../api/notificationApi";
+import { getAlertCategory, getNotifications, removeFromList } from "../../api/notificationApi";
 import { getTradeAnalysis } from "../../api/tradeAnalysisApi";
 import EmptyList from "../../components/EmptyList";
 
@@ -36,14 +36,23 @@ const NotificationCard = ({ item, updateNoteList }) => {
     }
   };
 
+  const checkPriceAlert = async() => {
+    try {
+      
+    } catch (error) {
+      
+    }
+  }
+
   const markAsRead = async () => {
     let resp = await removeFromList(item.id).then((res) => {
       return res.data;
     });
     if(resp.status){
-      console.log("All is well");
+      updateNoteList(item);
+    }else{
+      console.log(resp.message);
     }
-    updateNoteList(item);
   }
 
   return (
@@ -85,7 +94,7 @@ const NotificationCard = ({ item, updateNoteList }) => {
           </Text>
         </View>
         <Text style={{ color: COLORS.lightWhite, fontSize: SIZES.xSmall }}>
-          12:23 PM
+          {item.notificationTime}
         </Text>
       </View>
 
@@ -109,10 +118,11 @@ const NotificationCard = ({ item, updateNoteList }) => {
               checkTradeNotification();
             }
             if (item.notificationCategory == "Entry"){
-              navigation.navigate("ConfirmEntry");
+              navigation.navigate("ConfirmEntry", { tradeDetail : item.metaOrderId });
+              markAsRead();
             }
             if(item.notificationCategory == "Price Alert"){
-
+              checkPriceAlert()
             }
           }}
         >
@@ -148,20 +158,49 @@ const Notification = () => {
   };
 
   const getAllNotification = async (id) => {
+    setIsLoading(true);
     const response = await getNotifications(id).then((res) => {
       return res.data;
     });
+    
     if (response.status) {
       if (response.data.length == 0) {
         setError(true);
         updateNotification(false);
       } else {
         setNotification(response.data);
+        setError(false);
       }
     } else {
       console.log(response.message);
     }
     setIsLoading(false);
+  };
+
+  const getCategoryNotification = async (category) => {
+    setIsLoading(true);
+    try {
+      const response = await getAlertCategory(accountDetails.accountId, category).then((res) => {
+        return res.data;
+      });
+      if (response.status) {
+        if (response.data.length == 0) {
+          setError(true);
+          updateNotification(false);
+          
+        } else {
+          setNotification(response.data);
+          setError(false);
+          
+        }
+      } else {
+        console.log(response.message);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+    
   };
 
   useEffect(() => {
@@ -178,36 +217,41 @@ const Notification = () => {
 
   const setRestInActive = (item) => {
     let search = "All";
-    if (item == "exit") {
+    if (item == "Exit Level") {
       search = item;
       setAlertPressed(false);
       setOngoingPressed(false);
       setAllPressed(false);
       setAnalysisPressed(false);
+      getCategoryNotification(item);
     } else if (item == "All") {
       search = item;
       setAlertPressed(false);
       setOngoingPressed(false);
       setExitPressed(false);
       setAnalysisPressed(false);
+      getAllNotification(accountDetails.accountId);
     } else if (item == "Trades") {
       search = item;
       setExitPressed(false);
       setAlertPressed(false);
       setAllPressed(false);
       setAnalysisPressed(false);
-    } else if (item == "alerts") {
+      getCategoryNotification(item);
+    } else if (item == "Price Alert") {
       search = item;
       setExitPressed(false);
       setOngoingPressed(false);
       setAllPressed(false);
       setAnalysisPressed(false);
+      getCategoryNotification(item);
     } else if (item == "Entry") {
       search = item;
       setExitPressed(false);
       setOngoingPressed(false);
       setAllPressed(false);
       setAlertPressed(false);
+      getCategoryNotification(item);
     }
     return search;
   };
@@ -251,7 +295,7 @@ const Notification = () => {
               }}
               onPress={() => {
                 setAlertPressed(true);
-                setRestInActive("alerts");
+                setRestInActive("Price Alert");
               }}
             >
               <Text style={{ color: COLORS.lightWhite }}>Price Alerts</Text>
@@ -311,7 +355,7 @@ const Notification = () => {
               }}
               onPress={() => {
                 setExitPressed(true);
-                setRestInActive("exit");
+                setRestInActive("Exit Level");
               }}
             >
               <Text style={{ color: COLORS.lightWhite }}>Exit Levels</Text>

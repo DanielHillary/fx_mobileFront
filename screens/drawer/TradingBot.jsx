@@ -8,6 +8,8 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   LogBox,
+  Alert,
+  Modal,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import {
@@ -19,6 +21,7 @@ import {
   tradeTypelist,
 } from "../../constants";
 import DropDownPicker from "react-native-dropdown-picker";
+import { Dropdown } from "react-native-element-dropdown";
 import { ScrollView } from "react-native-gesture-handler";
 import {
   useFocusEffect,
@@ -31,6 +34,8 @@ import Toast from "react-native-toast-message";
 import _ from "lodash";
 import { getAllUserAccounts } from "../../api/accountApi";
 import { AuthContext } from "../../context/AuthContext";
+import SuccessModal from "../../components/modal/SuccessModal";
+import ConfirmStrategyModal from "../../components/modal/ConfirmStrategyModal";
 
 const DownArrow = () => {
   return (
@@ -45,7 +50,12 @@ const DownArrow = () => {
 
 const Details = ({ selectCategory }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [assetType, setAssetType] = useState(false);
+  const [assetType, setAssetType] = useState(" ");
+  const [items, setItems] = useState([
+    { label: "Synthetics", value: "Synthetic" },
+    { label: "Currencies", value: "Currencies" },
+  ]);
+  const [isFocus, setIsFocus] = useState(false);
 
   const categories = [
     { label: "Synthetics", value: "Synthetic" },
@@ -61,33 +71,57 @@ const Details = ({ selectCategory }) => {
         width: 170,
       }}
     >
-      <DropDownPicker
-          listMode="SCROLLVIEW"
-          items={categories}
-          open={isOpen}
-          setOpen={() => setIsOpen(!isOpen)}
-          value={assetType}
-          setValue={(val) => {
-            setAssetType(val);
-            selectCategory(val());
-          }}
-          placeholder="Please choose"
-          placeholderStyle={{ fontSize: 20, fontWeight: "300" }}
-          style={{
-            backgroundColor: "#111",
-            borderColor: COLORS.darkyellow,
-            marginBottom: 10,
-          }}
-          disableBorderRadius={false}
-          textStyle={{ color: COLORS.darkyellow, fontSize: 20 }}
-          labelStyle={{ color: COLORS.darkyellow, fontSize: 20 }}
-          // arrowIconStyle={{backgroundColor: COLORS.darkyellow}}
-          ArrowDownIconComponent={DownArrow}
-          dropDownContainerStyle={{
-            backgroundColor: "#111",
-            borderColor: COLORS.darkyellow,
-          }}
-        />
+      <Dropdown
+        style={{
+          backgroundColor: "#111",
+          borderWidth: 0.9,
+          borderRadius: SIZES.small - 4,
+          borderColor: COLORS.darkyellow,
+          width: 150,
+          marginBottom: 10,
+          padding: SIZES.small - 4,
+          zIndex: -1,
+        }}
+        placeholderStyle={styles.placeholder}
+        selectedTextStyle={styles.placeholder}
+        itemTextStyle={{
+          fontFamily: FONT.bold,
+          color: COLORS.darkyellow,
+          backgroundColor: "#111",
+        }}
+        inputSearchStyle={{
+          color: COLORS.white,
+          borderColor: COLORS.darkyellow,
+          padding: 2,
+          borderRadius: SIZES.small - 4,
+        }}
+        // iconStyle={styles.iconContainer}
+        data={items.map((item) => ({
+          label: item?.label,
+          value: item?.value,
+        }))}
+        search
+        maxHeight={300}
+        labelField="label"
+        valueField="value"
+        placeholder={!isFocus ? "Select Category" : "..."}
+        searchPlaceholder="Search..."
+        renderRightIcon={() => <DownArrow />}
+        value={assetType}
+        onFocus={() => setIsFocus(true)}
+        onBlur={() => setIsFocus(false)}
+        onChange={(item) => {
+          // onChange(item.value);
+          setAssetType(item.value);
+          selectCategory(item.value);
+          setIsFocus(false);
+        }}
+        containerStyle={{
+          backgroundColor: "#111",
+          borderColor: COLORS.darkyellow,
+          borderRadius: SIZES.small,
+        }}
+      />
     </View>
   );
 };
@@ -235,7 +269,7 @@ const Account = ({
               setVolume("");
             }
           }}
-          style={{ marginBottom: 20 }}
+          style={{ flexDirection: "row" }}
         >
           <View>
             {isPressed ? (
@@ -247,18 +281,19 @@ const Account = ({
               <View style={styles.checkbox} />
             )}
           </View>
+
+          <View style={{ width: 80, marginLeft: 8 }}>
+            <Text style={[styles.text, { fontSize: SIZES.medium }]}>
+              {item.login}
+            </Text>
+            <Text style={[styles.text, { fontSize: SIZES.small - 2 }]}>
+              ${item.accountBalance}
+            </Text>
+            <Text style={[styles.text, { fontSize: SIZES.small }]}>
+              {item.server}
+            </Text>
+          </View>
         </TouchableOpacity>
-        <View style={{ width: 80, marginLeft: 8 }}>
-          <Text style={[styles.text, { fontSize: SIZES.medium }]}>
-            {item.login}
-          </Text>
-          <Text style={[styles.text, { fontSize: SIZES.small - 2 }]}>
-            ${item.accountBalance}
-          </Text>
-          <Text style={[styles.text, { fontSize: SIZES.small }]}>
-            {item.server}
-          </Text>
-        </View>
 
         <View
           style={{
@@ -330,19 +365,31 @@ const TradingBot = () => {
   const [entryPrice, setEntryPrice] = useState("");
   const [assetType, setAssetType] = useState("");
   const [isCurrencies, setIsCurrencies] = useState(false);
+  const [selectedLabel, setSelectedLabel] = useState("");
+  const [isFocus, setIsFocus] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isEntryModalVisible, setIsEntryModalVisible] = useState(false);
   // const [totalTrades, setTotalTrades] = useState(0);
+
+  const setModalVisible = (value) => {
+    setIsModalVisible(value);
+  };
+
+  const setEntryModalVisible = (value) => {
+    setIsEntryModalVisible(value);
+  };
 
   const { accountDetails, userInfo } = useContext(AuthContext);
 
   const [acctList, setAcctList] = useState([]);
 
   const selectSymbolType = (value) => {
-    setTradeAsset(value);
     if (value == "Currencies") {
       setIsCurrencies(true);
     } else {
       setIsCurrencies(false);
     }
+    setTradeAsset(value);
   };
 
   const updateArrayForAccount = (id, isPart) => {
@@ -354,10 +401,9 @@ const TradingBot = () => {
           ...acctList[alreadyExists],
           accountId: id,
         };
-        console.log("Is active");
       } else {
         const newArray = acctList.filter((obj) => obj.accountId !== id);
-        console.log("Is not active");
+
         setAcctList(newArray);
       }
     } else {
@@ -383,10 +429,9 @@ const TradingBot = () => {
           accountId: id,
           tradeAmount: amount,
         };
-        console.log("Is active");
       } else {
         const newArray = acctList.filter((obj) => obj.accountId !== id);
-        console.log("Is not active");
+
         setAcctList(newArray);
       }
     } else {
@@ -411,10 +456,8 @@ const TradingBot = () => {
           ...acctList[alreadyExists],
           lotSize: parseFloat(volume),
         };
-        console.log("Is active");
       } else {
         const newArray = acctList.filter((obj) => obj.accountId !== id);
-        console.log("Is not active");
         setAcctList(newArray);
       }
     } else {
@@ -432,24 +475,27 @@ const TradingBot = () => {
 
   const increaser = (id, value, isPart) => {
     updateArray(id, value + 1, isPart);
-    console.log(acctList);
+    // console.log(acctList);
   };
 
   const decreaser = (id, value, isPart) => {
     updateArray(id, value - 1, isPart);
-    console.log(acctList);
+    // console.log(acctList);
   };
 
   const getUserAccounts = async () => {
-    const response = await getAllUserAccounts(accountDetails.userId).then(
-      (res) => {
-        return res.data;
+    if (accountDetails.accountName != "PsyDStarter") {
+      const response = await getAllUserAccounts(accountDetails.userId).then(
+        (res) => {
+          return res.data;
+        }
+      );
+      if (response.status) {
+        setUserAccounts(response.data.accountList);
+      } else {
+        //Set an alert modal that retries it.
+        console.log(response.message);
       }
-    );
-    if (response.status) {
-      setUserAccounts(response.data.accountList);
-    } else {
-      console.log(response.message);
     }
   };
 
@@ -466,9 +512,14 @@ const TradingBot = () => {
 
   const navigation = useNavigation();
 
-  const placeTradeOrder = async () => {
+  const placeTradeOrder = async (
+    ignoreEntries,
+    confirmEntries,
+    percentEntry
+  ) => {
+    setIsClicked(true);
     const tradeOrder = {
-      assetCategory: "Synthetic",
+      assetCategory: isCurrencies ? "Currencies" : "Synthetic",
       comments: "title",
       lotSize: 1,
       metaAccountId: account.metaApiAccountId,
@@ -482,31 +533,25 @@ const TradingBot = () => {
       userAccountId: account.accountId,
       actDetails: acctList,
       userId: userInfo.user.userId,
+      assetAbbrev: selectedLabel,
+      ignoreEntries: ignoreEntries,
+      confirmEntries: confirmEntries,
+      entryPercent: percentEntry,
     };
 
-    console.log(tradeOrder);
+    console.log(acctList);
 
     const response = await executeAdvancedOrder(tradeOrder).then((res) => {
       return res.data;
     });
-
     setIsClicked(false);
     if (response.status) {
-      Toast.show({
-        type: "success",
-        text1: "Successful Trade",
-        text2: "Go to Dashboard to see your trades",
-      });
+      setIsModalVisible(true);
     } else {
       setAlert(true);
-      // return (
-      //   <View>
-      //     <Text>Something went wrong</Text>
-      //   </View>
-      // );
+      Alert.alert("Failed", response.message);
       console.log(response.message);
     }
-    // console.log(response);
   };
 
   const handleDebouncedSetValue = _.debounce((value) => {
@@ -554,34 +599,62 @@ const TradingBot = () => {
             borderColor: COLORS.darkyellow,
           }}
         />
-        <DropDownPicker
-          listMode="SCROLLVIEW"
-          items={isCurrencies ? Currencies : Synthetics}
-          open={isAssetOpen}
-          setOpen={() => setIsAssetOpen(!isAssetOpen)}
-          value={assetType}
-          setValue={(val) => {
-            setAssetType(val);
-          }}
-          placeholder={isCurrencies ? "EURUSD" : "Step Index"}
-          placeholderStyle={{ fontSize: SIZES.large, fontWeight: "bold" }}
+
+        <Dropdown
           style={{
             backgroundColor: "#111",
+            borderWidth: 1,
+            borderRadius: SIZES.small - 4,
             borderColor: COLORS.darkyellow,
-            height: 30,
+            width: 135,
+            padding: SIZES.small - 4,
             zIndex: -1,
           }}
-          dropDownDirection="bottom"
-          disableBorderRadius={false}
-          textStyle={{ color: COLORS.darkyellow, fontSize: SIZES.large }}
-          labelStyle={{ color: COLORS.darkyellow, fontSize: SIZES.large }}
-          // arrowIconStyle={{backgroundColor: COLORS.darkyellow}}
-          ArrowDownIconComponent={DownArrow}
-          dropDownContainerStyle={{
-            backgroundColor: "black",
-            height: 300,
-            borderColor: COLORS.darkyellow,
+          placeholderStyle={styles.placeholder}
+          selectedTextStyle={styles.placeholder}
+          itemTextStyle={{
+            fontFamily: FONT.bold,
+            color: COLORS.darkyellow,
+            backgroundColor: "#111",
           }}
+          inputSearchStyle={{
+            color: COLORS.white,
+            borderColor: COLORS.darkyellow,
+            padding: 2,
+            borderRadius: SIZES.small - 4,
+          }}
+          iconStyle={{backgroundColor: "#111"}}
+          data={isCurrencies ? Currencies.map((item) => ({
+            label: item?.label,
+            value: item?.value,
+          })) : Synthetics.map((item) => ({
+            label: item?.label,
+            value: item?.value,
+          }))}
+          search
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder={!isFocus ? "Select Asset" : "..."}
+          searchPlaceholder="Search..."
+          renderRightIcon={() => <DownArrow />}
+          value={assetType}
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onChange={(item) => {
+            setAssetType(item.value);
+            setSelectedLabel(item.label);
+            setIsFocus(false);
+          }}
+          containerStyle={{
+            backgroundColor: "#111",
+            borderColor: COLORS.darkyellow,
+            borderRadius: SIZES.small,
+          }}
+          selectedTextProps={{
+            style: styles.placeholder,
+          }}
+          // itemContainerStyle={{backgroundColor: "black"}}
         />
       </View>
 
@@ -660,7 +733,6 @@ const TradingBot = () => {
             value={stopLoss}
           />
         </View>
-
         <View>
           <Text
             style={{
@@ -684,22 +756,29 @@ const TradingBot = () => {
           />
         </View>
       </View>
-      <Text style={[styles.text, { marginLeft: 30, marginTop: SIZES.medium }]}>
-        Choose trading account(s)
-      </Text>
-      <Text
-        style={{
-          color: COLORS.lightWhite,
-          textAlign: "center",
-          fontSize: SIZES.xSmall,
-          paddingHorizontal: SIZES.medium,
-          marginVertical: SIZES.medium,
-          marginTop: SIZES.small,
-        }}
-      >
-        Attention!!: Please note that if you do not specify a volume, we would open each trade using the
-        recommended volume for each account based on your risk management plan
-      </Text>
+      {accountDetails.accountName != "PsyDStarter" && (
+        <Text
+          style={[styles.text, { marginLeft: 30, marginTop: SIZES.medium }]}
+        >
+          Choose trading account(s)
+        </Text>
+      )}
+      {accountDetails.accountName != "PsyDStarter" && (
+        <Text
+          style={{
+            color: COLORS.lightWhite,
+            textAlign: "center",
+            fontSize: SIZES.xSmall,
+            paddingHorizontal: SIZES.medium,
+            marginVertical: SIZES.medium,
+            marginTop: SIZES.small,
+          }}
+        >
+          Attention!!: Please note that if you do not specify a volume, we would
+          open each trade using the recommended volume for each account based on
+          your risk management plan
+        </Text>
+      )}
       {userAccounts?.map((item) => (
         <Account
           item={item}
@@ -711,35 +790,101 @@ const TradingBot = () => {
           updateListForAccount={updateArrayForAccount}
         />
       ))}
-      <Text
-        style={{
-          color: COLORS.lightWhite,
-          textAlign: "center",
-          fontSize: SIZES.xSmall,
-          paddingHorizontal: SIZES.medium,
-          marginVertical: SIZES.medium,
-          marginTop: SIZES.small,
-        }}
-      >
-        Attention!!: Please note that the trade will be executed at market
-        conditions, difference with the request price may be significant.
-      </Text>
+      {accountDetails.accountName != "PsyDStarter" ? (
+        <Text
+          style={{
+            color: COLORS.lightWhite,
+            textAlign: "center",
+            fontSize: SIZES.xSmall,
+            paddingHorizontal: SIZES.medium,
+            marginVertical: SIZES.medium,
+            marginTop: SIZES.small,
+          }}
+        >
+          Attention!!: Please note that the trade will be executed at market
+          conditions, difference with the request price may be significant.
+        </Text>
+      ) : (
+        <View>
+          <Text
+            style={{
+              color: COLORS.lightWhite,
+              textAlign: "center",
+              fontSize: SIZES.medium - 5,
+              paddingHorizontal: SIZES.medium,
+              marginVertical: SIZES.medium,
+              marginTop: SIZES.large,
+            }}
+          >
+            Please register a real trading account in order able to use this
+            feature and place trades.
+          </Text>
 
-      <TouchableOpacity
-        onPress={() => {
-          //   navigate("AutoTrader");
-          setIsClicked(true);
-          placeTradeOrder();
-        }}
-        style={styles.button}
-      >
-        {isClicked ? (
-          <ActivityIndicator size="large" colors={"black"} />
-        ) : (
-          <Text style={styles.buttonText}>Place Order</Text>
-        )}
-      </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("AddNewAccount");
+            }}
+            style={styles.button}
+          >
+            {isClicked ? (
+              <ActivityIndicator size="large" colors={"black"} />
+            ) : (
+              <Text style={styles.buttonText}>Register an account</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {accountDetails.accountName != "PsyDStarter" && (
+        <TouchableOpacity
+          onPress={() => {
+            if (tradeAsset.length == 0) {
+              Alert.alert("", "Please select a category");
+            } else if (assetType.length === 0) {
+              Alert.alert("", "Please select an asset to trade");
+            } else if (tradeType.length === 0) {
+              Alert.alert("", "Please select market position");
+            } else if (acctList.length === 0) {
+              Alert.alert("", "Please choose an account");
+            } else if (acctList[0].tradeAmount === 0) {
+              Alert.alert("", "Please choose the number of positions to place");
+            } else {
+              setIsEntryModalVisible(true);
+            }
+          }}
+          style={styles.button}
+        >
+          {isClicked ? (
+            <ActivityIndicator size="large" colors={"black"} />
+          ) : (
+            <Text style={styles.buttonText}>Place Order</Text>
+          )}
+        </TouchableOpacity>
+      )}
       <Toast />
+      <Modal
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setIsModalVisible(false);
+        }}
+        animationType="slide"
+        transparent={true}
+      >
+        <SuccessModal setVisibility={setModalVisible} />
+      </Modal>
+      <Modal
+        visible={isEntryModalVisible}
+        onRequestClose={() => {
+          setIsEntryModalVisible(false);
+        }}
+        animationType="slide"
+        transparent={true}
+      >
+        <ConfirmStrategyModal
+          setVisibility={setEntryModalVisible}
+          openTrade={placeTradeOrder}
+        />
+      </Modal>
     </ScrollView>
   );
 };
@@ -750,6 +895,12 @@ const styles = StyleSheet.create({
   baseContainer: {
     flex: 1,
     backgroundColor: "#111",
+  },
+  placeholder: {
+    color: COLORS.darkyellow,
+    fontSize: SIZES.medium,
+    fontFamily: FONT.bold,
+    backgroundColor: "#111"
   },
   text: {
     color: COLORS.lightWhite,

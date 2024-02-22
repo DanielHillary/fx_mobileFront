@@ -6,7 +6,9 @@ import {
   Image,
   FlatList,
   TextInput,
+  ActivityIndicator,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { COLORS, FONT, SIZES } from "../../../constants";
 import {
@@ -19,6 +21,8 @@ import { getAllActiveAlerts } from "../../../api/dashboardApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { isNull } from "lodash";
 import EmptyList from "../../../components/EmptyList";
+import { searchForSymbol } from "../../../api/priceAlertApi";
+import { LogBox } from "react-native";
 
 const ActiveAlerts = ({ alerts, navigate }) => {
   return (
@@ -48,15 +52,20 @@ const ActiveAlerts = ({ alerts, navigate }) => {
             />
             <View style={{ marginBottom: 5 }}>
               <Text style={styles.text}>{alerts.symbol}</Text>
-              <Text style={[styles.text, styles.trigger]}>
-                Watch Price: {alerts.watchPrice}
+              <Text style={[styles.text, { marginLeft: 10 }]}>
+                Watch Price:{" "}
+                <Text style={styles.trigger}>{alerts.watchPrice}</Text>
               </Text>
             </View>
           </View>
 
           <View style={{ marginBottom: 5 }}>
-            <Text style={[styles.text, { alignSelf: "flex-end" }]}>1hr</Text>
-            <Text style={[styles.text, styles.trigger]}>Exit level</Text>
+            <Text style={[styles.text, { alignSelf: "flex-end" }]}>
+              {alerts.openTime}
+            </Text>
+            <Text style={[styles.text, { marginLeft: 10 }]}>
+              {alerts.subject}
+            </Text>
           </View>
         </View>
       </View>
@@ -75,37 +84,35 @@ const ActiveAlertsScreen = ({ account, alerts }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    let alertLists = alerts.activeAlertList
-    console.log(alertLists)
-    if(alertList.length == 0){
+    let alertLists = alerts.activeAlertList;
+    if (alertList.length == 0) {
       setIsEmpty(true);
       setUseCurrentList(true);
-      setAlertList([{},])
-      console.log('It is empty');
+      setAlertList([{}]);
+      console.log("It is empty");
     }
   }, []);
 
   const { navigate } = useNavigation();
 
-  const onRefresh = useCallback(() => {
-    // Set refreshing to true to show the loading indicator
-    setRefreshing(true);
+  LogBox.ignoreLogs([`Warning: Each child in a list should have a unique "key" prop`]);
 
-    setIsLoading(true);
-    setError(false);
-    setUseCurrentList(true);
+  const getCurrentAlerts = () => {
     getAllActiveAlerts(account.accountId)
       .then((res) => {
         let alerts = res.data.data;
         if (res.data.status) {
           if (alerts.length == 0) {
             setIsEmpty(true);
+            setAlertList([{}]);
           } else {
             setAlertList(alerts);
             setIsEmpty(false);
           }
         } else {
+          setAlertList([{}]);
           setRefreshing(false);
+          console.log("Alerts went wrong");
         }
         setRefreshing(false);
       })
@@ -114,7 +121,56 @@ const ActiveAlertsScreen = ({ account, alerts }) => {
         setError(true);
         setRefreshing(false);
       });
-  }, []);
+  };
+
+  const onRefresh = useCallback(() => {
+    // Set refreshing to true to show the loading indicator
+    setRefreshing(true);
+
+    // setIsLoading(true);
+    setError(false);
+    setUseCurrentList(true);
+    getCurrentAlerts();
+  }, [account]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // async function fetchData() {
+      getCurrentAlerts();
+      // }
+      // fetchData();
+    }, [account])
+  );
+
+  const searchByAssetName = async () => {
+    try {
+      if (searchTerm.length === 0) {
+        Alert.alert("", "Please enter a valid asset/symbol to search");
+      } else {
+        setIsLoading(true)
+        const response = await searchForSymbol(
+          account.accountId,
+          searchTerm,
+          true
+        ).then((res) => {
+          return res.data;
+        });
+        if (response.status) {
+          setAlertList(response.data);
+          setIsLoading(false)
+          setUseCurrentList(true);
+        }else{
+          setIsLoading(false);
+          Alert.alert("Empty", "No alerts with this symbol");
+          console.log(response.message);
+        }
+      }
+    } catch (error) {
+      setIsLoading(false)
+      Alert.alert("Failed transaction", "Something went wrong, please try again");
+      console.log(error);
+    }
+  };
 
   return (
     <View style={styles.baseContainer}>
@@ -179,7 +235,12 @@ const ActiveAlertsScreen = ({ account, alerts }) => {
                 ></TextInput>
               </View>
 
-              <TouchableOpacity style={styles.searchBtn}>
+              <TouchableOpacity
+                style={styles.searchBtn}
+                onPress={() => {
+                  searchByAssetName();
+                }}
+              >
                 <Image
                   source={require("../../../assets/icons/search.png")}
                   resizeMode="contain"
@@ -191,10 +252,21 @@ const ActiveAlertsScreen = ({ account, alerts }) => {
         }
         data={useCurrentList ? alertList : alerts.activeAlertList}
         renderItem={({ item }) =>
-          isEmpty ? (
+          isLoading ? (
+            <View
+              style={{
+                backgroundColor: COLORS.appBackground,
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <ActivityIndicator size={"large"} />
+            </View>
+          ) : isEmpty ? (
             <EmptyList message={"No active Alerts"} />
           ) : (
-            <ActiveAlerts alerts={item} navigate={navigate} />
+            <ActiveAlerts key={item} alerts={item} navigate={navigate} />
           )
         }
         refreshControl={
@@ -245,6 +317,9 @@ const styles = StyleSheet.create({
   },
   trigger: {
     marginLeft: 10,
+    fontFamily: FONT.bold,
+    fontSize: SIZES.medium,
+    color: COLORS.darkyellow,
   },
   button: {
     // margin: 80,

@@ -4,7 +4,7 @@ import { FONT, SIZES, COLORS } from "../../constants";
 
 const styles = StyleSheet.create({
   container: {
-    // marginTop: SIZES.small,
+    marginTop: SIZES.large * 2,
     // padding: SIZES.small,
     // marginBottom: SIZES.medium
   },
@@ -13,6 +13,26 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: SIZES.small
+  },
+  alertText: {
+    color: "black",
+    fontFamily: FONT.bold,
+  },
+  levelText: {
+    color: COLORS.lightWhite,
+    alignSelf: "flex-end",
+    fontSize: SIZES.small + 2,
+    marginBottom: 4,
+    fontFamily: FONT.medium,
+  },
+  alertMessage: {
+    color: COLORS.white,
+    textAlign: "center",
+  },
+  alertContainer: {
+    backgroundColor: "black",
+    borderRadius: SIZES.medium,
+    width: 200,
   },
   headerTitle: {
     fontSize: SIZES.large,

@@ -6,12 +6,16 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  Alert,
+  Modal,
 } from "react-native";
 import { COLORS, Currencies, FONT, SIZES, Synthetics } from "../../../constants";
 import React, { useContext, useEffect, useState } from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 import { AuthContext } from "../../../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createAlert } from "../../../api/priceAlertApi";
+import SuccessModal from "../../../components/modal/SuccessModal";
 
 const DownArrow = () => {
   return (
@@ -54,6 +58,15 @@ const SetAlert = () => {
   const [currentAsset, setCurrentAsset] = useState();
   const [accountInfo, setAccountInfo] = useState({});
   const [isCurrencies, setIsCurrencies] = useState(false);
+  const [note, setNote] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { accountDetails, userInfo } = useContext(AuthContext);
+
+  const setVisibility = (val) => {
+    setIsModalVisible(val);
+  }
 
   const getAccountInfo = async () => {
     const account = AsyncStorage.getItem("accountInfo").then((res) => {
@@ -66,26 +79,38 @@ const SetAlert = () => {
   }, []);
 
   const body = {
-    accountId: accountInfo.accountId,
+    accountId: accountDetails.accountId,
     active: true,
     alertMedium: option,
-    alertType: "string",
-    fireBaseToken: "string",
-    forATrade: true,
-    id: 0,
-    journalId: "string",
-    metaOrderId: "string",
-    planId: 0,
-    position: "string",
-    reason: "string",
-    recurrent: true,
-    remark: "string",
-    symbol: "string",
-    symbolCategory: "string",
-    systemId: "string",
-    watchId: "string",
-    watchPrice: 0,
+    fireBaseToken: userInfo.user.firebaseToken,
+    forATrade: false,
+    planId: accountDetails.planId,
+    position: position,
+    reason: "Price alert",
+    recurrent: !isPressed,
+    remark: note,
+    symbol: currentAsset,
+    subject: "PriceAlert",
+    symbolCategory: isCurrencies ? "Currencies" : "Synthetic",
+    watchPrice: watchPrice,
   };
+
+  const addToWatchList = async() =>{
+    setIsLoading(true)
+    try{
+      const response = await createAlert(body).then((res) => {
+        return res.data;
+      })
+      if(response.status){
+        setIsModalVisible(true);
+      }else{
+        Alert.alert("Failed transaction", response.message)
+      }
+    }catch(error){
+      console.log(error);
+    }
+    setIsLoading(false);
+  }
   return (
     <ScrollView style={styles.base}>
       <View style={{ paddingHorizontal: 80 }}>
@@ -276,12 +301,17 @@ const SetAlert = () => {
           ]}
         >
           <TextInput
+            placeholder="Comments on alert"
+            placeholderTextColor={"gray"}
+            multiline
             style={{
               color: COLORS.white,
               fontFamily: FONT.medium,
               paddingHorizontal: SIZES.small - 4,
               height: '50%',
             }}
+            onChangeText={(num) => setNote(num)}
+            value={note}
           />
         </View>
       </View>
@@ -315,12 +345,24 @@ const SetAlert = () => {
       <TouchableOpacity
         onPress={() => {
           //   navigate("AutoTrader");
-          console.log(accountInfo.accountId);
+          console.log(accountDetails.accountId);
+          addToWatchList()
         }}
         style={styles.button}
       >
         <Text style={styles.buttonText}>Create alert</Text>
       </TouchableOpacity>
+
+      <Modal
+         visible={isModalVisible}
+         onRequestClose={() => {
+           setIsModalVisible(false);
+         }}
+         animationType="slide"
+         transparent={true}
+      >
+        <SuccessModal setVisibility={setVisibility} />
+      </Modal>
     </ScrollView>
   );
 };

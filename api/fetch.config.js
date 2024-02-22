@@ -1,5 +1,3 @@
-
-
 export const baseURL = "http://192.168.247.215:8080/api";
 
 export const baseUrL = "http://192.168.43.131:8080/api";

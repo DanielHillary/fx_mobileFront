@@ -210,8 +210,6 @@ const TradeReport = () => {
           remarks={remarks}
         />
 
-        <Text style={styles.tradeID}>Profitability: High</Text>
-
         {/* <TouchableOpacity
           onPress={() => {
             navigate("AutoTrader", { data: tradeDetails });

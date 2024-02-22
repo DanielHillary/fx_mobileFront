@@ -6,21 +6,25 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, FONT, SIZES } from "../../constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getUserAccont, registerMetaApiAccount } from "../../api/accountApi";
+import { getUserAccont, registerDummyAccount, registerMetaApiAccount, registerNewMetaApiAccount } from "../../api/accountApi";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { AuthContext } from "../../context/AuthContext";
+import AwesomeAlert from "react-native-awesome-alerts";
 
 const AlertModal = ({
   title,
   isAlert,
   handleConfirm,
   handleCancel,
-  showCancelButton = true,
+  showCancelButton,
+  showConfirmButton,
+  message,
 }) => {
   return (
     <View>
@@ -29,12 +33,20 @@ const AlertModal = ({
         title={title}
         titleStyle={styles.title}
         contentContainerStyle={styles.alertContainer}
-        showConfirmButton={true}
+        showConfirmButton={showConfirmButton}
         showCancelButton={showCancelButton}
+        cancelButtonColor={COLORS.darkyellow}
+        cancelButtonTextStyle={styles.alertText}
+        cancelText="Review"
+        confirmButtonColor={COLORS.darkyellow}
+        confirmButtonTextStyle={styles.alertText}
+        confirmText="Save"
         onCancelPressed={handleCancel}
         onConfirmPressed={handleConfirm}
         closeOnTouchOutside={true}
         onDismiss={handleCancel}
+        message={message}
+        messageStyle={styles.alertMessage}
       />
     </View>
   );
@@ -140,6 +152,7 @@ const AddAccount = () => {
   const [userData, setUserData] = useState({});
   const [option, setOption] = useState("");
   const [accountInfo, setAccountInfo] = useState({});
+  const [check, setCheck] = useState(false);
 
   const navigation = useNavigation();
 
@@ -175,6 +188,36 @@ const AddAccount = () => {
     fetchUserData();
   }, []);
 
+  const createDummyAccount = async() => {
+    const account = {
+      brokerServer: "Server",
+      login: "Login",
+      metaPassWord: "Random@123",
+      platForm: "mt5",
+      userId: userInfo.userId,
+      userName: userInfo.userName,
+      defaultAccount: true,
+    };
+
+    const response = await registerDummyAccount(account).then((res) => {
+      return res.data;
+    });
+    setIsClicked(false);
+    if (response.status) {
+      updateAccount(response.data.account);
+      AsyncStorage.setItem(
+        "accountInfo",
+        JSON.stringify(response.data.account)
+      );
+      navigation.navigate("SetupNewTradingPlan", {
+        account: response.data.account,
+      });
+    } else {
+      console.log(response.message);
+      Alert.alert("Failed Request", "Something went wrong. Please try again");
+    }
+  }
+
   const registerAccount = async () => {
     const account = {
       brokerServer: brokerValue,
@@ -186,21 +229,22 @@ const AddAccount = () => {
       defaultAccount: true,
     };
 
-    const response = await registerMetaApiAccount(account).then((res) => {
+    const response = await registerNewMetaApiAccount(account).then((res) => {
       return res.data;
     });
     setIsClicked(false);
     if (response.status) {
-        updateAccount(response.data.account);
-        AsyncStorage.setItem(
-          "accountInfo",
-          JSON.stringify(response.data.account)
-        );
-        navigation.navigate("SetUpTradingPlan", {
-          account: response.data.account,
-        });
+      updateAccount(response.data.account);
+      AsyncStorage.setItem(
+        "accountInfo",
+        JSON.stringify(response.data.account)
+      );
+      navigation.navigate("SetUpTradingPlan", {
+        account: response.data.account,
+      });
     } else {
       console.log(response.message);
+      Alert.alert("Failed Request", "Something went wrong. Please try again");
     }
   };
 
@@ -326,6 +370,49 @@ const AddAccount = () => {
           <Text style={styles.buttonText}>Register Account</Text>
         )}
       </TouchableOpacity>
+
+      <View style={{ flexDirection: "row", alignContent: "center" }}>
+        <Text
+          style={{
+            color: COLORS.lightWhite,
+            padding: SIZES.small - 3,
+          }}
+        >
+          Don't want to register yet?
+        </Text>
+        <TouchableOpacity
+          style={{ justifyContent: "center", alignItems: "center" }}
+          onPress={() => {
+            setCheck(true);
+          }}
+        >
+          <Text
+            style={{
+              color: COLORS.darkyellow,
+              alignSelf: "center",
+              fontWeight: "500",
+            }}
+          >
+            Skip
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <AlertModal
+        message={
+          "Are you sure you want to skip account creation? You would not be able to use most of the features we provide until you register an account."
+        }
+        showCancelButton={true}
+        showConfirmButton={true}
+        handleCancel={() => {
+          setCheck(false);
+        }}
+        handleConfirm={() => {
+          createDummyAccount();
+          setCheck(false);
+        }}
+        isAlert={check}
+      />
     </View>
   );
 };
@@ -395,5 +482,25 @@ const styles = StyleSheet.create({
     fontSize: SIZES.large,
     color: "black",
     fontFamily: FONT.bold,
+  },
+  alertContainer: {
+    backgroundColor: "black",
+    borderRadius: SIZES.medium,
+    width: 200,
+  },
+  alertText: {
+    color: "black",
+    fontFamily: FONT.bold,
+  },
+  levelText: {
+    color: COLORS.lightWhite,
+    alignSelf: "flex-end",
+    fontSize: SIZES.small + 2,
+    marginBottom: 4,
+    fontFamily: FONT.medium,
+  },
+  alertMessage: {
+    color: COLORS.white,
+    textAlign: "center",
   },
 });

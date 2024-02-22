@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   FlatList,
   ScrollView,
+  Alert,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { COLORS, FONT, SIZES } from "../../../constants";
@@ -31,7 +32,7 @@ const Options = ({ item }) => {
     >
       {item?.map((value) => (
         <View
-          key={value.id}
+          key={value}
           style={{
             flexDirection: "row",
             justifyContent: "center",
@@ -134,7 +135,7 @@ const EntryPlan = () => {
     getEntryTechs();
     getAccount();
     setInitialData(true);
-  }, []);
+  }, [accountDetails]);
 
   const text1 = "Submit";
   const text2 = "Edit";
@@ -144,7 +145,6 @@ const EntryPlan = () => {
       setIsEmpty(true);
       return;
     }
-
     const separatedArray = entryValue.split(",");
     const filtered = separatedArray.filter((item) => item.trim() !== "");
 
@@ -153,10 +153,10 @@ const EntryPlan = () => {
     setInitialData(false);
 
     const diff = data.length - entryData.length;
-    if (diff !== 0 && edit) {
+    if (edit) {
       setWarning(true);
-    }else{
-      setIsEdit(prev => !prev);
+    } else {
+      setIsEdit((prev) => !prev);
     }
   };
 
@@ -170,7 +170,10 @@ const EntryPlan = () => {
       const response = await updateEntryStrategies(body);
       if (response.status) {
         setData(entryData);
-        console.log("Update Successful:", response.data);
+        Alert.alert(
+          "Successful",
+          "You have successfully updated you entry plan"
+        );
       } else {
         console.log(response.message);
       }
@@ -214,11 +217,15 @@ const EntryPlan = () => {
                 </Text>
               </View>
             ) : (
-              <Text style={[styles.text, { fontSize: SIZES.medium }]}>
-                Here is a list of indicators and a complete set up that you must
-                confirm before you place any trade. Always endeavor to analyze
-                every trade before entry and stick to an entry strategy.
-              </Text>
+              <View>
+                <Text style={[styles.text, { fontSize: SIZES.medium }]}>
+                  Here is a list of indicators and a complete set up that you
+                  must confirm before you place any trade. Always endeavor to
+                  analyze every trade before entry and stick to an entry
+                  strategy.
+                </Text>
+                <Text style={[styles.text, {color: COLORS.darkyellow, fontStyle: "italic"}]}>{`Please ensure that you really want to make a change before you click the "Edit" button`}</Text>
+              </View>
             )}
           </View>
         </View>
@@ -263,7 +270,11 @@ const EntryPlan = () => {
               {number}
             </Text>
           )}
-          {!isEdit ? <Options key={data} item={initialData ? data : entryData} /> : <></>}
+          {!isEdit ? (
+            <Options key={data} item={initialData ? data : entryData} />
+          ) : (
+            <></>
+          )}
         </View>
 
         <TouchableOpacity
@@ -280,7 +291,7 @@ const EntryPlan = () => {
         </TouchableOpacity>
       </View>
 
-      {!isEdit && (
+      {/* {!isEdit && (
         <View style={{ marginTop: SIZES.large }}>
           <Text
             style={[
@@ -297,20 +308,8 @@ const EntryPlan = () => {
             shut down any trade that is not in compliance with your trading
             plan.
           </Text>
-          {/* <TouchableOpacity
-            onPress={() => {
-              registerEntry();
-            }}
-            style={styles.buttonContinue}
-          >
-            {isClicked ? (
-              <ActivityIndicator size="large" colors={"black"} />
-            ) : (
-              <Text style={styles.buttonText}>Continue</Text>
-            )}
-          </TouchableOpacity> */}
         </View>
-      )}
+      )} */}
 
       <AlertModal
         isAlert={isEmpty}
@@ -331,6 +330,7 @@ const EntryPlan = () => {
         showCancelButton={true}
         handleCancel={() => {
           setWarning(false);
+          setIsEdit(false);
         }}
         showConfirmButton={true}
         handleConfirm={() => {

@@ -1,10 +1,11 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useState } from "react";
 import { COLORS, SIZES, FONT } from "../../../constants";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import Bronze from "./Bronze";
 import Gold from "./Gold";
 import Diamond from "./Diamond";
+import PriceModal from "../../../components/modal/PriceModal";
 
 const TopTab = createMaterialTopTabNavigator();
 
@@ -32,6 +33,11 @@ const Pricing = () => {
   const [isRegular, setIsRegular] = useState(true);
   const [regular, setRegular] = useState(true);
   const [strict, setStrict] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const setModalVisible = (value) => {
+    setIsModalVisible(value)
+  }
 
   return (
     <View style={styles.base}>
@@ -43,12 +49,22 @@ const Pricing = () => {
         <TouchableOpacity
           style={styles.buttonStyle}
           onPress={() => {
-            setIsRegular(true), setRegular(true), setStrict(false);
+            setIsModalVisible(true);
           }}
         >
           <Text style={styles.text}>Make Payment</Text>
         </TouchableOpacity>
       </View>
+      <Modal
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setIsModalVisible(false);
+        }}
+        animationType="slide"
+        transparent={true}
+      >
+        <PriceModal setVisibility={setModalVisible}/>
+      </Modal>
     </View>
   );
 };

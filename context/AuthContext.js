@@ -20,47 +20,42 @@ export const AuthProvider = ({ children }) => {
 
   const requestUserPermission = async () => {
     if (!messaging().isDeviceRegisteredForRemoteMessages) {
-      messaging().registerDeviceForRemoteMessages()
+      messaging().registerDeviceForRemoteMessages();
     }
     const authStatus = await messaging().requestPermission();
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
     if (enabled) {
-      console.log("Authorization status:", authStatus)
+      console.log("Authorization status:", authStatus);
     }
   };
 
-  const login = (email, password) => {
+  const login = async (email, password) => {
     let userDetails = {};
     // const userId = '';
     let check = true;
     try {
       setIsLoading(false);
-      const response = fetchUser(email, password).then((res) => {
-        userDetails = res.data.data
+      const response = await fetchUser(email, password).then((res) => {
+        return res.data;
+      });
+      if(response.status){
+        // console.log(response.data);
+        userDetails = response.data;
 
-        console.log("User details: " + res.data.data.jwtToken);
+        console.log("User details: " + response.data.jwtToken);
         setUserInfo(userDetails);
         setUserToken(JSON.stringify(userDetails.jwtToken));
 
         AsyncStorage.setItem("userInfo", JSON.stringify(userDetails));
         AsyncStorage.setItem("jwtToken", userDetails.jwtToken);
         // console.log(userDetails);
-
-        return res.data;
-      });
-
-      if (userInfo == null) {
-        check = false;
-      } else {
-        check = true;
-        setIsLoading(false);
       }
-
-      return userInfo;
+      return response
     } catch (error) {
-      console.log(error);
+      console.log(error.response.status);
+      Alert.alert("Invalid credentials", "Please enter valid username and password");
     }
   };
 
@@ -70,7 +65,7 @@ export const AuthProvider = ({ children }) => {
     AsyncStorage.removeItem("jwtToken");
     AsyncStorage.removeItem("userInfo");
     AsyncStorage.removeItem("userId");
-    AsyncStorage.removeItem("accountInfo")
+    AsyncStorage.removeItem("accountInfo");
   };
 
   const fetchUserData = async () => {
@@ -79,12 +74,12 @@ export const AuthProvider = ({ children }) => {
       let tokenValue = await AsyncStorage.getItem("jwtToken");
       let user = await AsyncStorage.getItem("userInfo");
       let userInf = JSON.parse(user);
- 
+
       // console.log("User Information: " + userInf)
 
       if (userInf) {
-        setUserToken(tokenValue)
-        setUserInfo(userInf)
+        setUserToken(tokenValue);
+        setUserInfo(userInf);
       }
       setIsLoading(false);
     } catch (error) {
@@ -93,7 +88,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchUserData(); 
+    fetchUserData();
   }, []);
 
   const updateAccount = (account) => {
@@ -102,11 +97,11 @@ export const AuthProvider = ({ children }) => {
 
   const updateCompleted = (value) => {
     setIsCompletePlan(value);
-  }
+  };
 
   const updateNotification = (value) => {
-    setHasNotification(value)
-  }
+    setHasNotification(value);
+  };
 
   return (
     <AuthContext.Provider
@@ -121,7 +116,7 @@ export const AuthProvider = ({ children }) => {
         updateNotification,
         isCompletePlan,
         accountDetails,
-        hasNotification
+        hasNotification,
       }}
     >
       {children}

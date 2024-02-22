@@ -7,6 +7,8 @@ import {
   ActivityIndicator,
   Image,
   FlatList,
+  Alert,
+  Dimensions,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
@@ -20,26 +22,58 @@ import {
   getTradesByMonth,
   getTradesByRange,
   getTradesByWeek,
+  searchForSymbol,
 } from "../../api/journalApi";
 import JournalCard from "../../components/JournalCard";
 
 const CustomDate = ({ getStartDate, getEndDate, getRangeData }) => {
   const [startDate, setStartDate] = useState(false);
   const [endDate, setEndDate] = useState(false);
-  const [startValue, setStartValue] = useState(null);
-  const [endValue, setEndValue] = useState(null);
+  const [startValue, setStartValue] = useState("");
+  const [endValue, setEndValue] = useState("");
   const [isClicked, setIsClicked] = useState(false);
   const [isNFocused, setIsNFocused] = useState(false);
   const [isUNFocused, setIsUNFocused] = useState(false);
+  const [isStartValidFormat, setIsStartValidFormat] = useState(false);
+  const [isEndValidFormat, setIsEndValidFormat] = useState(false);
+
+  const screenHeight = Dimensions.get("window").height;
+
+  const validateStartDateFormat = (input) => {
+    
+    const dateFormatRegex = /^\d{4}-\d{2}-\d{2}$/;
+    const isValid = dateFormatRegex.test(input);
+    if(input.length === 0){
+      setIsStartValidFormat(false);
+    }else {
+      setIsStartValidFormat(!isValid);
+    }
+
+    return isValid;
+  };
+
+  const validateEndDateFormat = (input) => {
+  
+    const dateFormatRegex = /^\d{4}-\d{2}-\d{2}$/;
+    const isValid = dateFormatRegex.test(input);
+
+    if(input.length === 0){
+      setIsEndValidFormat(false);
+    }else {
+      setIsEndValidFormat(!isValid);
+    }
+
+    return isValid;
+  };
 
   return (
-    <View style={{ paddingHorizontal: SIZES.medium }}>
+    <ScrollView style={{ paddingHorizontal: SIZES.medium, height: screenHeight}}>
       <View style={{ width: "80%", marginTop: SIZES.medium }}>
         <Text style={{ color: COLORS.lightWhite, padding: SIZES.small - 5 }}>
           Start Date
         </Text>
         <TextInput
-          placeholder="10-03-2023"
+          placeholder="yyyy-mm-dd"
           placeholderTextColor={COLORS.gray}
           style={styles.email(startDate)}
           onFocus={() => {
@@ -48,12 +82,16 @@ const CustomDate = ({ getStartDate, getEndDate, getRangeData }) => {
           onBlur={() => {
             setStartDate(false);
           }}
-          onChange={(val) => {
+          onChangeText={(val) => {
             setStartValue(val);
+            validateStartDateFormat(val);
             getStartDate(val);
           }}
           value={startValue}
         />
+        {isStartValidFormat && <Text style={{ color: "red", paddingLeft: SIZES.small - 4}}>
+          Invalid date format
+        </Text>}
       </View>
 
       <View style={{ width: "80%", marginTop: SIZES.medium }}>
@@ -61,7 +99,7 @@ const CustomDate = ({ getStartDate, getEndDate, getRangeData }) => {
           End Date
         </Text>
         <TextInput
-          placeholder="11-3-2023"
+          placeholder="yyyy-mm-dd"
           placeholderTextColor={COLORS.gray}
           style={styles.email(endDate)}
           onFocus={() => {
@@ -70,12 +108,16 @@ const CustomDate = ({ getStartDate, getEndDate, getRangeData }) => {
           onBlur={() => {
             setEndDate(false);
           }}
-          onChange={(val) => {
+          onChangeText={(val) => {
             setEndValue(val);
             getEndDate(val);
+            validateEndDateFormat(val)
           }}
           value={endValue}
         />
+        {isEndValidFormat && <Text style={{ color: "red", paddingLeft: SIZES.small - 4}}>
+          Invalid date format
+        </Text>}
       </View>
 
       <TouchableOpacity
@@ -88,10 +130,10 @@ const CustomDate = ({ getStartDate, getEndDate, getRangeData }) => {
         {isClicked ? (
           <ActivityIndicator size="large" colors={"black"} />
         ) : (
-          <Text style={styles.buttonText}>Get Records</Text>
+          <Text style={styles.buttontext}>Get Records</Text>
         )}
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -106,8 +148,8 @@ const TradingJournal = () => {
   const [error, setError] = useState(null);
   const [isEmpty, setIsEmpty] = useState(false);
   const [tradeRecords, setTradeRecords] = useState([]);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const setStartDateValue = (start) => {
     setStartDate(start);
@@ -120,8 +162,8 @@ const TradingJournal = () => {
   const { accountDetails } = useContext(AuthContext);
 
   const getAllRecords = async () => {
-    setIsLoading(true);
     try {
+      setIsLoading(true);
       const response = await getTradesByDay(accountDetails.accountId).then(
         (res) => {
           return res.data;
@@ -132,14 +174,16 @@ const TradingJournal = () => {
         if (response.data.length == 0) {
           setIsEmpty(true);
         } else {
+          setIsEmpty(false);
           setTradeRecords(response.data);
         }
       } else {
         console.log(response.message);
+        setError(true);
       }
       setIsLoading(false);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       setError(true);
       setIsLoading(false);
     }
@@ -201,7 +245,6 @@ const TradingJournal = () => {
       //   ).then((res) => {
       //     return res.data;
       //   });
-
       //   if (response.status) {
       //     if (response.data.length == 0) {
       //       setIsEmpty(true);
@@ -270,7 +313,6 @@ const TradingJournal = () => {
           } else {
             setIsEmpty(false);
             setTradeRecords(response.data);
-            
           }
         } else {
           console.log(response.message);
@@ -316,20 +358,57 @@ const TradingJournal = () => {
     return search;
   };
   const [searchTerm, setSearchTerm] = useState("");
+
+  const searchRecordsBySymbol = async () => {
+    try {
+      if (searchTerm.length === 0) {
+        Alert.alert("", "Please enter a valid asset/symbol to search");
+      } else {
+        setIsLoading(true);
+        const response = await searchForSymbol(
+          accountDetails.accountId,
+          searchTerm
+        ).then((res) => {
+          return res.data;
+        });
+        if (response.status) {
+          if (response.data.length === 0) {
+            setIsEmpty(true);
+          } else {
+            setTradeRecords(response.data);
+            setIsEmpty(false);
+          }
+          setIsLoading(false);
+        } else {
+          setIsEmpty(true);
+          setIsLoading(false);
+        }
+      }
+    } catch (error) {
+      setError(true);
+      setIsLoading(false);
+    }
+  };
   return (
     <View style={styles.base}>
-      <View style={{ flexDirection: "row", alignItems: "center", padding: 5, rowGap: SIZES.medium}}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          padding: 5,
+          rowGap: SIZES.medium,
+        }}
+      >
         <Text style={styles.desc}>
           Your trade journal comprises all the positions you have completed in
-          this account. You can print them out to have a comprehensive insight
-          into your trading habits over a period of time.
+          this account. PsyDTrader sends you regular reports on all records for
+          the month with insights to help improve your trade.
         </Text>
-        <TouchableOpacity style={{}}>
-          <Image
-            source={require("../../assets/icons/printout.png")}
-            style={{ height: 40, width: 40 }}
-          />
-        </TouchableOpacity>
+
+        <Image
+          source={require("../../assets/images/3.png")}
+          style={{ height: 80, width: 80 }}
+        />
       </View>
       <View style={styles.searchContainer}>
         <View style={styles.searchWrapper}>
@@ -343,7 +422,12 @@ const TradingJournal = () => {
           ></TextInput>
         </View>
 
-        <TouchableOpacity style={styles.searchBtn}>
+        <TouchableOpacity
+          style={styles.searchBtn}
+          onPress={() => {
+            searchRecordsBySymbol();
+          }}
+        >
           <Image
             source={require("../../assets/icons/search.png")}
             resizeMode="contain"
@@ -359,26 +443,6 @@ const TradingJournal = () => {
           showsHorizontalScrollIndicator={false}
         >
           <View style={{ flexDirection: "row", gap: SIZES.small - 2 }}>
-            {/* <TouchableOpacity
-              style={{
-                borderColor: COLORS.darkyellow,
-                borderWidth: 0.5,
-                borderRadius: SIZES.medium,
-                width: 70,
-                padding: SIZES.small - 3,
-                backgroundColor: allPressed
-                  ? COLORS.darkyellow
-                  : COLORS.appBackground,
-                alignItems: "center",
-              }}
-              onPress={() => {
-                setAllPressed(true);
-                setRestInActive("All");
-              }}
-            >
-              <Text style={{ color: COLORS.lightWhite }}>All</Text>
-            </TouchableOpacity> */}
-
             <TouchableOpacity
               style={{
                 borderColor: COLORS.darkyellow,
@@ -467,7 +531,7 @@ const TradingJournal = () => {
       {isLoading ? (
         <ActivityIndicator size="large" colors={COLORS.darkyellow} />
       ) : error ? (
-        <EmptyList message={"Something went wrong. Please click to refresh"} />
+        <EmptyList message={"Something went wrong. Please retry"} />
       ) : isEmpty ? (
         <EmptyList message={"No records at this time"} />
       ) : (

@@ -4,6 +4,7 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { COLORS, SIZES, FONT } from "../../../constants";
@@ -11,7 +12,11 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation } from "@react-navigation/native";
 import AwesomeAlert from "react-native-awesome-alerts";
 import { AuthContext } from "../../../context/AuthContext";
-import { getRiskManager } from "../../../api/tradingplanApi";
+import {
+  getRiskManager,
+  updateRiskRegister,
+} from "../../../api/tradingplanApi";
+import EmptyList from "../../../components/EmptyList";
 
 const AlertModal = ({
   title,
@@ -49,12 +54,12 @@ const AlertModal = ({
 };
 
 const RiskRegister = () => {
-  const [lossPerTrade, setLossPerTrade] = useState("");
-  const [lossPerDay, setLossPerDay] = useState("");
-  const [minProfitPerTrade, setMinProfitPerTrade] = useState("");
-  const [minRRR, setMinRRR] = useState("");
-  const [defaultVolume, setDefaultVolume] = useState("");
-  const [targetProfit, setTargetProfit] = useState("");
+  const [lossPerTrade, setLossPerTrade] = useState(0);
+  const [lossPerDay, setLossPerDay] = useState(0);
+  const [minProfitPerTrade, setMinProfitPerTrade] = useState(0);
+  const [minRRR, setMinRRR] = useState(0);
+  const [defaultVolume, setDefaultVolume] = useState(0);
+  const [targetProfit, setTargetProfit] = useState(0);
   const [date, setDate] = useState(new Date());
   const [showDate, setShowDate] = useState(false);
   const [hours, setHours] = useState("12");
@@ -62,61 +67,123 @@ const RiskRegister = () => {
   const [isClicked, setIsClicked] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [checkAlert, setCheckAlert] = useState(false);
-  const [riskManager, setRiskManager] = useState({}); 
+  const [riskManager, setRiskManager] = useState({});
+  const [isChanged, setIsChanged] = useState(false);
+  const [timing, setTiming] = useState("AM");
+  const [hasRisk, setHasRisk] = useState(false);
 
   const navigation = useNavigation();
 
   const { accountDetails } = useContext(AuthContext);
 
-  const getRiskRegister = async() => {
+  const getRiskRegister = async () => {
     const response = await getRiskManager(accountDetails.planId).then((res) => {
       return res.data;
-    })
-    if(response.status){
+    });
+    if (response.status) {
       setRiskManager(response.data);
-    }else {
+      let risk = response.data;
+      setDefaultVolume(risk.defaultVolume);
+      setMinProfitPerTrade(risk.minProfitPercentPerTrade);
+      setLossPerTrade(risk.allowedLossLevelPercentage);
+      setLossPerDay(risk.totalPercentRiskPerDay);
+      setTargetProfit(risk.totalProfitPercentPerDay);
+      setMinRRR(risk.riskRewardRatio);
+      setHasRisk(true);
+    } else {
+      setHasRisk(false);
       console.log(response.message);
     }
-  }
+  };
 
   useEffect(() => {
-    getRiskRegister()
-  }, []);
+    getRiskRegister();
+  }, [accountDetails]);
 
   const onChange = (e, selectedDate) => {
+    const amOrPm = selectedDate
+      .toLocaleString("en-US", { hour12: true, hour: "numeric" })
+      .split(" ")[1];
     setDate(selectedDate);
-    setHours(date.getHours().toString());
-    setMinutes(date.getMinutes().toString());
+    setHours(
+      selectedDate.getHours().toString() == "0"
+        ? "12"
+        : selectedDate.getHours().toString()
+    );
+    setMinutes(
+      selectedDate.getMinutes().toString() == "0"
+        ? "00"
+        : selectedDate.getMinutes().toString()
+    );
+    setTiming(amOrPm);
     setShowDate(false);
   };
 
   const inputRef = useRef(null);
 
-  const handleSave = () => {
-    const body = {
-      accountId: accountDetails.accountId,
-      accountNumber: accountDetails.accountNumber,
-      allowedLossLevelPercentage: lossPerTrade == "" ? riskManager.allowedLossLevelPercentage : lossPerTrade,
-      defaultVolume: defaultVolume == "" ? riskManager.defaultVolume : defaultVolume,
-      maxRiskPercentPerTrade: lossPerTrade == "" ? riskManager.allowedLossLevelPercentage : lossPerTrade,
-      minAcceptedScore: 100,
-      minProfitPercentPerTrade: minProfitPerTrade == "" ? riskManager.minProfitPercentPerTrade : minProfitPerTrade,
-      riskRewardRatio: minRRR == "" ? riskManager.riskRewardRatio : minRRR,
-      totalPercentRiskPerDay: lossPerDay == "" ? riskManager.totalPercentRiskPerDay : lossPerDay,
-      totalProfitPercentPerDay: targetProfit == "" ? riskManager.totalProfitPercentPerDay : targetProfit,
-      tradingPlanId: accountDetails.planId,
-      metaApiAccountId: accountDetails.metaApiAccountId,
-      userId: accountDetails.userId,
-    };
+  const handleSave = async () => {
+    (riskManager.allowedLossLevelPercentage =
+      lossPerTrade == ""
+        ? riskManager.allowedLossLevelPercentage
+        : lossPerTrade),
+      (riskManager.defaultVolume =
+        defaultVolume == "" ? riskManager.defaultVolume : defaultVolume),
+      (riskManager.maxRiskPercentPerTrade =
+        lossPerTrade == ""
+          ? riskManager.allowedLossLevelPercentage
+          : lossPerTrade),
+      (riskManager.minProfitPercentPerTrade =
+        minProfitPerTrade == ""
+          ? riskManager.minProfitPercentPerTrade
+          : minProfitPerTrade),
+      (riskManager.riskRewardRatio =
+        minRRR == "" ? riskManager.riskRewardRatio : minRRR),
+      (riskManager.totalPercentRiskPerDay =
+        lossPerDay == "" ? riskManager.totalPercentRiskPerDay : lossPerDay),
+      (riskManager.totalProfitPercentPerDay =
+        targetProfit == ""
+          ? riskManager.totalProfitPercentPerDay
+          : targetProfit),
+      (riskManager.dayInHour = hours),
+      (riskManager.dayInMinute = minutes),
+      (riskManager.dailyResetTime = date);
 
-    setLossPerTrade(body.allowedLossLevelPercentage);
-    setLossPerDay(body.totalPercentRiskPerDay);
-    setMinRRR(body.riskRewardRatio);
-    setMinProfitPerTrade(body.minProfitPercentPerTrade);
-    setTargetProfit(body.totalProfitPercentPerDay);
-    setDefaultVolume(body.defaultVolume);
+    const response = await updateRiskRegister(riskManager).then((res) => {
+      return res.data;
+    });
+    if (response.status) {
+      Alert.alert(
+        "Updated",
+        "You have successfully updated your risk register"
+      );
+      setEditMode(false);
+    } else {
+      console.log(response.message);
+    }
+  };
 
-    console.log("save risk register");
+  if (!hasRisk) {
+    return (
+      <View style={{flex:1, backgroundColor: COLORS.appBackground, paddingTop: 30}}>
+        <EmptyList
+          message={"You do not have a risk register. Kindly register one"}
+        />
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("AddNewRiskRegister", {
+              account: accountDetails,
+            });
+          }}
+          style={styles.button}
+        >
+          {isClicked ? (
+            <ActivityIndicator size="large" colors={"black"} />
+          ) : (
+            <Text style={styles.buttontext}>Set Risk Register</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    );
   }
 
   return (
@@ -127,9 +194,25 @@ const RiskRegister = () => {
         consistency and protection against the sting of the market.
       </Text>
 
+      <Text
+        style={[
+          styles.text,
+          {
+            fontSize: SIZES.small,
+            color: COLORS.darkyellow,
+            fontStyle: "italic",
+          },
+        ]}
+      >
+        Please Ensure that you want to make a change before you hit the edit
+        button
+      </Text>
+
       <View style={styles.infocontainer}>
         <View style={styles.infoEntry}>
-          <Text style={{ color: "white", width: 120, fontSize: SIZES.medium -3 }}>
+          <Text
+            style={{ color: "white", width: 120, fontSize: SIZES.medium - 3 }}
+          >
             Max loss% per trade
           </Text>
 
@@ -137,140 +220,178 @@ const RiskRegister = () => {
             <TextInput
               ref={inputRef}
               placeholderTextColor={"gray"}
-              placeholder="0.0%"
+              // placeholder="0.0%"
               keyboardType="numeric"
               numberOfLines={1}
+              value={lossPerTrade}
               style={[styles.input]}
               onChangeText={(text) => {
                 setLossPerTrade(text);
               }}
-              value={lossPerTrade}
               selection={{
                 start: lossPerTrade.length,
                 end: lossPerTrade.length,
               }}
             />
           ) : (
-            <Text style={styles.textInput}>{riskManager.maxRiskPercentPerTrade}%</Text>
+            <Text style={styles.textInput}>
+              {riskManager.maxRiskPercentPerTrade}%
+            </Text>
           )}
           <View style={styles.line(editMode)} />
         </View>
 
         <View style={[styles.infoEntry, { marginLeft: 15 }]}>
-          <Text style={{ color: "white", width: 120, fontSize: SIZES.medium -3 }}>
+          <Text
+            style={{ color: "white", width: 120, fontSize: SIZES.medium - 3 }}
+          >
             Max loss% per day
           </Text>
 
-          {editMode ? <TextInput
-            placeholderTextColor={"gray"}
-            placeholder="0.0%"
-            keyboardType="numeric"
-            numberOfLines={1}
-            style={[styles.input]}
-            onChangeText={(num) => {
-              setLossPerDay(num);
-            }}
-            value={lossPerDay}
-            selection={{
-              start: lossPerDay.length,
-              end: lossPerDay.length,
-            }}
-          /> : <Text style={styles.textInput}>{riskManager.totalPercentRiskPerDay}%</Text>}
+          {editMode ? (
+            <TextInput
+              placeholderTextColor={"gray"}
+              // placeholder="0.0%"
+              keyboardType="numeric"
+              numberOfLines={1}
+              style={[styles.input]}
+              onChangeText={(num) => {
+                setLossPerDay(num);
+              }}
+              value={lossPerDay}
+              selection={{
+                start: lossPerDay.length,
+                end: lossPerDay.length,
+              }}
+            />
+          ) : (
+            <Text style={styles.textInput}>
+              {riskManager.totalPercentRiskPerDay}%
+            </Text>
+          )}
           <View style={styles.line(editMode)} />
         </View>
       </View>
 
       <View style={styles.infocontainer}>
         <View style={styles.infoEntry}>
-          <Text style={{ color: "white", width: 80, fontSize: SIZES.medium -3 }}>
+          <Text
+            style={{ color: "white", width: 80, fontSize: SIZES.medium - 3 }}
+          >
             Minimum RRR
           </Text>
 
-          {editMode ? <TextInput
-            placeholderTextColor={"gray"}
-            placeholder="0.0%"
-            keyboardType="numeric"
-            numberOfLines={1}
-            style={[styles.input]}
-            onChangeText={(text) => {
-              setMinRRR(text);
-            }}
-            value={minRRR}
-            selection={{
-              start: minRRR.length,
-              end: minRRR.length,
-            }}
-          /> : <Text style={styles.textInput}>{riskManager.riskRewardRatio}</Text>}
+          {editMode ? (
+            <TextInput
+              placeholderTextColor={"gray"}
+              // placeholder="0.0%"
+              keyboardType="numeric"
+              numberOfLines={1}
+              style={[styles.input]}
+              onChangeText={(text) => {
+                setMinRRR(text);
+              }}
+              value={minRRR}
+              selection={{
+                start: minRRR.length,
+                end: minRRR.length,
+              }}
+            />
+          ) : (
+            <Text style={styles.textInput}>{riskManager.riskRewardRatio}</Text>
+          )}
           <View style={styles.line(editMode)} />
         </View>
         <View style={[styles.infoEntry, { marginLeft: 15 }]}>
-          <Text style={{ color: "white", width: 120, fontSize: SIZES.medium -3 }}>
+          <Text
+            style={{ color: "white", width: 120, fontSize: SIZES.medium - 3 }}
+          >
             Min profit% per trade
           </Text>
 
-          {editMode ? <TextInput
-            placeholderTextColor={"gray"}
-            placeholder="0.0%"
-            numberOfLines={1}
-            keyboardType="numeric"
-            style={[styles.input]}
-            onChangeText={(text) => {
-              setMinProfitPerTrade(text);
-            }}
-            value={minProfitPerTrade}
-            selection={{
-              start: minProfitPerTrade.length,
-              end: minProfitPerTrade.length,
-            }}
-          /> : <Text style={styles.textInput}>{riskManager.minProfitPercentPerTrade}%</Text>}
+          {editMode ? (
+            <TextInput
+              placeholderTextColor={"gray"}
+              // placeholder="0.0%"
+              numberOfLines={1}
+              keyboardType="numeric"
+              style={[styles.input]}
+              onChangeText={(text) => {
+                setMinProfitPerTrade(text);
+              }}
+              value={minProfitPerTrade}
+              selection={{
+                start: minProfitPerTrade.length,
+                end: minProfitPerTrade.length,
+              }}
+            />
+          ) : (
+            <Text style={styles.textInput}>
+              {riskManager.minProfitPercentPerTrade}%
+            </Text>
+          )}
           <View style={styles.line(editMode)} />
         </View>
       </View>
 
       <View style={styles.infocontainer}>
         <View style={styles.infoEntry}>
-          <Text style={{ color: "white", width: 120, fontSize: SIZES.medium -3 }}>
+          <Text
+            style={{ color: "white", width: 120, fontSize: SIZES.medium - 3 }}
+          >
             Default Vol. per trade
           </Text>
 
-          {editMode ? <TextInput
-            placeholderTextColor={"gray"}
-            placeholder="0.0"
-            keyboardType="numeric"
-            numberOfLines={1}
-            style={[styles.input]}
-            onChangeText={(text) => {
-              setDefaultVolume(text);
-            }}
-            value={defaultVolume}
-            selection={{
-              start: defaultVolume.length,
-              end: defaultVolume.length,
-            }}
-          /> : <Text style={styles.textInput}>{riskManager.defaultVolume}</Text>}
+          {editMode ? (
+            <TextInput
+              placeholderTextColor={"gray"}
+              // placeholder="0.0"
+              keyboardType="numeric"
+              numberOfLines={1}
+              style={[styles.input]}
+              onChangeText={(text) => {
+                setDefaultVolume(text);
+              }}
+              value={defaultVolume}
+              selection={{
+                start: defaultVolume.length,
+                end: defaultVolume.length,
+              }}
+            />
+          ) : (
+            <Text style={styles.textInput}>{riskManager.defaultVolume}</Text>
+          )}
           <View style={styles.line(editMode)} />
         </View>
 
         <View style={[styles.infoEntry, { marginLeft: 15 }]}>
-          <Text style={{ color: "white", width: 100, fontSize: SIZES.medium -3 }}>
+          <Text
+            style={{ color: "white", width: 100, fontSize: SIZES.medium - 3 }}
+          >
             Daily profit target
           </Text>
 
-          {editMode ? <TextInput
-            placeholderTextColor={"gray"}
-            placeholder="0.0"
-            keyboardType="numeric"
-            numberOfLines={1}
-            style={[styles.input]}
-            onChangeText={(text) => {
-              setTargetProfit(text);
-            }}
-            value={targetProfit}
-            selection={{
-              start: targetProfit.length,
-              end: targetProfit.length,
-            }}
-          /> : <Text style={styles.textInput}>{riskManager.totalProfitPercentPerDay}%</Text>}
+          {editMode ? (
+            <TextInput
+              placeholderTextColor={"gray"}
+              // placeholder="0.0"
+              keyboardType="numeric"
+              numberOfLines={1}
+              style={[styles.input]}
+              onChangeText={(text) => {
+                setTargetProfit(text);
+              }}
+              value={targetProfit}
+              selection={{
+                start: targetProfit.length,
+                end: targetProfit.length,
+              }}
+            />
+          ) : (
+            <Text style={styles.textInput}>
+              {riskManager.totalProfitPercentPerDay}%
+            </Text>
+          )}
           <View style={styles.line(editMode)} />
         </View>
       </View>
@@ -282,7 +403,15 @@ const RiskRegister = () => {
 
         <TouchableOpacity
           onPress={() => {
-            setShowDate(true);
+            if (editMode) {
+              setShowDate(true);
+            } else {
+              Alert.alert(
+                "",
+                "Please click the edit button to change your time"
+              );
+              console.log("");
+            }
           }}
         >
           {showDate && (
@@ -290,13 +419,13 @@ const RiskRegister = () => {
               value={date}
               mode="time"
               onChange={onChange}
-              is24Hour={true}
+              is24Hour={false}
             />
           )}
 
           <View style={styles.time}>
             <Text style={{ color: COLORS.gray, fontSize: SIZES.large }}>
-              {`${hours}:${minutes} AM`}
+              {`${hours}:${minutes} ${timing}`}
             </Text>
           </View>
         </TouchableOpacity>
@@ -310,7 +439,7 @@ const RiskRegister = () => {
         showConfirmButton={true}
         handleCancel={() => {
           setCheckAlert(false);
-          setEditMode(true);
+          setEditMode(false);
         }}
         handleConfirm={() => {
           setCheckAlert(false);
@@ -323,7 +452,6 @@ const RiskRegister = () => {
         <TouchableOpacity
           onPress={() => {
             // navigation.navigate("Plan");
-            setEditMode(false);
             setCheckAlert(true);
           }}
           style={styles.buttonContinue(editMode)}
@@ -422,13 +550,13 @@ const styles = StyleSheet.create({
     height: 25,
     marginTop: 10,
     color: COLORS.white,
-    fontSize: SIZES.medium
+    fontSize: SIZES.medium,
   },
   line: (edit) => ({
     backgroundColor: !edit ? "white" : COLORS.darkyellow,
     height: 1.4,
     width: "50%",
-    marginTop: edit ? 1 : 6
+    marginTop: edit ? 1 : 6,
   }),
   buttonContinue: (edit) => ({
     // margin: 80,
@@ -439,6 +567,15 @@ const styles = StyleSheet.create({
     marginTop: 100,
     alignSelf: "center",
   }),
+  button:{
+    // margin: 80,
+    height: 40,
+    backgroundColor: COLORS.darkyellow,
+    borderRadius: 10,
+    width: 200,
+    marginTop: 40,
+    alignSelf: "center",
+  },
   buttonText: (edit) => ({
     flex: 1,
     alignSelf: "center",
@@ -447,4 +584,12 @@ const styles = StyleSheet.create({
     color: edit ? "white" : "black",
     fontFamily: FONT.bold,
   }),
+  buttontext: {
+    flex: 1,
+    alignSelf: "center",
+    marginTop: 10,
+    fontSize: SIZES.medium,
+    color: "black",
+    fontFamily: FONT.bold,
+  }
 });

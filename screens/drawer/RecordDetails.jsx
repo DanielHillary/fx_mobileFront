@@ -16,7 +16,7 @@ import { COLORS, SIZES, FONT } from "../../constants";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import RecordOutline from "./RecordOutline";
 import TradeChanges from "./TradeChanges";
-import { getTradeChanges } from "../../api/journalApi";
+import { getTradeChanges, getTradeNotes } from "../../api/journalApi";
 
 const RecordDetails = () => {
   const [snapPoint, setSnapPoint] = useState(false);
@@ -24,6 +24,7 @@ const RecordDetails = () => {
   const [hasFetched, setHasFetched] = useState(false);
   const [changes, setChanges] = useState([]);
   const [isEmpty, setIsEmpty] = useState(false);
+  const [tradeNotes, setTradeNotes] = useState(null);
 
   const route = useRoute();
 
@@ -37,6 +38,16 @@ const RecordDetails = () => {
         return res.data;
       }
     );
+
+    const resp = await getTradeNotes(tradeDetails.id).then((res) => {
+      return res.data
+    })
+
+    if(resp.status){
+      setTradeNotes(resp.data.note);
+    }else{
+      console.log(resp.message);
+    }
 
     if (response.status) {
       setChanges(response.data);
@@ -100,7 +111,7 @@ const RecordDetails = () => {
       {/* <Button title="Close" onPress={() => handleClosePress()} />
         <Button title="Open" onPress={() => handleOpenPress(0)} /> */}
 
-      <RecordOutline />
+      <RecordOutline notes={tradeNotes === null ? "No notes for this trade" : tradeNotes} />
       <BottomSheet
         ref={bottomSheetRef}
         snapPoints={snapPoints}

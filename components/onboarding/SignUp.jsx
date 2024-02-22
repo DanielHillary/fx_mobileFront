@@ -1,4 +1,5 @@
 import {
+  Alert,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -46,6 +47,7 @@ const SignUp = () => {
       return res.data;
     })
 
+    
     if(response.status){
       Toast.show({
         type: "success",
@@ -55,7 +57,7 @@ const SignUp = () => {
       navigate("AddAccount", { user : response.data });
     }else{
       console.log(response.message)
-      navigate("AddAccount", { user : response.data });
+      Alert.alert("Failed transaction", response.message)
     }
   };
 

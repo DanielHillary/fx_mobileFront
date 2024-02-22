@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, Image, ActivityIndicator, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
 import { useState, useEffect, useContext } from "react";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -19,7 +26,6 @@ import {
   Entypo,
   MaterialIcons,
 } from "@expo/vector-icons";
-import TradeDetails from "./screens/stack/TradeDetails";
 import ScreenHeaderBtn from "./components/header/ScreenHeaderBtn";
 import menu from "./assets/icons/menu.png";
 import notification from "./assets/icons/notify.png";
@@ -51,6 +57,15 @@ import ChangePassword from "./components/onboarding/ChangePassword";
 import HeaderNotify from "./components/header/HeaderNotify";
 import ConfirmEntry from "./screens/stack/ConfirmEntry";
 import TradeReport from "./screens/stack/TradeReport";
+import AddNewAccount from "./screens/stack/AddNewAccount";
+import AddNewEntryStrategies from "./screens/stack/AddNewEntryStrategies";
+import AddNewExitStrategy from "./screens/stack/AddNewExitStrategy";
+import AddNewRiskManager from "./screens/stack/AddNewRiskRegister";
+import SetUpNewTradingPlan from "./screens/stack/SetupNewTradingPlan";
+import SuccessPage from "./components/SuccessPage";
+import AccountReport from "./screens/stack/AccountReport";
+import TradeJournal from "./screens/drawer/TradeJournal";
+import WelcomeSlider from "./components/onboarding/slider/WelcomeSlider";
 
 const Tab = createBottomTabNavigator();
 
@@ -66,10 +81,14 @@ const AuthStack = () => {
         headerTintColor: "white",
       }}
     >
-      <Stack.Screen name="SignIn" component={SignIn} />
-      <Stack.Screen name="SignUp" component={SignUp} />
-      <Stack.Screen name="AddAccount" component={AddAccount} />
-      <Stack.Screen
+      <AuthenticationStack.Screen
+        name="PsyDTrader"
+        component={WelcomeSlider}
+      />
+      <AuthenticationStack.Screen name="SignIn" component={SignIn} />
+      <AuthenticationStack.Screen name="SignUp" component={SignUp} />
+      <AuthenticationStack.Screen name="AddAccount" component={AddAccount} />
+      <AuthenticationStack.Screen
         name="EntryStrategy"
         component={EntryStrategy}
         options={{
@@ -80,7 +99,7 @@ const AuthStack = () => {
         }}
       />
 
-      <Stack.Screen
+      <AuthenticationStack.Screen
         name="ExitStrategy"
         component={ExitStrategy}
         options={{
@@ -91,7 +110,7 @@ const AuthStack = () => {
         }}
       />
 
-      <Stack.Screen
+      <AuthenticationStack.Screen
         name="RiskManager"
         component={RiskManager}
         options={{
@@ -102,7 +121,7 @@ const AuthStack = () => {
         }}
       />
 
-      <Stack.Screen
+      <AuthenticationStack.Screen
         name="SetUpTradingPlan"
         component={SetUpTradingPlan}
         options={{
@@ -112,7 +131,7 @@ const AuthStack = () => {
           headerTitleAlign: "center",
         }}
       />
-      <Stack.Screen
+      <AuthenticationStack.Screen
         name="Home"
         component={StackNavigation}
         options={{
@@ -171,7 +190,7 @@ const DrawerNavigation = () => {
 
       <Drawer.Screen
         name="TradingJournal"
-        component={TradingJournal}
+        component={TradeJournal}
         options={{
           headerShown: true,
           headerStyle: styles.header,
@@ -282,7 +301,7 @@ const StackNavigation = () => {
 
       <Stack.Screen
         name="TradeJournal"
-        component={TradingJournal}
+        component={TradeJournal}
         options={{
           presentation: "modal",
           headerStyle: styles.header,
@@ -316,6 +335,61 @@ const StackNavigation = () => {
       <Stack.Screen
         name="AlertHistory"
         component={AlertHistory}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="AddNewAccount"
+        component={AddNewAccount}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="AddNewEntryStrategies"
+        component={AddNewEntryStrategies}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="AddNewRiskRegister"
+        component={AddNewRiskManager}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="SetupNewTradingPlan"
+        component={SetUpNewTradingPlan}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="AddNewExitStrategy"
+        component={AddNewExitStrategy}
         options={{
           presentation: "modal",
           headerStyle: styles.header,
@@ -459,6 +533,28 @@ const StackNavigation = () => {
       <Stack.Screen
         name="Accounts"
         component={Account}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="SuccessPage"
+        component={SuccessPage}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="AccountReport"
+        component={AccountReport}
         options={{
           presentation: "modal",
           headerStyle: styles.header,

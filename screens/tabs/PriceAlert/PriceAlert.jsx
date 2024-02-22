@@ -12,7 +12,7 @@ import ActiveAlertsScreen from "./ActiveAlertsScreen";
 import React, { useContext, useState, useEffect } from "react";
 import { getAllUserAlert } from "../../../api/priceAlertApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../../context/AuthContext";
 
 const PriceAlert = () => {
@@ -24,29 +24,42 @@ const PriceAlert = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [accountInfo, setAccountInfo] = useState({});
 
-  const { accountDetails } = useContext(AuthContext);
+  const { accountDetails, logout } = useContext(AuthContext);
 
   const getAlertList = async () => {
     const response = await getAllUserAlert(accountDetails.accountId).then(
       (res) => {
-        return res.data;
+        return res;
       }
     );
-
-    if (response.status) {
-      if (response.data.activeAlertList == 0) {
+    if(response.status === 401){
+      logout();
+    }else if (response.data.status) {
+      if (response.data.data.activeAlertList == 0) {
         setIsEmpty(true);
         setIsLoading(false);
       } else {
         setIsLoading(false);
       }
-      setAlertList(response.data);
+      setAlertList(response.data.data);
     }
   };
 
+  
+
   useEffect(() => {
     getAlertList();
-  }, []);
+  }, [accountDetails]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // async function fetchData() {
+        getAlertList();
+      // }
+      // fetchData();
+    }, [accountDetails])
+  );
+
 
   
   return (

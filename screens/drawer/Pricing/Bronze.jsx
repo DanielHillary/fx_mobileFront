@@ -43,42 +43,32 @@ const Bronze = () => {
     {
       id: 2,
       stat: true,
-      detail: "Open Single Trade",
+      detail: "PsyDTrader Trade Appraisal",
     },
     {
       id: 3,
       stat: true,
-      detail: "Trade Appraisal",
+      detail: "Open Multiple Trades for multiple accounts",
     },
     {
       id: 4,
       stat: true,
-      detail: "Alerts: Push Notification, email",
+      detail: "Alert medium: Push Notification, email",
     },
     {
       id: 5,
-      stat: false,
+      stat: true,
       detail: "Monthly account reporting",
     },
     {
       id: 6,
-      stat: false,
+      stat: true,
       detail: "Automatic Trade journaling",
     },
     {
       id: 7,
       stat: true,
-      detail: "Risk Analyzer",
-    },
-    {
-      id: 8,
-      stat: true,
-      detail: "Open Single Trade",
-    },
-    {
-      id: 9,
-      stat: true,
-      detail: "Trade Appraisal",
+      detail: "Limited alerts on all asset (50/month)",
     },
   ];
 

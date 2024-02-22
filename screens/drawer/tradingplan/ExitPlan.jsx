@@ -24,6 +24,7 @@ import {
   updateProfitExitStrategies,
 } from "../../../api/tradingplanApi";
 import { AuthContext } from "../../../context/AuthContext";
+import EmptyList from "../../../components/EmptyList";
 
 const AlertModal = ({
   title,
@@ -97,7 +98,6 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
         "Update Successful",
         "You have successfully updated this exit level"
       );
-      updateChange();
     } else {
       console.log(response.message);
     }
@@ -105,53 +105,33 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
 
   const deleteExitLevel = async () => {
     try {
-      const response = await deleteProfitExit(item.accountId, item.count).then((res) => {
-        return res.data;
-      });
+      const response = await deleteProfitExit(item.accountId, item.count).then(
+        (res) => {
+          return res.data;
+        }
+      );
       if (response.status) {
-        updateList(item)
+        updateList(item);
         Alert.alert("Successful", "Your exit level has been deleted");
       } else {
         console.log(response.message);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
 
   const navigation = useNavigation();
   return (
-    <View style={{ marginTop: 30 }}>
-      <View
-        style={{
-          flexDirection: "row",
-          gap: SIZES.small,
-          justifyContent: "space-between",
-        }}
-      >
-        <View style={{ flexDirection: "row", gap: SIZES.small }}>
-          <Text style={{ color: COLORS.lightWhite }}>Add Level</Text>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("CreateExit", { value: "Edit Profit" });
-            }}
-          >
-            <Image
-              source={require("../../../assets/icons/add.png")}
-              style={{ height: 20, width: 20 }}
-            />
-          </TouchableOpacity>
-        </View>
-        <Text style={{ color: COLORS.lightWhite }}>Profit level</Text>
-      </View>
-
+    <View style={{ marginTop: 3 }}>
       <View style={styles.contain}>
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.levelText}>At</Text>
           {editMode ? (
             <TextInput
               ref={inputRef}
-              placeholderTextColor={COLORS.darkyellow}
+              placeholder="0"
+              placeholderTextColor={COLORS.gray}
               style={styles.email(tpFocused)}
               numberOfLines={1}
               keyboardType="numeric"
@@ -165,10 +145,10 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
               onBlur={() => {
                 setTpFocused(false);
               }}
-              selection={{
-                start: item.inTradeProfitLevel,
-                end: item.inTradeProfitLevel,
-              }}
+              // selection={{
+              //   start: item.inTradeProfitLevel,
+              //   end: item.inTradeProfitLevel,
+              // }}
             />
           ) : (
             <Text style={styles.levels}>
@@ -185,7 +165,8 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
           <Text style={styles.levelText}>by</Text>
           {editMode ? (
             <TextInput
-              placeholderTextColor={COLORS.darkyellow}
+              placeholderTextColor={COLORS.gray}
+              placeholder="0"
               style={styles.email(lotSizeFocused)}
               numberOfLines={1}
               keyboardType="numeric"
@@ -208,36 +189,50 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
           )}
 
           <Text style={styles.levelText}>
-            % of my current lotSize, and secure
+            % of my current lotSize
+            {item.slplacementPercentAfterProfit != 0 ? ", and" : "."}
           </Text>
         </View>
 
-        <View style={{ flexDirection: "row" }}>
-          {editMode ? (
-            <TextInput
-              placeholderTextColor={COLORS.darkyellow}
-              style={[styles.email(slFocused), { marginLeft: 0 }]}
-              keyboardType="numeric"
-              numberOfLines={1}
-              onChangeText={(text) => {
-                setSlProfitValue(text);
-              }}
-              value={slProfitValue}
-              onFocus={() => {
-                setSlFocused(true);
-              }}
-              onBlur={() => {
-                setSlFocused(false);
-              }}
-            />
-          ) : (
-            <Text style={styles.levels}>
-              {isChanged ? slProfitValue : item.slplacementPercentAfterProfit}
+        {item.slplacementPercentAfterProfit != 0 && (
+          <View style={{ flexDirection: "row" }}>
+            <Text style={styles.levelText}>
+              {item.slPlacementPercentIsForProfit ? "secure " : "reduce "}
             </Text>
-          )}
+            <Text style={styles.levelText}>
+              {!item.slPlacementPercentIsForProfit && " my risk allowance by "}
+            </Text>
+            {editMode ? (
+              <TextInput
+                placeholderTextColor={COLORS.gray}
+                placeholder="0"
+                style={[styles.email(slFocused), { marginLeft: 0 }]}
+                keyboardType="numeric"
+                numberOfLines={1}
+                onChangeText={(text) => {
+                  setSlProfitValue(text);
+                }}
+                value={slProfitValue}
+                onFocus={() => {
+                  setSlFocused(true);
+                }}
+                onBlur={() => {
+                  setSlFocused(false);
+                }}
+              />
+            ) : (
+              <Text style={styles.levels}>
+                {isChanged ? slProfitValue : item.slplacementPercentAfterProfit}
+              </Text>
+            )}
 
-          <Text style={styles.levelText}>% of current profit.</Text>
-        </View>
+            <Text style={styles.levelText}>
+              {item.slPlacementPercentIsForProfit
+                ? "% of current profit."
+                : "%"}
+            </Text>
+          </View>
+        )}
       </View>
       <View
         style={{
@@ -311,6 +306,7 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
         }
         handleCancel={() => {
           setCheck(false);
+          setEditMode(false);
         }}
         handleConfirm={() => {
           updateExitLevels();
@@ -368,18 +364,17 @@ const LossExits = ({ item, updateChange, updateList }) => {
         "Update Successful",
         "You have successfully updated this exit level"
       );
-      updateChange();
     } else {
       console.log(response.message);
     }
   };
 
   const deleteExitLevel = async () => {
-    console.log("Deletion Loss");
-
-    const response = await deleteLossExit(item.accountId, item.exitId).then((res) => {
-      return res.data;
-    });
+    const response = await deleteLossExit(item.accountId, item.exitId).then(
+      (res) => {
+        return res.data;
+      }
+    );
     if (response.status) {
       updateList(item);
       Alert.alert("Delete Successful", "Your exit level has been deleted");
@@ -388,38 +383,14 @@ const LossExits = ({ item, updateChange, updateList }) => {
     }
   };
   return (
-    <View style={{ marginTop: 20 }}>
-      <View
-        style={{
-          flexDirection: "row",
-          gap: SIZES.small,
-          justifyContent: "space-between",
-        }}
-      >
-        <View style={{ flexDirection: "row", gap: SIZES.small }}>
-          <Text style={{ color: COLORS.lightWhite }}>Add Level</Text>
-          <TouchableOpacity
-            onPress={() => {
-              // setIsProfitAlert(true);
-              navigation.navigate("CreateExit", { value: "Edit Loss" });
-            }}
-          >
-            <Image
-              source={require("../../../assets/icons/add.png")}
-              style={{ height: 20, width: 20 }}
-            />
-          </TouchableOpacity>
-        </View>
-        <Text style={{ color: COLORS.lightWhite }}>Loss levels</Text>
-      </View>
-
+    <View style={{ marginTop: 2 }}>
       <View style={styles.contain}>
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.levelText}>At</Text>
           {editMode ? (
             <TextInput
               placeholder="0"
-              placeholderTextColor={COLORS.darkyellow}
+              placeholderTextColor={COLORS.gray}
               style={styles.email(slFocused)}
               numberOfLines={1}
               keyboardType="numeric"
@@ -450,7 +421,7 @@ const LossExits = ({ item, updateChange, updateList }) => {
           {editMode ? (
             <TextInput
               placeholder="0"
-              placeholderTextColor={COLORS.darkyellow}
+              placeholderTextColor={COLORS.gray}
               style={styles.email(lotSizeFocused)}
               numberOfLines={1}
               keyboardType="numeric"
@@ -546,6 +517,7 @@ const LossExits = ({ item, updateChange, updateList }) => {
         }
         handleCancel={() => {
           setCheck(false);
+          setEditMode(false);
         }}
         handleConfirm={() => {
           updateExitLevels();
@@ -618,7 +590,7 @@ const ExitPlan = () => {
   useEffect(() => {
     getExitsForPlan();
     setAccountInfo(accountDetails);
-  }, []);
+  }, [accountDetails]);
 
   const navigation = useNavigation();
 
@@ -697,19 +669,18 @@ const ExitPlan = () => {
   ];
 
   const updateList = (item) => {
-    if(item.isInProfit){
+    if (item.isInProfit) {
       const newArray = profitExits.filter((obj) => obj.exitId !== item.exitId);
       setProfitExits(newArray);
       if (newArray.length == 0) {
         setIsProfitEmpty(true);
       }
-    }else{
+    } else {
       const newArray = lossExits.filter((obj) => obj.exitId !== item.exitId);
       setLossExits(newArray);
       if (newArray.length == 0) {
         setIsLossEmpty(true);
       }
-
     }
   };
 
@@ -744,7 +715,31 @@ const ExitPlan = () => {
         Note: To break-even, set secure profit percent at 0
       </Text>
 
-      <ScrollView horizontal>
+
+      <View
+        style={{
+          flexDirection: "row",
+          gap: SIZES.small,
+          justifyContent: "space-between",
+          marginTop: 30
+        }}
+      >
+        <View style={{ flexDirection: "row", gap: SIZES.small }}>
+          <Text style={{ color: COLORS.lightWhite }}>Add Level</Text>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("CreateExit", { value: "Edit Profit" });
+            }}
+          >
+            <Image
+              source={require("../../../assets/icons/add.png")}
+              style={{ height: 20, width: 20 }}
+            />
+          </TouchableOpacity>
+        </View>
+        <Text style={{ color: COLORS.lightWhite }}>Profit level</Text>
+      </View>
+      {isProfitEmpty ? <EmptyList message={"You don't have any exit levels"} /> : <ScrollView horizontal>
         <View style={{ flexDirection: "row", gap: SIZES.medium }}>
           {profitExits?.map((item) => (
             <ProfitExits
@@ -755,9 +750,33 @@ const ExitPlan = () => {
             />
           ))}
         </View>
-      </ScrollView>
+      </ScrollView>}
 
-      <ScrollView horizontal>
+      <View
+        style={{
+          flexDirection: "row",
+          gap: SIZES.small,
+          justifyContent: "space-between",
+          marginTop: 20,
+        }}
+      >
+        <View style={{ flexDirection: "row", gap: SIZES.small }}>
+          <Text style={{ color: COLORS.lightWhite }}>Add Level</Text>
+          <TouchableOpacity
+            onPress={() => {
+              // setIsProfitAlert(true);
+              navigation.navigate("CreateExit", { value: "Edit Loss" });
+            }}
+          >
+            <Image
+              source={require("../../../assets/icons/add.png")}
+              style={{ height: 20, width: 20 }}
+            />
+          </TouchableOpacity>
+        </View>
+        <Text style={{ color: COLORS.lightWhite }}>Loss levels</Text>
+      </View>
+      {isLossEmpty ? <EmptyList message={"You don't have any exit levels"} /> : <ScrollView horizontal>
         <View style={{ flexDirection: "row", gap: SIZES.medium }}>
           {lossExits?.map((item) => (
             <LossExits
@@ -768,7 +787,7 @@ const ExitPlan = () => {
             />
           ))}
         </View>
-      </ScrollView>
+      </ScrollView>}
 
       <AlertModal
         message={
@@ -928,4 +947,5 @@ const styles = StyleSheet.create({
     color: "black",
     fontFamily: FONT.bold,
   },
+  
 });

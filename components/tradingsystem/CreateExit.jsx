@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Modal,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { COLORS, SIZES, FONT } from "../../constants";
@@ -14,9 +15,10 @@ import AwesomeAlert from "react-native-awesome-alerts";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-  registerLossExitStrategy,
-  registerProfitExitStrategy,
+  registerNewLossExitStrategy,
+  registerNewProfitExitStrategy,
 } from "../../api/tradingplanApi";
+import SuccessModal from "../modal/SuccessModal";
 
 const AlertModal = ({
   title,
@@ -70,6 +72,13 @@ const CreateExit = () => {
   const [isContinue, setIsContinue] = useState(false);
   const [accountInfo, setAccountInfo] = useState({});
   const [isCheckLevels, setIsCheckLevels] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [slLossFocused, setSlLossFocused] = useState(false);
+  const [slLossValue, setSlLossValue] = useState(0);
+
+  const setVisibility = (value) => {
+    setIsModalVisible(value);
+  };
 
   const getAccount = async () => {
     const account = await AsyncStorage.getItem("accountInfo").then((res) => {
@@ -96,7 +105,7 @@ const CreateExit = () => {
   };
 
   const checkEmptyLevelsForLoss = () => {
-    if (lossLotSize != 0 && slValue != 0) {
+    if (lossLotSize != 0 || slValue != 0) {
       return false;
     }
     return true;
@@ -127,29 +136,34 @@ const CreateExit = () => {
 
   const registerProfit = () => {
     const body = {
+      accountId: accountInfo.accountId,
       count: profitCount,
       inProfit: true,
       inTradeProfitLevel: tpValue,
       lotSizePercentWhenTradeInProfit: profitLotSize,
       metaAccountId: accountInfo.metaApiAccountId,
       original: true,
-      slPlacementPercentIsForProfit: true,
+      slPlacementPercentIsForProfit: slLossValue == 0 ? true : false,
       slplacementPercentAfterProfit: slProfitValue == 0 ? 1 : slProfitValue,
       tradingPlanId: accountInfo.planId,
     };
 
-    const response = registerProfitExitStrategy(body).then((res) => {
+    const response = registerNewProfitExitStrategy(body).then((res) => {
       return res.data;
     });
-    if(response.status){
-      Alert.alert("Successful", "Your exit level has been created");
-    }else{
-      console.log(response.message)
+    if (response.status) {
+      setIsModalVisible(true);
+      setSlProfitValue(0);
+      setTpValue(0);
+      setProfitLotSize(0);
+    } else {
+      Alert.alert("Failed", response.message);
     }
   };
 
   const registerLoss = () => {
     const body = {
+      accountId: accountInfo.accountId,
       allowedLossLevelPercentage: slValue,
       count: lossCount,
       inProfit: false,
@@ -161,13 +175,13 @@ const CreateExit = () => {
       tradingPlanId: accountInfo.planId,
     };
 
-    const response = registerLossExitStrategy(body).then((res) => {
+    const response = registerNewLossExitStrategy(body).then((res) => {
       return res.data;
     });
-    if(response.status){
-      Alert.alert("Successful", "Your exit level has been created");
-    }else{
-      console.log(response.message)
+    if (response.status) {
+      setIsModalVisible(true);
+    } else {
+      Alert.alert("Failed", response.message);
     }
   };
 
@@ -194,7 +208,7 @@ const CreateExit = () => {
             fontSize: SIZES.xLarge + 4,
           }}
         >
-          Register Your {dataFrom =="Edit Profit" ? "Profit" : "Loss"} Exits
+          Register Your {dataFrom == "Edit Profit" ? "Profit" : "Loss"} Exits
         </Text>
         <Text style={[styles.text, { fontSize: SIZES.medium }]}>
           Your exit strategy is made up of exit levels. Exit levels are market
@@ -343,6 +357,27 @@ const CreateExit = () => {
 
               <Text style={styles.levelText}>% of current profit.</Text>
             </View>
+            <View style={{ flexDirection: "row" }}>
+              <Text style={styles.levelText}>Reduce my risk size by </Text>
+              <TextInput
+                placeholder="0"
+                placeholderTextColor={COLORS.darkyellow}
+                style={[styles.email(slLossFocused), { marginLeft: 0 }]}
+                keyboardType="numeric"
+                numberOfLines={1}
+                onChangeText={(text) => {
+                  setSlLossValue(text);
+                }}
+                value={slLossValue}
+                onFocus={() => {
+                  setSlLossFocused(true);
+                }}
+                onBlur={() => {
+                  setSlLossFocused(false);
+                }}
+              />
+              <Text style={styles.levelText}>% of my current risk.</Text>
+            </View>
           </View>
         </View>
       ) : (
@@ -447,7 +482,7 @@ const CreateExit = () => {
         }}
         handleConfirm={() => {
           setLossCount((prev) => prev + 1);
-          registerLoss()
+          registerLoss();
         }}
         isAlert={isLossAlert}
       />
@@ -484,7 +519,8 @@ const CreateExit = () => {
 
       <TouchableOpacity
         onPress={() => {
-          handleFinish();
+          // handleFinish();
+          navigation.goBack();
         }}
         style={styles.buttonContinue}
       >
@@ -494,6 +530,17 @@ const CreateExit = () => {
           <Text style={styles.buttonText}>Finish</Text>
         )}
       </TouchableOpacity>
+
+      <Modal
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setIsModalVisible(false);
+        }}
+        animationType="slide"
+        transparent={true}
+      >
+        <SuccessModal setVisibility={setVisibility} />
+      </Modal>
     </ScrollView>
   );
 };

@@ -7,6 +7,8 @@ import {
   ActivityIndicator,
   FlatList,
   ScrollView,
+  Alert,
+  Modal,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { COLORS, FONT, SIZES } from "../../constants";
@@ -14,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getEntries, registerEntryStrategy } from "../../api/tradingplanApi";
 import AwesomeAlert from "react-native-awesome-alerts";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import SuccessModal from "../modal/SuccessModal";
 
 const Options = ({ item }) => {
   return (
@@ -91,8 +94,17 @@ const EntryStrategy = () => {
   const [number, setNumber] = useState(0);
   const [data, setData] = useState([]);
   const [isEmpty, setIsEmpty] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const navigation = useNavigation();
+
+  const setVisibility = (val) => {
+    setIsModalVisible(val);
+    navigation.navigate("ExitStrategy", {
+      account: accountInfo,
+      tradingPlan: tradePlan,
+    });
+  };
 
   const route = useRoute();
 
@@ -103,23 +115,30 @@ const EntryStrategy = () => {
   const text2 = "Edit";
 
   const registerEntry = async () => {
-    setIsClicked(true);
-    const body = {
-      accountId: accountInfo.accountId,
-      analysisNames: data,
-      category: "Price Action",
-      entryStrategyName: "Jumbo",
-      noteToSelf: "Please always check",
-      tradingPlanId: tradePlan.planId,
-      tradingPlanName: "Some name",
-    };
+    try {
+      setIsClicked(true);
+      const body = {
+        accountId: accountInfo.accountId,
+        analysisNames: data,
+        category: "Price Action",
+        entryStrategyName: "Jumbo",
+        noteToSelf: "Please always check",
+        tradingPlanId: tradePlan.planId,
+        tradingPlanName: "Some name",
+      };
 
-    let response = await registerEntryStrategy(body).then((res) => {
-      return res.data;
-    });
-    if (response.status) {
-      console.log(response.message);
-      navigation.navigate("ExitStrategy", { account: accountInfo, tradingPlan: tradePlan});
+      let response = await registerEntryStrategy(body).then((res) => {
+        return res.data;
+      });
+      if (response.status) {
+        if (response.status) {
+          setIsModalVisible(true);
+        } else {
+          Alert.alert("Transaction failed", response.message);
+        }
+      }
+    } catch (error) {
+      console.log(error);
     }
     setIsClicked(false);
   };
@@ -230,7 +249,7 @@ const EntryStrategy = () => {
       </View>
 
       {!isEdit && (
-        <View style={{marginTop: SIZES.large}}>
+        <View style={{ marginTop: SIZES.large }}>
           <Text
             style={[
               styles.text,
@@ -260,6 +279,17 @@ const EntryStrategy = () => {
           </TouchableOpacity>
         </View>
       )}
+
+      <Modal
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setIsModalVisible(false);
+        }}
+        animationType="slide"
+        transparent={true}
+      >
+        <SuccessModal setVisibility={setVisibility}/>
+      </Modal>
 
       <AlertModal
         isAlert={isEmpty}

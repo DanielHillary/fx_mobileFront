@@ -44,10 +44,10 @@ const Options = ({ setAccount, setAgreed }) => {
 
   const setRestInActive = (item) => {
     let search = "";
-    if (item == "strict") {
+    if (item == "Strict") {
       search = item;
       setRegular(false);
-    } else if (item == "regular") {
+    } else if (item == "Flexible") {
       search = item;
       setStrict(false);
       setAgreed(false);
@@ -68,13 +68,13 @@ const Options = ({ setAccount, setAgreed }) => {
         <TouchableOpacity
           onPress={() => {
             setRegular(true);
-            setRestInActive("regular");
+            setRestInActive("Flexible");
           }}
           style={styles.accountType(regular)}
         >
           <View>
             <Text style={[styles.texting(regular), { fontSize: SIZES.medium }]}>
-              Regular
+              Flexible
             </Text>
           </View>
         </TouchableOpacity>
@@ -82,7 +82,7 @@ const Options = ({ setAccount, setAgreed }) => {
         <TouchableOpacity
           onPress={() => {
             setStrict(true);
-            setRestInActive("strict");
+            setRestInActive("Strict");
           }}
           style={styles.accountType(strict)}
         >
@@ -111,21 +111,39 @@ const Options = ({ setAccount, setAgreed }) => {
             plans for every trade that you take.
           </Text>
         ) : (
-          <Text
-            style={[
-              styles.text,
-              {
-                padding: SIZES.small,
-                fontFamily: FONT.medium,
-                fontSize: SIZES.medium - 2,
-              },
-            ]}
-          >
-            In order to use this service, you have to agree to our terms and
-            condition. This service strictly monitors ALL your trades and would
-            shut down any trade that is not in compliance with your trading
-            plan.
-          </Text>
+          <ScrollView>
+            <Text
+              style={[
+                styles.text,
+                {
+                  fontSize: SIZES.large,
+                  alignSelf: "center",
+                  marginBottom: SIZES.xSmall,
+                },
+              ]}
+            >
+              Strict Agreement
+            </Text>
+            <Text style={styles.text}>
+              Hello, please note that if you switch your account to strict mode,
+              you are authorizing us to carry out the following actions on your
+              account.
+            </Text>
+            <Text style={styles.subtext}>
+              1. Automatically close a trade when it doesn't fit with your
+              trading plan
+            </Text>
+            <Text style={styles.subtext}>
+              2. Adjust your stop levels to always meet your risk/reward ration
+              per trade
+            </Text>
+            <Text style={styles.text}>
+              Therefore, you might lose money due to broker spread or market
+              volatility everytime you open a trade and we have to shut it down.
+              Also your stop levels might not be the exact prices as set when
+              purchasing your positions.
+            </Text>
+          </ScrollView>
         )}
 
         {strict && (
@@ -175,8 +193,6 @@ const SetUpTradingPlan = () => {
 
   const account = route.params?.account || null;
 
-  console.log(account);
-
   const setAgreement = (data) => {
     setIsAgree(data);
   };
@@ -196,7 +212,7 @@ const SetUpTradingPlan = () => {
       userAccountId: account.accountId,
       strict: isAgree,
     };
-    if (accountType == "strict") {
+    if (accountType == "Strict") {
       if (isAgree) {
         account.isStrict = isAgree;
         body.strict = isAgree;
@@ -395,6 +411,12 @@ const styles = StyleSheet.create({
   },
   alertContainer: {
     backgroundColor: "black",
+  },
+  subtext: {
+    color: COLORS.white,
+    fontSize: SIZES.small + 1,
+    fontFamily: FONT.regular,
+    margin: SIZES.small,
   },
   email: (focused) => ({
     borderColor: focused ? COLORS.darkyellow : COLORS.gray,

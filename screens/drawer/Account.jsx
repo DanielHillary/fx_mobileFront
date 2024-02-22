@@ -2,15 +2,20 @@ import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import { COLORS, SIZES, FONT } from "../../constants";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../context/AuthContext";
 import { getAllUserAccounts } from "../../api/accountApi";
 
-const AccountCard = ({ item, currentAccount }) => {
+const AccountCard = ({
+  item,
+  currentAccount,
+  handleNavigate,
+  updateAccountDetails,
+}) => {
   const [hasTrade, setHasTrade] = useState(true);
 
   let accountDesc =
-    "An account for the big big people in our midst. Top Priority";
+    "PsyDTrader account representaion of your metatrader account.";
 
   return (
     <View style={styles.accountCard}>
@@ -33,7 +38,7 @@ const AccountCard = ({ item, currentAccount }) => {
           </Text>
         </View>
 
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <View
             style={{
               height: 10,
@@ -46,7 +51,10 @@ const AccountCard = ({ item, currentAccount }) => {
             }}
           />
           <TouchableOpacity>
-            <Image source={require("../../assets/icons/delete.png")} style={{height: 25, width: 25}}/>
+            <Image
+              source={require("../../assets/icons/delete.png")}
+              style={{ height: 25, width: 25 }}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -75,21 +83,27 @@ const AccountCard = ({ item, currentAccount }) => {
             padding: 7,
           }}
         >
-          ${item.formattedBalance}.{item.fraction}
+          ${item.accountBalance}
         </Text>
-        {currentAccount.accountId != item.accountId && <TouchableOpacity
-          style={{ flexDirection: "row", gap: 4, alignItems: "center" }}
-        >
-          <Text
-            style={{ color: COLORS.darkyellow, fontSize: SIZES.xSmall + 2 }}
+        {currentAccount.accountId != item.accountId && (
+          <TouchableOpacity
+            style={{ flexDirection: "row", gap: 4, alignItems: "center" }}
+            onPress={() => {
+              updateAccountDetails(item);
+              handleNavigate.navigate("Home", { account: item });
+            }}
           >
-            Switch to account
-          </Text>
-          <Image
-            source={require("../../assets/icons/ChevRight.png")}
-            style={{ height: 10, width: 10, tintColor: COLORS.darkyellow }}
-          />
-        </TouchableOpacity>}
+            <Text
+              style={{ color: COLORS.darkyellow, fontSize: SIZES.xSmall + 2 }}
+            >
+              Switch to account
+            </Text>
+            <Image
+              source={require("../../assets/icons/ChevRight.png")}
+              style={{ height: 10, width: 10, tintColor: COLORS.darkyellow }}
+            />
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -97,23 +111,26 @@ const AccountCard = ({ item, currentAccount }) => {
 const Account = () => {
   const [userAccounts, setUserAccounts] = useState([]);
   const [totalBalance, setTotalBalance] = useState("");
+  const [isClicked, setIsClicked] = useState(false);
 
   const navigation = useNavigation();
 
-  const { accountDetails } = useContext(AuthContext);
+  const { accountDetails, updateAccount } = useContext(AuthContext);
 
   const getUserAccounts = async () => {
-    const response = await getAllUserAccounts(accountDetails.userId).then(
-      (res) => {
-        return res.data;
-      }
-    );
+    if (accountDetails.accountName != "PsyDStarter") {
+      const response = await getAllUserAccounts(accountDetails.userId).then(
+        (res) => {
+          return res.data;
+        }
+      );
 
-    if (response.status) {
-      setUserAccounts(response.data.accountList);
-      setTotalBalance(response.data.totalBalance);
-    } else {
-      console.log(response.message);
+      if (response.status) {
+        setUserAccounts(response.data.accountList);
+        setTotalBalance(response.data.totalBalance);
+      } else {
+        console.log(response.message);
+      }
     }
   };
 
@@ -121,7 +138,15 @@ const Account = () => {
     getUserAccounts();
   }, []);
 
-  const [isClicked, setIsClicked] = useState(false);
+  useFocusEffect(
+    React.useCallback(() => {
+      // async function fetchData() {
+      getUserAccounts();
+      // }
+      // fetchData();
+    }, [accountDetails])
+  );
+
   return (
     <ScrollView style={styles.base}>
       <View
@@ -137,7 +162,7 @@ const Account = () => {
 
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate("AddAccount");
+          navigation.navigate("AddNewAccount");
         }}
         style={styles.button}
       >
@@ -153,8 +178,9 @@ const Account = () => {
           <AccountCard
             item={item}
             currentAccount={accountDetails}
+            updateAccountDetails={updateAccount}
             key={item.accountId}
-            handleNavigate={() => {}}
+            handleNavigate={navigation}
           />
         ))}
       </View>

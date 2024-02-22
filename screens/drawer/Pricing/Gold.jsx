@@ -37,42 +37,34 @@ const Gold = () => {
   const data = [
     {
       stat: true,
-      detail: "Risk Analyzer",
+      detail: "Limited price alerts (100/month)",
     },
     {
       stat: true,
-      detail: "Open Single Trade",
+      detail: "Auto alerts on TakeProfit and StopLoss levels",
     },
     {
       stat: true,
-      detail: "Trade Appraisal",
+      detail: "Alert options: WhatsApp, Telegram",
     },
     {
       stat: true,
-      detail: "Alerts: Push Notification, email",
+      detail: "Automatic execution of all exit levels",
     },
     {
-      stat: false,
-      detail: "Monthly account reporting",
-    },
-    {
-      stat: false,
-      detail: "Automatic Trade journaling",
-    },
-    {
-      stat: false,
-      detail: "Monthly account reporting...",
-    },
-    {
-      stat: false,
-      detail: "Automatic Trade journaling.",
+      stat: true,
+      detail: "Auto alerts on all exit",
     },
   ];
 
   return (
     <View style={styles.container}>
       <View>
-        <Text style={styles.price}>$14/Month</Text>
+        <Text style={styles.price}>$15/Month</Text>
+      </View>
+
+      <View style={{marginTop: SIZES.medium, margin: SIZES.small}}>
+        <Text style={styles.plus}>Everything from Bronze package Plus...</Text>
       </View>
 
       <FlatList
@@ -105,6 +97,12 @@ const styles = StyleSheet.create({
   text: {
     color: COLORS.lightWhite,
     fontFamily: FONT.regular,
+  },
+  plus: {
+    color: COLORS.darkyellow,
+    fontFamily: FONT.regular,
+    fontSize: SIZES.medium - 4,
+    fontStyle: 'italic'
   },
   button: {
     // margin: 80,

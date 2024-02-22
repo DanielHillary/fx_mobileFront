@@ -4,7 +4,7 @@ import { COLORS, SIZES, FONT } from "../../../constants";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import EntryPlan from "./EntryPlan";
 import ExitPlan from "./ExitPlan";
-import RiskRegister from "./RiskRegister"
+import RiskRegister from "./RiskRegister";
 import NoTradePlan from "./NoTradePlan";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -50,9 +50,13 @@ const TradingPlan = () => {
 
   return (
     <View style={styles.base}>
-      {accountInfo.hasCompleteTradingPlan ? <TopTabGroup /> : <NoTradePlan accountInfo={accountInfo} />}
-      <View style={styles.buttonContainer}>
-      </View>
+      {accountInfo.completionStatus != 25 ||
+      accountInfo.completionStatus != 0 ? (
+        <TopTabGroup />
+      ) : (
+        <NoTradePlan accountInfo={accountInfo} />
+      )}
+      <View style={styles.buttonContainer}></View>
     </View>
   );
 };
@@ -64,7 +68,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.appBackground,
   },
-  tabBar:{
+  tabBar: {
     backgroundColor: COLORS.appBackground,
   },
   baseText: {

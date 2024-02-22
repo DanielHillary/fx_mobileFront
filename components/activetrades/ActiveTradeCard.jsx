@@ -28,10 +28,8 @@ const ActiveTradeCard = ({ item }) => {
         <View>
           <Text style={{ fontSize: SIZES.small, color: COLORS.darkyellow }}>
             {tradeType}
-            {/* sell */}
           </Text>
           <Text style={styles.asset(item.assetCategory)}>{item.asset}</Text>
-          {/* <Text style={styles.assets}>USD/JPY</Text> */}
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <View
@@ -43,7 +41,7 @@ const ActiveTradeCard = ({ item }) => {
               marginRight: 10,
             }}
           />
-          <Text style={styles.date}>12 June 2024</Text>
+          <Text style={styles.date}>{item.open}</Text>
         </View>
       </View>
 

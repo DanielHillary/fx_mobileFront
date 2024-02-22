@@ -72,8 +72,6 @@ const RiskAnalysis = () => {
 
   const tradeDetails = route.params?.data || null;
 
-  console.log(tradeDetails);
-
   return (
     <ScrollView style={styles.baseContainer}>
       <View
@@ -284,7 +282,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.darkyellow,
     borderRadius: 10,
     width: 300,
-    marginTop: 20,
+    marginTop: 30,
+    marginBottom: 40,
     alignSelf: "center",
   },
   buttonText: {

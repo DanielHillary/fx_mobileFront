@@ -9,6 +9,7 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
+  Alert,
 } from "react-native";
 import {
   GestureHandlerRootView,
@@ -24,7 +25,43 @@ import {
 import BottomSlide from "../../components/BottomSlide";
 import { useRoute } from "@react-navigation/native";
 import { getResponseRemarks } from "../../api/tradeAnalysisApi";
+import AwesomeAlert from "react-native-awesome-alerts";
+import { getTradeNotes, saveTradingNotes, updateTradeNotes } from "../../api/journalApi";
 
+const AlertModal = ({
+  title,
+  isAlert,
+  handleConfirm,
+  handleCancel,
+  showCancelButton,
+  showConfirmButton,
+  message,
+}) => {
+  return (
+    <View>
+      <AwesomeAlert
+        show={isAlert}
+        title={title}
+        titleStyle={styles.title}
+        contentContainerStyle={styles.alertContainer}
+        showConfirmButton={showConfirmButton}
+        showCancelButton={showCancelButton}
+        cancelButtonColor={COLORS.darkyellow}
+        cancelButtonTextStyle={styles.alertText}
+        cancelText="Review"
+        confirmButtonColor={COLORS.darkyellow}
+        confirmButtonTextStyle={styles.alertText}
+        confirmText="Save"
+        onCancelPressed={handleCancel}
+        onConfirmPressed={handleConfirm}
+        closeOnTouchOutside={true}
+        onDismiss={handleCancel}
+        message={message}
+        messageStyle={styles.alertMessage}
+      />
+    </View>
+  );
+};
 
 const Remark = ({ status, hasTradingPlan, remarks }) => {
   return (
@@ -69,16 +106,21 @@ const Remark = ({ status, hasTradingPlan, remarks }) => {
           </Text>
         )}
       </View>
-      <View style={{marginBottom: 100}}>
+      <View style={{ marginBottom: 100 }}>
         {status ? (
           <Text style={[styles.text, { marginHorizontal: 10 }]}>
             We analyzed the parameters you provided against your trading plan
             and it looks all good
           </Text>
         ) : (
-          <View style={{rowGap: SIZES.medium, marginBottom: 5}}>
+          <View style={{ rowGap: SIZES.medium, marginBottom: 5 }}>
             {remarks?.map((item) => (
-              <Text key={item.id} style={[styles.text, { marginHorizontal: 30 }]}>{item.remark}</Text>
+              <Text
+                key={item.id}
+                style={[styles.text, { marginHorizontal: 30 }]}
+              >
+                {item.remark}
+              </Text>
             ))}
           </View>
         )}
@@ -88,9 +130,13 @@ const Remark = ({ status, hasTradingPlan, remarks }) => {
 };
 
 const TradeOutline = () => {
-  const [note, setNote] = useState("Add note");
+  const [note, setNote] = useState("");
+  const [tradeNote, setTradeNote] = useState({})
   const [editMode, setEditMode] = useState(false);
   const [remarks, setRemarks] = useState([]);
+  const [noteEditMode, setNoteEditMode] = useState(false);
+  const [check, setCheck] = useState(false);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     loadCustomFont();
@@ -114,9 +160,16 @@ const TradeOutline = () => {
         return res.data;
       }
     );
+    const resp = await getTradeNotes(details.id).then((res) => {
+      return res.data;
+    })
+    if(resp.status){
+      setTradeNote(resp.data)
+    }else{
+      console.log(resp.message);
+    }
     if (response.status) {
       setRemarks(response.data);
-      console.log(response.data);
     } else {
       console.log(response.message);
     }
@@ -125,6 +178,43 @@ const TradeOutline = () => {
   useEffect(() => {
     getRemarks();
   }, []);
+
+  const saveTradeNote = () => {
+    if (note === "Add note") {
+      console.log("Do nothing");
+    } else if (note.length == 0) {
+      //tell the user to input something
+      Alert.alert("Empty fields", "Your text field is empty")
+    } else {
+      setCheck(true);
+    }
+  };
+
+  const saveNote = async() => {
+    let response = {};
+    if(count > 1 || tradeNote.length != 0){
+      tradeNote.note = note;
+      response = await updateTradeNotes(tradeNote).then((res) => {
+        return res.data;
+      })
+    }else{
+      const body = {
+        note: note,
+        tradeId: details.id,
+        metaOrderId: details.metaTradeOrderId
+      }
+      response = await saveTradingNotes(body).then((res) => {
+        return res.data;
+      })
+    }
+    if(response.status){
+      setTradeNote(response.data);
+      setCount(prev => prev + 1);
+      setEditMode(false);
+    }else {
+      console.log(response.message);
+    }
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -237,7 +327,7 @@ const TradeOutline = () => {
               <View>
                 <Text style={[styles.info, { marginLeft: 55 }]}>Open Date</Text>
                 <Text style={[styles.infodetail, { marginLeft: 55 }]}>
-                  {details.entryDate}
+                  {details.open}
                 </Text>
               </View>
             </View>
@@ -254,40 +344,100 @@ const TradeOutline = () => {
                     placeholder="Add a note to your trade"
                     placeholderTextColor={"gray"}
                     numberOfLines={4}
-                    style={[styles.input, { marginTop: 4 }]}
+                    multiline={true}
+                    style={[styles.input]}
                     onChangeText={(text) => {
                       setNote(text);
                     }}
                     value={note}
-                    selection={{
-                      start: note.length,
-                      end: note.length,
-                    }}
+                    // selection={{
+                    //   start: note.length,
+                    //   end: note.length,
+                    // }}
                   />
                 ) : (
-                  <Text style={styles.input}>{note}</Text>
+                  <Text style={styles.input}>{tradeNote.note}</Text>
                 )}
               </View>
+            </View>
 
+            {!editMode ? (
               <TouchableOpacity
                 onPress={() => {
-                  setEditMode(!editMode);
+                  setEditMode(true);
                   inputRef.current?.focus();
                 }}
-                style={{ width: 40, alignSelf: "flex-end" }}
+                style={{
+                  flexDirection: "row",
+                  alignSelf: "flex-end",
+                  alignItems: "center",
+                  padding: SIZES.small,
+                  marginRight: SIZES.small,
+                }}
               >
+                <Text
+                  style={{
+                    color: COLORS.lightWhite,
+                    marginRight: SIZES.small - 4,
+                  }}
+                >
+                  Edit
+                </Text>
                 <Image
                   source={require("../../assets/icons/EditFirst.png")}
                   resizeMode="cover"
                   style={styles.logImage}
                 />
               </TouchableOpacity>
-            </View>
+            ) : (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignSelf: "flex-end",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: COLORS.lightWhite,
+                  }}
+                >
+                  Save
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    saveTradeNote();
+                  }}
+                  style={{ padding: SIZES.small, marginRight: SIZES.small }}
+                >
+                  <Image
+                    source={require("../../assets/icons/save.png")}
+                    style={{
+                      height: 25,
+                      width: 25,
+                    }}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
 
-          <Remark
-            status={!details.isProtected}
-            remarks={remarks}
+          <Remark status={details.status} remarks={remarks} />
+
+          <AlertModal
+            isAlert={check}
+            title={"Save note"}
+            message={"You sure you want to save?"}
+            handleCancel={() => {
+              setCheck(false);
+            }}
+            handleConfirm={() => {
+              setCheck(false);
+              saveNote();
+              
+            }}
+            showCancelButton={true}
+            showConfirmButton={true}
           />
         </ScrollView>
       </View>
@@ -373,13 +523,13 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginBottom: 10,
     borderColor: COLORS.darkyellow,
-    borderWidth: 0.5
+    borderWidth: 0.5,
   },
   input: {
-    marginTop: 10,
     color: COLORS.white,
     justifyContent: "flex-start",
-    height: 20,
+    height: "auto",
+    padding: SIZES.small,
   },
   infodetail: {
     color: COLORS.darkyellow,
@@ -391,7 +541,7 @@ const styles = StyleSheet.create({
   commentContainer: {
     width: "90%",
     height: "auto",
-    padding: SIZES.medium - 5,
+    paddingHorizontal: SIZES.xSmall - 3,
     backgroundColor: "#111",
     borderRadius: SIZES.xSmall,
     borderColor: COLORS.darkyellow,
@@ -420,6 +570,26 @@ const styles = StyleSheet.create({
     height: 30,
     borderRadius: 10,
     alignSelf: "flex-end",
+  },
+  alertText: {
+    color: "black",
+    fontFamily: FONT.bold,
+  },
+  levelText: {
+    color: COLORS.lightWhite,
+    alignSelf: "flex-end",
+    fontSize: SIZES.small + 2,
+    marginBottom: 4,
+    fontFamily: FONT.medium,
+  },
+  alertMessage: {
+    color: COLORS.white,
+    textAlign: "center",
+  },
+  alertContainer: {
+    backgroundColor: "black",
+    borderRadius: SIZES.medium,
+    width: 200,
   },
 });
 

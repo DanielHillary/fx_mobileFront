@@ -24,6 +24,7 @@ const RiskManager = () => {
   const [hours, setHours] = useState("12");
   const [minutes, setMinutes] = useState("00");
   const [isClicked, setIsClicked] = useState(false);
+  const [timing, setTiming] = useState("AM");
 
   const navigation = useNavigation();
 
@@ -49,6 +50,9 @@ const RiskManager = () => {
       tradingPlanId: tradingPlan.planId,
       metaApiAccountId: accountInfo.metaApiAccountId,
       userId: accountInfo.userId,
+      dailyResetTime: date,
+      dayInHour: hours,
+      dayInMinute: minutes,
     };
 
     const response = await createRiskRegister(body).then((res) => {
@@ -59,17 +63,32 @@ const RiskManager = () => {
       console.log(response.message);
       updateCompleted(true);
       navigation.navigate("SignIn");
-    }else {
+    } else {
       console.log(response.message);
     }
-    
   };
 
   const onChange = (e, selectedDate) => {
-    setDate(selectedDate);
-    setHours(date.getHours().toString());
-    setMinutes(date.getMinutes().toString());
-    setShowDate(false);
+    try {
+      const amOrPm = selectedDate
+        .toLocaleString("en-US", { hour12: true, hour: "numeric" })
+        .split(" ")[1];
+      setDate(selectedDate);
+      setHours(
+        selectedDate.getHours().toString() == "0"
+          ? "12"
+          : selectedDate.getHours().toString()
+      );
+      setMinutes(
+        selectedDate.getMinutes().toString() == "0"
+          ? "00"
+          : selectedDate.getMinutes().toString()
+      );
+      setTiming(amOrPm);
+      setShowDate(false);
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <View style={styles.baseContainer}>
@@ -212,17 +231,27 @@ const RiskManager = () => {
               value={date}
               mode="time"
               onChange={onChange}
-              is24Hour={true}
+              is24Hour={false}
             />
           )}
 
           <View style={styles.time}>
             <Text style={{ color: COLORS.gray, fontSize: SIZES.large }}>
-              {`${hours}:${minutes} AM`}
+              {`${hours}:${minutes} ${timing}`}
             </Text>
           </View>
         </TouchableOpacity>
       </View>
+
+      <Text
+        style={[
+          styles.text,
+          { marginTop: 30, fontStyle: "italic", color: COLORS.darkyellow },
+        ]}
+      >
+        Please note: If you do not provide a time, the default time would be set
+        to 12:00AM of your local time
+      </Text>
 
       <TouchableOpacity
         onPress={() => {

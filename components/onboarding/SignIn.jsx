@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  Alert,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -127,10 +128,14 @@ const SignIn = () => {
       </View>
 
       <TouchableOpacity
-        onPress={() => {
+        onPress={async () => {
           setIsClicked(true);
-          const user = login(email, password);
-          navigation.navigate("Home");
+          const response = await login(email, password);
+          if(response){
+            // navigation.navigate("Home");
+          }else{
+            console.log(response);
+          }
           setIsClicked(false);
         }}
         style={styles.button}

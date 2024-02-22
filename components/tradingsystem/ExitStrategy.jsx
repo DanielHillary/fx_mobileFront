@@ -6,6 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Alert,
+  Modal,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { COLORS, SIZES, FONT } from "../../constants";
@@ -16,6 +18,7 @@ import {
   registerLossExitStrategy,
   registerProfitExitStrategy,
 } from "../../api/tradingplanApi";
+import SuccessModal from "../modal/SuccessModal";
 
 const AlertModal = ({
   title,
@@ -69,6 +72,13 @@ const ExitStrategy = () => {
   const [isContinue, setIsContinue] = useState(false);
   const [accountInfo, setAccountInfo] = useState({});
   const [isCheckLevels, setIsCheckLevels] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [slLossValue, setSlLossValue] = useState(0);
+  const [slLossFocused, setSlLossFocused] = useState(false);
+
+  const setModalVisible = (value) => {
+    setIsModalVisible(value);
+  }
 
   const getAccount = async () => {
     const account = await AsyncStorage.getItem("accountInfo").then((res) => {
@@ -88,7 +98,6 @@ const ExitStrategy = () => {
   const account = route.params?.account || null;
   const tradingPlan = route.params?.tradingPlan || null;
 
-
   const checkEmptyLevels = () => {
     if (
       slValue != 0 &&
@@ -102,25 +111,18 @@ const ExitStrategy = () => {
   };
 
   const checkEmptyLevelsForProfit = () => {
-    if (
-      profitLotSize != 0 &&
-      tpValue != 0
-    ) {
+    if (profitLotSize != 0 && tpValue != 0) {
       return true;
     }
     return false;
   };
 
   const checkEmptyLevelsForLoss = () => {
-    if (
-      lossLotSize != 0 &&
-      slValue != 0
-    ) {
+    if (lossLotSize != 0 && slValue != 0) {
       return true;
     }
     return false;
   };
-
 
   const registerProfit = async () => {
     const body = {
@@ -132,17 +134,22 @@ const ExitStrategy = () => {
       lotSizePercentWhenTradeInProfit: profitLotSize,
       metaAccountId: account.metaApiAccountId,
       original: true,
-      slPlacementPercentIsForProfit: true,
+      slPlacementPercentIsForProfit: slLossValue == 0 ? true : false,
       slplacementPercentAfterProfit: slProfitValue == 0 ? 1 : slProfitValue,
       tradingPlanId: tradingPlan.planId,
     };
 
-    console.log(body);
-
     const response = await registerProfitExitStrategy(body).then((res) => {
       return res.data;
     });
-    console.log(response.message);
+    if (response.status) {
+      setIsModalVisible(true);
+      setProfitLotSize(0);
+      setSlProfitValue(0);
+      setTpValue(0);
+    } else {
+      Alert.alert("Transaction failed", response.message);
+    }
   };
 
   const registerLoss = async () => {
@@ -151,7 +158,7 @@ const ExitStrategy = () => {
       count: lossCount,
       accountId: account.accountId,
       inProfit: false,
-      lotSizePercentWhenTradeInLoss: profitLotSize,
+      lotSizePercentWhenTradeInLoss: lossLotSize,
       metaAccountId: account.metaApiAccountId,
       original: true,
       slPlacementPercentIsForProfit: false,
@@ -162,8 +169,13 @@ const ExitStrategy = () => {
     const response = await registerLossExitStrategy(body).then((res) => {
       return res.data;
     });
-
-    console.log(response.message);
+    if (response.status) {
+      setIsModalVisible(true);
+      setSlValue(0);
+      setLossLotSize(0)
+    } else {
+      Alert.alert("Transaction failed", response.message);
+    }
   };
 
   const registerExits = () => {
@@ -176,7 +188,10 @@ const ExitStrategy = () => {
     registerProfit();
     registerLoss();
 
-    navigation.navigate("RiskManager")
+    navigation.navigate("RiskManager",{
+      account: account,
+      tradingPlan: tradingPlan,
+    });
   };
 
   return (
@@ -189,7 +204,7 @@ const ExitStrategy = () => {
             fontSize: SIZES.xLarge + 4,
           }}
         >
-         Register Your Exit Strategy
+          Register Your Exit Strategy
         </Text>
         <Text style={[styles.text, { fontSize: SIZES.medium }]}>
           Your exit strategy is made up of exit levels. Exit levels are market
@@ -226,12 +241,11 @@ const ExitStrategy = () => {
           <Text style={{ color: COLORS.lightWhite }}>Add Profit Level</Text>
           <TouchableOpacity
             onPress={() => {
-              if(checkEmptyLevelsForProfit()){
+              if (checkEmptyLevelsForProfit()) {
                 setIsProfitAlert(true);
-              }else {
+              } else {
                 //Sound an alarm
               }
-              
             }}
           >
             <Image
@@ -313,6 +327,28 @@ const ExitStrategy = () => {
 
             <Text style={styles.levelText}>% of current profit.</Text>
           </View>
+
+          <View style={{ flexDirection: "row" }}>
+            <Text style={styles.levelText}>Reduce my risk size by </Text>
+            <TextInput
+              placeholder="0"
+              placeholderTextColor={COLORS.darkyellow}
+              style={[styles.email(slLossFocused), { marginLeft: 0 }]}
+              keyboardType="numeric"
+              numberOfLines={1}
+              onChangeText={(text) => {
+                setSlLossValue(text);
+              }}
+              value={slLossValue}
+              onFocus={() => {
+                setSlLossFocused(true);
+              }}
+              onBlur={() => {
+                setSlLossFocused(false);
+              }}
+            />
+            <Text style={styles.levelText}>% of my current risk.</Text>
+          </View>
         </View>
       </View>
 
@@ -321,12 +357,11 @@ const ExitStrategy = () => {
           <Text style={{ color: COLORS.lightWhite }}>Add Loss Level</Text>
           <TouchableOpacity
             onPress={() => {
-              if(checkEmptyLevelsForLoss()){
+              if (checkEmptyLevelsForLoss()) {
                 setIsLossAlert(true);
-              }else {
+              } else {
                 //Sound an alarm
               }
-              
             }}
           >
             <Image
@@ -445,37 +480,40 @@ const ExitStrategy = () => {
         }}
         handleConfirm={() => {
           // registerExits();
-          navigation.navigate("RiskManager")
-          setIsCheckLevels(false)
+          navigation.navigate("RiskManager");
+          setIsCheckLevels(false);
         }}
         isAlert={isCheckLevels}
       />
 
       <TouchableOpacity
         onPress={() => {
-          if ((lossCount == 0 && profitCount == 0)) {
-            if(!checkEmptyLevels()){
+          if (lossCount == 0 && profitCount == 0) {
+            if (!checkEmptyLevels()) {
               setIsCheckLevels(true);
-            }else{
+            } else {
               registerExits();
             }
-          }else {
-            if(lossCount == 0){
-              if(!checkEmptyLevelsForLoss()){
+          } else {
+            if (lossCount == 0) {
+              if (!checkEmptyLevelsForLoss()) {
                 setIsContinue(true);
-              }else{
+              } else {
                 setIsLossAlert(true);
               }
             }
-            if(profitCount == 0){
-              if(!checkEmptyLevelsForProfit()){
+            if (profitCount == 0) {
+              if (!checkEmptyLevelsForProfit()) {
                 setIsContinue(true);
-              }else{
+              } else {
                 setIsProfitAlert(true);
               }
             }
             // setIsContinue(true);
-            navigation.navigate("RiskManager", { account: account, tradingPlan: tradingPlan});
+            navigation.navigate("RiskManager", {
+              account: account,
+              tradingPlan: tradingPlan,
+            });
           }
         }}
         style={styles.buttonContinue}
@@ -486,6 +524,44 @@ const ExitStrategy = () => {
           <Text style={styles.buttonText}>Continue</Text>
         )}
       </TouchableOpacity>
+
+      <View style={{ flexDirection: "row", alignSelf: "center", marginBottom: 60,}}>
+        <Text
+          style={{
+            color: COLORS.lightWhite,
+            padding: SIZES.small - 3,
+          }}
+        >
+          Don't have an exit strategy yet?
+        </Text>
+        <TouchableOpacity
+          style={{ justifyContent: "center", alignItems: "center" }}
+          onPress={() => {
+            navigation.navigate("RiskManager");
+          }}
+        >
+          <Text
+            style={{
+              color: COLORS.darkyellow,
+              alignSelf: "center",
+              fontWeight: "500",
+            }}
+          >
+            Skip
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <Modal
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setIsModalVisible(false);
+        }}
+        animationType="slide"
+        transparent={true}
+      >
+        <SuccessModal setVisibility={setModalVisible} />
+      </Modal>
     </ScrollView>
   );
 };
@@ -524,7 +600,7 @@ const styles = StyleSheet.create({
   levelText: {
     color: COLORS.lightWhite,
     alignSelf: "flex-end",
-    fontSize: SIZES.small + 2,
+    fontSize: SIZES.small,
     marginBottom: 4,
     fontFamily: FONT.medium,
   },

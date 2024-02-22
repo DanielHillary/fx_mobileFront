@@ -55,10 +55,10 @@ const ActiveAlert = ({ empty, activeAlerts }) => {
         <Text style={styles.headerTitle}>Active Alerts</Text>
         <TouchableOpacity
           onPress={() => {
-            navigate("PriceAlert");
+              navigate("PriceAlert");
           }}
         >
-          <Text style={styles.headerBtn}>{isEmpty ? text1 : text2}</Text>
+          <Text style={styles.headerBtn}>{!isEmpty ? text1 : text2}</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.cardsContainer}>

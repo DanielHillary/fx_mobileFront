@@ -3,10 +3,12 @@ import {
   Text,
   View,
   Image,
+  Switch,
   FlatList,
+  Modal,
   TouchableOpacity,
 } from "react-native";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import switchIcon from "../../assets/icons/switch.png";
 import { COLORS, FONT, SIZES } from "../../constants";
 import ProgressBar from "../../components/ProgressBar";
@@ -15,6 +17,8 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../context/AuthContext";
 import AwesomeAlert from "react-native-awesome-alerts";
+import StrictModal from "../../components/modal/StrictModal";
+import { updateAccountMode } from "../../api/accountApi";
 
 const AlertModal = ({
   title,
@@ -75,20 +79,24 @@ const Options = ({ image, option, nav, checkOut }) => {
 };
 
 const AccountAction = () => {
+  const navigation = useNavigation();
   return (
-    <View
+    <TouchableOpacity
       style={{
         backgroundColor: "#212121",
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        marginTop: 20,
+        marginTop: 35,
         borderRadius: 10,
         borderColor: "#B89F1B",
         borderWidth: 0.5,
         width: "95%",
         gap: 15,
         padding: 7,
+      }}
+      onPress={() => {
+        navigation.navigate("AddNewAccount");
       }}
     >
       <Image
@@ -120,22 +128,54 @@ const AccountAction = () => {
             width: 230,
           }}
         >
-          It is a long established fact that a reader will be distracted by the
-          readable content of a page when looking at its layout.
+          Please do well to add a real account for you to have access to the
+          features we provide. Kindly click to continue to register your
+          account.
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 const Profile = () => {
   const [isComplete, setIsComplete] = useState(true);
   const [checkSignOut, setCheckSignOut] = useState(false);
   const [account, setAccount] = useState({});
+  const [isStrict, setIsStrict] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState();
+  const [isSigned, setIsSigned] = useState(false);
 
-  const { accountDetails, userInfo, logout } = useContext(AuthContext);
+  const { accountDetails, userInfo, logout, updateAccount } =
+    useContext(AuthContext);
+
+  const setVisibility = (value) => {
+    setIsModalVisible(value);
+  };
 
   const checkOut = (value) => {
     setCheckSignOut(value);
+  };
+
+  const updateStrict = (value) => {
+    setIsStrict(!value);
+  };
+
+  useEffect(() => {
+    setIsStrict(accountDetails.isStrict);
+    setIsModalVisible(false);
+  }, [accountDetails]);
+
+  const updateAccountInfo = async (value) => {
+    const response = await updateAccountMode(
+      accountDetails.accountId,
+      value
+    ).then((res) => {
+      return res.data;
+    });
+    if (response.status) {
+      setIsModalVisible(false);
+    } else {
+      console.log(response.message);
+    }
   };
 
   return (
@@ -175,22 +215,50 @@ const Profile = () => {
         </View>
       </View>
 
-      {isComplete ? (
+      {accountDetails.accountName != "PsyDStarter" ? (
         <ProgressBar status={accountDetails.completionStatus} />
       ) : (
         <AccountAction />
       )}
 
       <View style={{ marginTop: 30 }}>
-        <Text
+        <View
           style={{
-            fontFamily: FONT.medium,
-            fontSize: 16,
-            color: COLORS.lightWhite,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          Account balance
-        </Text>
+          <Text
+            style={{
+              fontFamily: FONT.medium,
+              fontSize: 16,
+              color: COLORS.lightWhite,
+            }}
+          >
+            Account balance
+          </Text>
+          {accountDetails.accountName != "PsyDStarter" && (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text style={styles.mode}>
+                {!isStrict ? "Strict" : "Flexible"}
+              </Text>
+              <Switch
+                value={!isStrict}
+                onValueChange={() => {
+                  setIsStrict((prev) => !prev);
+                  if (isStrict) {
+                    setIsModalVisible(true);
+                  } else {
+                    updateAccountInfo(false);
+                  }
+                }}
+                trackColor={{ false: "black" }}
+                thumbColor={"green"}
+              />
+            </View>
+          )}
+        </View>
         <View
           style={{
             marginTop: 10,
@@ -269,7 +337,7 @@ const Profile = () => {
           <Options
             image={images.reporting}
             option={"Account Report"}
-            nav={"TradeJournal"}
+            nav={"AccountReport"}
           />
           <Options
             image={images.upgrade}
@@ -288,7 +356,9 @@ const Profile = () => {
           isAlert={checkSignOut}
           showCancelButton={true}
           showConfirmButton={true}
-          message={"Are you sure you want to log out? You would have to log in again"}
+          message={
+            "Are you sure you want to log out? You would have to log in again"
+          }
           handleCancel={() => {
             setCheckSignOut(false);
           }}
@@ -298,6 +368,21 @@ const Profile = () => {
           }}
         />
       </View>
+      <Modal
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setIsModalVisible(false);
+        }}
+        animationType="slide"
+        transparent={true}
+      >
+        <StrictModal
+          setVisibility={setVisibility}
+          updateSigned={updateStrict}
+          updateAccount={updateAccountInfo}
+          account={accountDetails}
+        />
+      </Modal>
     </ScrollView>
   );
 };
@@ -310,7 +395,6 @@ const images = {
   upgrade: require("../../assets/icons/upgrade.png"),
   logout: require("../../assets/icons/logout1.png"),
 };
-
 
 export default Profile;
 
@@ -354,4 +438,9 @@ const styles = StyleSheet.create({
     width: 25,
     alignSelf: "flex-start",
   },
+  mode: {
+    color: COLORS.white,
+    fontSize: SIZES.medium,
+    fontFamily: FONT.bold
+  }
 });

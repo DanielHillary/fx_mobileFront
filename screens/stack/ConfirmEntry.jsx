@@ -5,11 +5,14 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { COLORS, FONT, SIZES } from "../../constants";
 import { getEntryTechniques } from "../../api/tradingplanApi";
 import { AuthContext } from "../../context/AuthContext";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { confirmEntries } from "../../api/placeTradeApi";
 
 const Options = ({ option, updateList }) => {
   const [entry, setEntry] = useState(false);
@@ -44,8 +47,15 @@ const Options = ({ option, updateList }) => {
 const ConfirmEntry = () => {
   const [entries, setEntries] = useState([]);
   const [chosen, setChosen] = useState([]);
+  const [entryNum, setEntryNum] = useState(0);
 
   const { accountDetails } = useContext(AuthContext);
+
+  const navigation = useNavigation();
+
+  const route = useRoute();
+
+  let details = route.params?.tradeDetail || null;
 
   const getEntryTechs = async () => {
     const response = await getEntryTechniques(accountDetails.accountId).then(
@@ -55,6 +65,9 @@ const ConfirmEntry = () => {
     );
     if (response.status) {
       setEntries(response.data);
+      setEntryNum(response.data.length);
+    }else{
+      console.log(response.message);
     }
   };
 
@@ -78,13 +91,26 @@ const ConfirmEntry = () => {
     });
   };
 
-  const confirmEntries = async () => {
-    console.log(chosen);
+  const confirmEntry = async () => {
+    if(chosen.length == 0){
+      Alert.alert("Empty", "You haven't selected any entries yet");
+    }else{
+      let percentEntry = 0;
+      if (entryNum !== 0) {
+        percentEntry = (chosen.length / entryNum) * 100;
+      }
+      const response = await confirmEntries(details, percentEntry).then((res) => {
+        return res;
+      })
+      if(response.status){
+        Alert.alert("Successful", "Successfully updated your trade");
+        navigation.goBack();
+      }
+      console.log(chosen);
+    }
+    
   };
 
-  const setSelect = () => {
-    setSelectAll(false);
-  };
   return (
     <ScrollView style={styles.base}>
       <Text style={styles.text}>
@@ -101,7 +127,7 @@ const ConfirmEntry = () => {
 
       <TouchableOpacity
         onPress={() => {
-          confirmEntries();
+          confirmEntry();
         }}
         style={styles.button}
       >

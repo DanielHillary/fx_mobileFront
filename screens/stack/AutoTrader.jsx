@@ -7,6 +7,8 @@ import {
   TextInput,
   ActivityIndicator,
   TouchableOpacity,
+  Alert,
+  Modal,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { COLORS, FONT, SIZES } from "../../constants";
@@ -18,6 +20,8 @@ import { executeAdvancedOrder, executeTrade } from "../../api/placeTradeApi";
 import Toast from "react-native-toast-message";
 import { AuthContext } from "../../context/AuthContext";
 import { getAllUserAccounts } from "../../api/accountApi";
+import SuccessModal from "../../components/modal/SuccessModal";
+import ConfirmStrategyModal from "../../components/modal/ConfirmStrategyModal";
 
 const DownArrow = () => {
   return (
@@ -30,12 +34,7 @@ const DownArrow = () => {
   );
 };
 
-const Increment = ({
-  item,
-  getTotalCount,
-  decreaseTotalCount,
-  isPart,
-}) => {
+const Increment = ({ item, getTotalCount, decreaseTotalCount, isPart }) => {
   const [numOfTrades, setNumOfTrades] = useState(0);
 
   const incrementCounter = () => {
@@ -180,20 +179,34 @@ const AutoTrader = () => {
   const [takeProfit, setTakeProfit] = useState("");
   const [entryPrice, setEntryPrice] = useState("");
   const [userAccounts, setUserAccounts] = useState([]);
-  
+  const [isPressed, setIsPressed] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isEntryModalVisible, setIsEntryModalVisible] = useState(false);
+
+  const setModalVisible = (value) => {
+    setIsModalVisible(value);
+  };
+
+  const setEntryModalVisible = (value) => {
+    setIsEntryModalVisible(value);
+  };
+
   const { accountDetails, userInfo } = useContext(AuthContext);
 
-
-  const getUserAccounts = async() => {
-    const response = await getAllUserAccounts(accountDetails.userId).then((res) => {
-      return res.data;
-    })
-    if(response.status){
-      setUserAccounts(response.data.accountList);
-    }else {
-      console.log(response.message);
+  const getUserAccounts = async () => {
+    if (accountDetails.accountName != "PsyDStarter") {
+      const response = await getAllUserAccounts(accountDetails.userId).then(
+        (res) => {
+          return res.data;
+        }
+      );
+      if (response.status) {
+        setUserAccounts(response.data.accountList);
+      } else {
+        console.log(response.message);
+      }
     }
-  }
+  };
 
   const [acctList, setAcctList] = useState([]);
 
@@ -207,9 +220,9 @@ const AutoTrader = () => {
           accountId: id,
           tradeAmount: amount,
         };
-        console.log("Is active")
+        console.log("Is active");
       } else {
-        const newArray = acctList.filter(obj => obj.accountId !== id);
+        const newArray = acctList.filter((obj) => obj.accountId !== id);
         console.log("Is not active");
         setAcctList(newArray);
       }
@@ -223,7 +236,7 @@ const AutoTrader = () => {
         setAcctList((prevList) => [...prevList, newObj]);
       }
     }
-  }
+  };
 
   const totalCounter = (id, value, isPart) => {
     updateArray(id, value + 1, isPart);
@@ -246,47 +259,61 @@ const AutoTrader = () => {
   const details = route.params?.data || null;
   // console.log(details);
 
-  const placeTradeOrder = async () => {
-    const tradeOrder = {
-      assetCategory: details.assetCategory,
-      comments: "title",
-      currency: details.currency,
-      lotSize: details.lotSize,
-      metaAccountId: account.metaApiAccountId,
-      numberOfTradesToExecute: entry,
-      stopLossPrice: details.stopLossPrice,
-      strategy: "SF",
-      symbol: details.asset,
-      takeProfitPrice: details.takeProfitPrice,
-      tradeType: details.tradeType == "BUY" ? "BUY INSTANT" : "SELL INSTANT",
-      tradingPlanId: account.planId,
-      userAccountId: account.accountId,
-      actDetails: acctList,
-      userId: userInfo.user.userId,
-    };
+  const placeTradeOrder = async (
+    ignoreEntries,
+    confirmEntries,
+    percentEntry
+  ) => {
+    setIsClicked(true);
+    try {
+      const tradeOrder = {
+        assetCategory: details.assetCategory,
+        comments: "title",
+        currency: details.currency,
+        lotSize: isPressed ? details.recommendedLotSize : details.lotSize,
+        metaAccountId: account.metaApiAccountId,
+        numberOfTradesToExecute: entry,
+        stopLossPrice: details.stopLossPrice,
+        strategy: "SF",
+        symbol: details.asset,
+        assetAbbrev: details.assetAbbrev,
+        takeProfitPrice: details.takeProfitPrice,
+        tradeType: details.tradeType == "BUY" ? "BUY INSTANT" : "SELL INSTANT",
+        tradingPlanId: account.planId,
+        userAccountId: account.accountId,
+        actDetails: acctList,
+        userId: userInfo.user.userId,
+        ignoreEntries: ignoreEntries,
+        confirmEntries: confirmEntries,
+        entryPercent: percentEntry,
+      };
 
-    console.log(tradeOrder);
+      console.log(tradeOrder);
 
-    const response = await executeAdvancedOrder(tradeOrder).then((res) => {
-      return res.data;
-    });
-
-    setIsClicked(false);
-    if (response.status) {
-      Toast.show({
-        type: "success",
-        text1: "Successful Trade",
-        text2: "Go to Dashboard to see your trades",
+      const response = await executeAdvancedOrder(tradeOrder).then((res) => {
+        return res.data;
       });
-    } else {
-      setAlert(true);
-      console.log(response.message);
-      // return (
-      //   <View>
-      //     <Text>Something went wrong</Text>
-      //   </View>
-      // );
+
+      setIsClicked(false);
+      if (response.status) {
+        // Toast.show({
+        //   type: "success",
+        //   text1: "Successful Trade",
+        //   text2: "Go to Dashboard to see your trades",
+        // });
+        setIsModalVisible(true);
+      } else {
+        setAlert(true);
+        console.log(response.message);
+        Alert.alert(
+          "Failed transaction",
+          "Something went wrong, please try again."
+        );
+      }
+    } catch (error) {
+      console.log(error.message);
     }
+
     // console.log(response);
   };
 
@@ -341,7 +368,7 @@ const AutoTrader = () => {
             backgroundColor: "#111",
             borderColor: COLORS.darkyellow,
             height: 40,
-            zIndex: -1
+            zIndex: -1,
           }}
           dropDownDirection="bottom"
           disableBorderRadius={false}
@@ -470,67 +497,165 @@ const AutoTrader = () => {
           />
         </View>
       </View>
-      <Text style={[styles.text, { marginLeft: 30, marginTop: SIZES.medium }]}>
-        Choose trading account(s)
-      </Text>
-      <Text
-        style={{
-          color: COLORS.lightWhite,
-          textAlign: "center",
-          fontSize: SIZES.xSmall,
-          paddingHorizontal: SIZES.medium,
-          marginVertical: SIZES.medium,
-          marginTop: SIZES.small,
-        }}
-      >
-        Attention!!: Please note that we would open each trade using the
-        recommended lotSize for each account based on your risk management plan
-      </Text>
-      <FlatList
-        data={userAccounts}
-        renderItem={({ item }) => (
-          <Account
-            item={item}
-            totalCount={totalCounter}
-            decreaserCount={decreaser}
-            updateList={updateArray}
-          />
-        )}
-        keyExtractor={(item) => item?.accountId}
-        contentContainerStyle={{ rowGap: SIZES.medium }}
-        vertical
-        showsHorizontalScrollIndicator={false}
-      />
+      {accountDetails.accountName != "PsyDStarter" && (
+        <Text
+          style={[styles.text, { marginLeft: 30, marginTop: SIZES.medium }]}
+        >
+          Choose trading account(s)
+        </Text>
+      )}
+      {accountDetails.accountName != "PsyDStarter" && (
+        <Text
+          style={{
+            color: COLORS.lightWhite,
+            textAlign: "center",
+            fontSize: SIZES.xSmall,
+            paddingHorizontal: SIZES.medium,
+            marginVertical: SIZES.medium,
+            marginTop: SIZES.small,
+          }}
+        >
+          Attention!!: Please note that if you do not specify a volume, we would
+          open each trade using the recommended volume for each account based on
+          your risk management plan
+        </Text>
+      )}
+      {userAccounts?.map((item) => (
+        <Account
+          item={item}
+          key={item.accountId}
+          totalCount={totalCounter}
+          decreaserCount={decreaser}
+          updateList={updateArray}
+        />
+      ))}
+      {accountDetails.accountName != "PsyDStarter" ? (
+        <Text
+          style={{
+            color: COLORS.lightWhite,
+            textAlign: "center",
+            fontSize: SIZES.xSmall,
+            paddingHorizontal: SIZES.medium,
+            marginVertical: SIZES.medium,
+            marginTop: SIZES.small,
+          }}
+        >
+          Attention!!: Please note that the trade will be executed at market
+          conditions, difference with the request price may be significant.
+        </Text>
+      ) : (
+        <View>
+          <Text
+            style={{
+              color: COLORS.lightWhite,
+              textAlign: "center",
+              fontSize: SIZES.medium - 5,
+              paddingHorizontal: SIZES.medium,
+              marginVertical: SIZES.medium,
+              marginTop: SIZES.large * 2,
+            }}
+          >
+            Please register a real trading account in order able to use this
+            feature and place trades.
+          </Text>
 
-      <Text
-        style={{
-          color: COLORS.lightWhite,
-          textAlign: "center",
-          fontSize: SIZES.xSmall,
-          paddingHorizontal: SIZES.medium,
-          marginVertical: SIZES.medium,
-          marginTop: SIZES.small,
-        }}
-      >
-        Attention!!: Please note that the trade will be executed at market
-        conditions, difference with the request price may be significant.
-      </Text>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("AddNewAccount");
+            }}
+            style={styles.button}
+          >
+            {isClicked ? (
+              <ActivityIndicator size="large" colors={"black"} />
+            ) : (
+              <Text style={styles.buttonText}>Register an account</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
 
-      <TouchableOpacity
-        onPress={() => {
-          //   navigate("AutoTrader");
-          setIsClicked(true);
-          placeTradeOrder();
-        }}
-        style={styles.button}
-      >
-        {isClicked ? (
-          <ActivityIndicator size="large" colors={"black"} />
-        ) : (
-          <Text style={styles.buttonText}>Place Order</Text>
-        )}
-      </TouchableOpacity>
+      {accountDetails.accountName != "PsyDStarter" && (
+        <View
+          style={{ flexDirection: "row", alignItems: "center", marginTop: 30 }}
+        >
+          <TouchableOpacity
+            onPress={() => setIsPressed(!isPressed)}
+            style={{
+              marginLeft: 15,
+              marginTop: 10,
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <View>
+              {isPressed ? (
+                <Image
+                  source={require("../../assets/icons/checkbox.png")}
+                  resizeMethod="scale"
+                  style={styles.image}
+                />
+              ) : (
+                <View style={styles.checkbox} />
+              )}
+            </View>
+
+            <View style={{ marginTop: 3 }}>
+              <Text
+                style={[styles.text, { marginLeft: 10, fontSize: SIZES.small }]}
+              >
+                Use Recommended LotSize/Volume.
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {accountDetails.accountName != "PsyDStarter" && (
+        <TouchableOpacity
+          onPress={() => {
+            if(acctList.length === 0){
+              Alert.alert("","Please choose an account");
+            }else if(acctList[0].tradeAmount === 0){
+              Alert.alert("","Please choose the number of positions to place");
+            }else{
+              setIsEntryModalVisible(true);
+            }
+              
+          }}
+          style={styles.button}
+        >
+          {isClicked ? (
+            <ActivityIndicator size="large" colors={"black"} />
+          ) : (
+            <Text style={styles.buttonText}>Place Order</Text>
+          )}
+        </TouchableOpacity>
+      )}
       <Toast />
+      <Modal
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setIsModalVisible(false);
+        }}
+        animationType="slide"
+        transparent={true}
+      >
+        <SuccessModal setVisibility={setModalVisible} />
+      </Modal>
+
+      <Modal
+        visible={isEntryModalVisible}
+        onRequestClose={() => {
+          setIsEntryModalVisible(false);
+        }}
+        animationType="slide"
+        transparent={true}
+      >
+        <ConfirmStrategyModal
+          setVisibility={setEntryModalVisible}
+          openTrade={placeTradeOrder}
+        />
+      </Modal>
     </ScrollView>
   );
 };
@@ -548,12 +673,11 @@ const styles = StyleSheet.create({
   },
   asset: {
     borderColor: COLORS.darkyellow,
-    borderWidth: 0.2,
-    borderRadius: SIZES.xSmall - 5,
+    borderBottomWidth: 1,
     height: 30,
     justifyContent: "center",
     alignItems: "center",
-    width: "auto",
+    width: 170,
   },
   inputcontainer: {
     flex: 1,

@@ -12,7 +12,7 @@ import { AuthContext } from "../context/AuthContext";
 
 const CustomDrawer = (props) => {
 
-  const {logout} = useContext(AuthContext);
+  const {logout, userInfo, accountDetails} = useContext(AuthContext);
 
   return (
     <View style={{ flex: 1 }}>
@@ -31,7 +31,7 @@ const CustomDrawer = (props) => {
               style={styles.image}
             />
             <View style={{ padding: 10 }}>
-              <Text style={styles.text}>Daniel Ibeto</Text>
+              <Text style={styles.text}>{userInfo.user.firstName} {userInfo.user.lastName}</Text>
               <Text
                 style={{
                   fontSize: SIZES.small,
@@ -39,7 +39,7 @@ const CustomDrawer = (props) => {
                   fontFamily: FONT.regular,
                 }}
               >
-                232455454
+               {userInfo.user.defaultAccountNumber}
               </Text>
             </View>
           </View>

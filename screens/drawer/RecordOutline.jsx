@@ -21,8 +21,9 @@ import {
   loadThemeCustomFont,
 } from "../../constants/theme";
 import { useRoute } from "@react-navigation/native";
+import { getTradeNotes } from "../../api/journalApi";
 
-const RecordOutline = () => {
+const RecordOutline = ({ notes }) => {
   useEffect(() => {
     loadCustomFont();
     loadThemeCustomFont();
@@ -164,7 +165,7 @@ const RecordOutline = () => {
               <View>
                 <Text style={[styles.info, { marginLeft: 30 }]}>Duration</Text>
                 <Text style={[styles.infodetail, { marginLeft: 30 }]}>
-                  {details.tradeDuration} {details.tradeInMinutes ? "mins" : "hrs"}
+                  {details.tradeDuration} {details.tradeInMinutes ? "mins" : details.tradeInSeconds ? "sec" : "hrs"}
                 </Text>
               </View>
             </View>
@@ -217,9 +218,7 @@ const RecordOutline = () => {
             <Text style={styles.note}>Trade Notes</Text>
             <View style={styles.commentContainer}>
               <Text style={{ color: COLORS.lightWhite, padding: 2 }}>
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry. Lorem Ipsum has been the industry's standard dummy
-                text ever since the 1500s,
+                {notes}
               </Text>
               {/* <TouchableOpacity>
                 <Image
@@ -304,8 +303,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   }),
   commentContainer: {
-    width: "auto",
-    height: 100,
+    width: "90%",
+    height: "auto",
     padding: SIZES.medium - 5,
     backgroundColor: "#111",
     borderRadius: SIZES.xSmall,
@@ -331,9 +330,8 @@ const styles = StyleSheet.create({
   note: {
     color: COLORS.white,
     fontSize: SIZES.medium,
-    paddingLeft: 15,
-    paddingBottom: 5,
-    marginTop: 10,
+    alignSelf: "center",
+    padding: SIZES.small,
   },
   logImage: {
     width: "10%",

@@ -37,27 +37,11 @@ const Diamond = () => {
   const data = [
     {
       stat: true,
-      detail: "Risk Analyzer",
+      detail: "Unlimited price alerts",
     },
     {
       stat: true,
-      detail: "Open Single Trade",
-    },
-    {
-      stat: true,
-      detail: "Trade Appraisal",
-    },
-    {
-      stat: true,
-      detail: "Alerts: Push Notification, email",
-    },
-    {
-      stat: false,
-      detail: "Monthly account reporting",
-    },
-    {
-      stat: false,
-      detail: "Automatic Trade journaling",
+      detail: "Alert options: Calls, SMS",
     },
   ];
 
@@ -65,6 +49,10 @@ const Diamond = () => {
     <View style={styles.container}>
       <View>
         <Text style={styles.price}>$20/Month</Text>
+      </View>
+
+      <View style={{marginTop: SIZES.medium, margin: SIZES.small}}>
+        <Text style={styles.plus}>Everything from Gold package Plus...</Text>
       </View>
 
       <FlatList
@@ -106,6 +94,12 @@ const styles = StyleSheet.create({
     width: 300,
     marginTop: 6,
     alignSelf: "center",
+  },
+  plus: {
+    color: COLORS.darkyellow,
+    fontFamily: FONT.regular,
+    fontSize: SIZES.small,
+    fontStyle: 'italic'
   },
   buttonText: {
     flex: 1,

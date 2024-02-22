@@ -19,7 +19,11 @@ const NoTradePlan = ({ accountInfo }) => {
       <EmptyList message={"No trading plan registered"} />
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate("SetUpTradingPlan", { account: accountInfo });
+          if (accountInfo.accountName != "PsyDStarter") {
+            navigation.navigate("SetUpTradingPlan", { account: accountInfo });
+          }else{
+            navigation.navigate("AddNewAccount");
+          }
         }}
         style={styles.buttonContinue}
       >

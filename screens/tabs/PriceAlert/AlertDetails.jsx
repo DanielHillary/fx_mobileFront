@@ -10,6 +10,43 @@ import { COLORS, FONT, SIZES } from "../../../constants";
 import React, { useState } from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { disableAsset } from "../../../api/priceAlertApi";
+import AwesomeAlert from "react-native-awesome-alerts";
+
+const AlertModal = ({
+  title,
+  isAlert,
+  handleConfirm,
+  handleCancel,
+  showCancelButton,
+  showConfirmButton,
+  message,
+}) => {
+  return (
+    <View>
+      <AwesomeAlert
+        show={isAlert}
+        title={"Please check"}
+        titleStyle={styles.title}
+        contentContainerStyle={styles.alertContainer}
+        showConfirmButton={showConfirmButton}
+        showCancelButton={showCancelButton}
+        cancelButtonColor={COLORS.darkyellow}
+        cancelButtonTextStyle={styles.alertText}
+        cancelText="Cancel"
+        confirmButtonColor={COLORS.darkyellow}
+        confirmButtonTextStyle={styles.alertText}
+        confirmText="Continue"
+        onCancelPressed={handleCancel}
+        onConfirmPressed={handleConfirm}
+        closeOnTouchOutside={true}
+        onDismiss={handleCancel}
+        message={message}
+        messageStyle={styles.alertMessage}
+      />
+    </View>
+  );
+};
 
 const AlertDetails = () => {
   const [asset, setAsset] = useState("");
@@ -20,13 +57,35 @@ const AlertDetails = () => {
   const [isAssetOpen, setIsAssetOpen] = useState(false);
   const [currentValue, setCurrentValue] = useState();
   const [currentAsset, setCurrentAsset] = useState();
+  const [check, setCheck] = useState(false);
 
   const route = useRoute();
 
+  const navigation = useNavigation();
+
   const alert = route.params?.alertDetails || null;
+  const history = route.params?.fromHistory || null;
+
+  const disableAlert = async () => {
+    try {
+      const response = await disableAsset(alert.id).then((res) => {
+        return res.data;
+      });
+      if (response.status) {
+        navigation.goBack();
+      } else {
+        console.log(response.message);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <View style={styles.base}>
+      <Text style={[styles.text, { alignSelf: "flex-end" }]}>
+        {alert.openTime}
+      </Text>
       <View style={{ flexDirection: "row", marginTop: 15 }}>
         <Text style={[styles.text, { marginTop: 6 }]}>When the price of</Text>
         <Text style={styles.asset}>{`  ${alert.symbol}`}</Text>
@@ -86,7 +145,7 @@ const AlertDetails = () => {
       {/* conditionally render this guy based on the alert details */}
 
       <View style={{ flexDirection: "row" }}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => setIsPressed(!isPressed)}
           style={{ marginLeft: 20, marginTop: 10 }}
         >
@@ -101,24 +160,39 @@ const AlertDetails = () => {
               <View style={styles.checkbox} />
             )}
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <View style={{ marginTop: 40 }}>
+        {/* <View style={{ marginTop: 40 }}>
           <Text
             style={[styles.text, { marginLeft: 10, fontSize: SIZES.small }]}
           >
             Disable this alert once it triggers.
           </Text>
-        </View>
+        </View> */}
       </View>
-      <TouchableOpacity
+      {!history && <TouchableOpacity
         onPress={() => {
-          //   navigate("AutoTrader");
+          setCheck(true);
         }}
         style={styles.button}
       >
         <Text style={styles.buttonText}>Disable this alert</Text>
-      </TouchableOpacity>
+      </TouchableOpacity>}
+      <AlertModal
+        isAlert={check}
+        showCancelButton={true}
+        showConfirmButton={true}
+        message={
+          "Alert will be removed from watchlist. Are you sure you want to diable this alert?"
+        }
+        handleCancel={() => {
+          setCheck(false);
+        }}
+        handleConfirm={() => {
+          setCheck(false);
+          disableAlert();
+        }}
+      />
     </View>
   );
 };
@@ -135,7 +209,7 @@ const styles = StyleSheet.create({
     color: COLORS.darkyellow,
     fontFamily: FONT.bold,
     fontSize: SIZES.medium,
-    marginTop: 7
+    marginTop: 7,
   },
   text: {
     color: COLORS.lightWhite,
@@ -168,6 +242,25 @@ const styles = StyleSheet.create({
     height: 40,
     width: 160,
     alignSelf: "center",
+  },
+  optionText: {
+    fontFamily: FONT.regular,
+    color: COLORS.white,
+    fontSize: SIZES.medium + 3,
+    margin: 5,
+  },
+  alertMessage: {
+    color: COLORS.white,
+    textAlign: "center",
+  },
+  alertText: {
+    color: "black",
+    fontFamily: FONT.bold,
+  },
+  alertContainer: {
+    backgroundColor: "black",
+    borderRadius: SIZES.medium,
+    width: 200,
   },
   categoryText: {
     flex: 1,
