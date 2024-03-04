@@ -49,7 +49,7 @@ const Remark = ({ status, hasTradingPlan, remarks }) => {
           </Text>
         )}
       </View>
-      <View>
+      <View style={{marginBottom: 40}}>
         {status ? (
           <Text style={[styles.text, { marginHorizontal: 30 }]}>
             We analyzed the parameters you provided against your trading plan
@@ -82,7 +82,6 @@ const TradeReport = () => {
     );
     if (response.status) {
       setRemarks(response.data);
-      console.log(response.data);
     } else {
       console.log(response.message);
     }

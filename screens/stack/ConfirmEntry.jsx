@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  Modal,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { COLORS, FONT, SIZES } from "../../constants";
@@ -13,6 +14,7 @@ import { getEntryTechniques } from "../../api/tradingplanApi";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { confirmEntries } from "../../api/placeTradeApi";
+import SuccessModal from "../../components/modal/SuccessModal";
 
 const Options = ({ option, updateList }) => {
   const [entry, setEntry] = useState(false);
@@ -48,6 +50,7 @@ const ConfirmEntry = () => {
   const [entries, setEntries] = useState([]);
   const [chosen, setChosen] = useState([]);
   const [entryNum, setEntryNum] = useState(0);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const { accountDetails } = useContext(AuthContext);
 
@@ -56,6 +59,12 @@ const ConfirmEntry = () => {
   const route = useRoute();
 
   let details = route.params?.tradeDetail || null;
+
+
+  const setVisibility = (val) => {
+    setIsModalVisible(val);
+    navigation.goBack();
+  }
 
   const getEntryTechs = async () => {
     const response = await getEntryTechniques(accountDetails.accountId).then(
@@ -103,10 +112,8 @@ const ConfirmEntry = () => {
         return res;
       })
       if(response.status){
-        Alert.alert("Successful", "Successfully updated your trade");
-        navigation.goBack();
+        setIsModalVisible(true);
       }
-      console.log(chosen);
     }
     
   };
@@ -133,6 +140,17 @@ const ConfirmEntry = () => {
       >
         <Text style={styles.buttonText}>Confirm Entries</Text>
       </TouchableOpacity>
+
+      <Modal
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setIsModalVisible(false);
+        }}
+        animationType="slide"
+        transparent={true}
+      >
+        <SuccessModal setVisibility={setVisibility} />
+      </Modal>
     </ScrollView>
   );
 };

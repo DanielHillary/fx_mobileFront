@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [accountDetails, setAccountDetails] = useState(null);
   const [isCompletePlan, setIsCompletePlan] = useState(false);
   const [hasNotification, setHasNotification] = useState(false);
+  const [isPaidAccount, setIsPaidAccount] = useState(true);
 
   const requestUserPermission = async () => {
     if (!messaging().isDeviceRegisteredForRemoteMessages) {
@@ -55,6 +56,7 @@ export const AuthProvider = ({ children }) => {
       return response
     } catch (error) {
       console.log(error.response.status);
+      setIsLoading(false);
       Alert.alert("Invalid credentials", "Please enter valid username and password");
     }
   };
@@ -95,6 +97,10 @@ export const AuthProvider = ({ children }) => {
     setAccountDetails(account);
   };
 
+  const updatePaymentStatus = (value) => {
+    setIsPaidAccount(value);
+  }
+
   const updateCompleted = (value) => {
     setIsCompletePlan(value);
   };
@@ -111,9 +117,11 @@ export const AuthProvider = ({ children }) => {
         isLoading,
         userToken,
         userInfo,
+        isPaidAccount,
         updateAccount,
         updateCompleted,
         updateNotification,
+        updatePaymentStatus,
         isCompletePlan,
         accountDetails,
         hasNotification,

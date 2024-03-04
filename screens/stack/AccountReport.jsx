@@ -37,6 +37,7 @@ const AccountReport = () => {
   const [enoughTrades, setEnoughTrades] = useState(false);
   const [buys, setBuys] = useState(0.56);
   const [sells, setSells] = useState(0.45);
+  const [paid, setPaid] = useState(true);
 
   const { accountDetails } = useContext(AuthContext);
   const navigation = useNavigation();
@@ -88,30 +89,34 @@ const AccountReport = () => {
   };
 
   const getWeekOrMonthReport = async (range) => {
-    setIsLoading(true);
-    try {
-      const response = await getWeeklyReport(
-        accountDetails.accountId,
-        range
-      ).then((res) => {
-        return res.data;
-      });
-      if (response.status) {
-        setReport(response.data);
-        setIsProfit(response.data.accountChangeIsPositive);
-        setAssets(response.data.tradedAssets);
-        setFrequency(response.data.tradeFrequency);
-        setSells(response.data.sellPercent);
-        setBuys(response.data.buyPercent);
+    if (accountDetails.paidAccount) {
+      setIsLoading(true);
+      try {
+        const response = await getWeeklyReport(
+          accountDetails.accountId,
+          range
+        ).then((res) => {
+          return res.data;
+        });
+        if (response.status) {
+          setReport(response.data);
+          setIsProfit(response.data.accountChangeIsPositive);
+          setAssets(response.data.tradedAssets);
+          setFrequency(response.data.tradeFrequency);
+          setSells(response.data.sellPercent);
+          setBuys(response.data.buyPercent);
+          setIsLoading(false);
+        } else {
+          setEnoughTrades(true);
+          setIsLoading(false);
+          console.log(response.message);
+        }
+      } catch (error) {
         setIsLoading(false);
-      } else {
-        setEnoughTrades(true);
-        setIsLoading(false);
-        console.log(response.message);
+        console.log(error);
       }
-    } catch (error) {
-      setIsLoading(false);
-      console.log(error);
+    } else {
+      setPaid(false);
     }
   };
 
@@ -120,6 +125,31 @@ const AccountReport = () => {
     getWeekOrMonthReport(7);
     setIsLoading(false);
   }, []);
+
+
+  if(!paid){
+    return (
+      <View style={styles.baseContainer}>
+        <Text style={styles.introText}>AccountReport</Text>
+        <View style={{ padding: SIZES.medium, marginTop: SIZES.xLarge }}>
+          <Text style={styles.note}>
+            {" "}
+            Unfortunately, you cannot view you account analysis until you have renewed your subscription. 
+            Kindly upgrade your account to continue using this feature.
+          </Text>
+
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("Pricing");
+            }}
+            style={styles.button}
+          >
+            <Text style={styles.buttonText}>Upgrade Account.</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    )
+  }
 
   if (isLoading) {
     return (
@@ -346,23 +376,21 @@ const AccountReport = () => {
           <Text style={styles.note}>
             On average, you are loosing{" "}
             <Text style={styles.info}>${report.avgLosingTrades}</Text> per
-            trade. That's{" "}
-            <Text style={styles.info}>${report.winLossDiff}</Text> (
-            {report.winLossDiffRatio}%) more than you gain on average for a
-            win trade
-            <Text style={styles.info}>(${report.avgWinningTrades})</Text>.
-            You need to stick to your trading plan to regain profitability.
+            trade. That's <Text style={styles.info}>${report.winLossDiff}</Text>{" "}
+            ({report.winLossDiffRatio}%) more than you gain on average for a win
+            trade
+            <Text style={styles.info}>(${report.avgWinningTrades})</Text>. You
+            need to stick to your trading plan to regain profitability.
           </Text>
         ) : (
           <Text style={styles.note}>
             On average, you are gaining{" "}
             <Text style={styles.info}>${report.avgWinningTrades}</Text> per
-            trade. That's{" "}
-            <Text style={styles.info}>${report.winLossDiff}</Text> (
-            {report.winLossDiffRatio}%) more than you lose on average for a
-            bad trade.
-            <Text style={styles.info}>(${report.avgLosingTrades})</Text>.
-            Hence, it's been profitable.
+            trade. That's <Text style={styles.info}>${report.winLossDiff}</Text>{" "}
+            ({report.winLossDiffRatio}%) more than you lose on average for a bad
+            trade.
+            <Text style={styles.info}>(${report.avgLosingTrades})</Text>. Hence,
+            it's been profitable.
           </Text>
         )}
       </View>
@@ -680,7 +708,7 @@ const styles = StyleSheet.create({
     fontFamily: FONT.regular,
     fontSize: SIZES.medium,
     margin: SIZES.small,
-    width: 300,
+    width: "85%",
   },
   optionText: {
     color: COLORS.white,

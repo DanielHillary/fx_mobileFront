@@ -2,8 +2,7 @@ import {
   View,
   Image,
   ScrollView,
-  TouchableOpacity,
-  Text,
+  BackHandler,
   ActivityIndicator,
   Alert,
 } from "react-native";
@@ -41,6 +40,7 @@ import messaging from "@react-native-firebase/messaging";
 import { loadCustomFont } from "../../../components/exits/exitlevelcard.style";
 import { loadThemeCustomFont } from "../../../constants/theme";
 import { saveFireBaseToken } from "../../../api/userApi";
+import AlertModal from "../../../components/modal/AlertModal";
 
 const Dashboard = () => {
   const [accountDetail, setAccountDetail] = useState({});
@@ -53,11 +53,40 @@ const Dashboard = () => {
   const [confirmEntries, setConfirmEntries] = useState([]);
   const [problemTrades, setProblemTrades] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [alertModal, setAlertModal] = useState(false);
 
   const navigation = useNavigation();
 
-  const { userInfo, updateAccount, updateNotification, accountDetails, logout } =
-    useContext(AuthContext);
+  // useEffect(() => {
+  //   const backAction = () => {
+  //     Alert.alert("Hold on!", "Are you sure you want to go back?", [
+  //       {
+  //         text: "Cancel",
+  //         onPress: () => null,
+  //         style: "cancel"
+  //       },
+  //       { text: "YES", onPress: () => BackHandler.exitApp() }
+  //     ]);
+  //     return true;
+  //   };
+
+  //   const backHandler = BackHandler.addEventListener(
+  //     "hardwareBackPress",
+  //     backAction
+  //   );
+
+  //   return () => backHandler.remove();
+  // }, []);
+
+  const {
+    userInfo,
+    updateAccount,
+    updateNotification,
+    accountDetails,
+    isPaidAccount,
+    updatePaymentStatus,
+    logout,
+  } = useContext(AuthContext);
 
   // console.log(accountDetails);
   // console.log(userInfo);
@@ -79,11 +108,12 @@ const Dashboard = () => {
   let alerts;
 
   const getAccountDetails = () => {
+    setDataArrived(false);
     getUserDashboardInfo(accountId, accountNumber)
       .then((res) => {
         if (!res.status) {
           console.log("Something went wrong with dashboard");
-        }else if(res.status === 401){
+        } else if (res.status === 401) {
           logout();
         }
         return res.data;
@@ -91,6 +121,7 @@ const Dashboard = () => {
       .then((data) => {
         setAccountDetail(data.data.account);
         updateAccount(data.data.account);
+        updatePaymentStatus(data.data.account.paidAccount)
         let trades = data.data.activeTrades;
         let alerts = data.data.activeAlerts;
         let problemTrades = data.data.troubleSomeTrades;
@@ -111,7 +142,25 @@ const Dashboard = () => {
         AsyncStorage.setItem("accountInfo", JSON.stringify(data.data.account));
       })
       .catch((error) => {
-        console.log(error);
+        setDataArrived(true);
+        if (
+          !window.navigator.onLine &&
+          !error.response &&
+          error.code === "ERR_NETWORK"
+        ) {
+          alert("no internet connection");
+        }
+        if (error.toJSON().message === "Network Error") {
+          alert("no internet connection");
+          dispatch({ type: RELOAD });
+        } else {
+          Alert.alert(
+            "Session expired",
+            "Please log in to continue using the app"
+          );
+          logout();
+        }
+        console.log(error.message);
       });
 
     // const actDetails = {
@@ -134,7 +183,7 @@ const Dashboard = () => {
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
     if (enabled) {
-      console.log("Authorization status:", authStatus);
+      // console.log("Authorization status:", authStatus);
     }
   };
 
@@ -142,7 +191,7 @@ const Dashboard = () => {
     setIsLoading(true);
     setDataArrived(false);
     getAccountDetails();
-    
+
     if (requestUserPermission()) {
       // console.log(userInfo);
       messaging()
@@ -156,7 +205,7 @@ const Dashboard = () => {
           if (response.status) {
             // console.log(token);
           } else {
-            console.log(response.message);
+            // console.log(response.message);
           }
         });
     } else {
@@ -164,16 +213,16 @@ const Dashboard = () => {
     }
 
     messaging().onNotificationOpenedApp(async (remoteMessage) => {
-      console.log(
-        "Notification caused app to open from background state:",
-        remoteMessage.notification
-      );
-      // navigation.navigate(remoteMessage.data.type);
+      // console.log(
+      //   "Notification caused app to open from background state:",
+      //   remoteMessage.notification
+      // );
+      navigation.navigate("Notifications");
     });
 
     // // Register background handler
     messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-      console.log("Message handled in the background!", remoteMessage);
+      // console.log("Message handled in the background!", remoteMessage);
     });
 
     // // Check whether an initial notification is available
@@ -181,10 +230,10 @@ const Dashboard = () => {
       .getInitialNotification()
       .then(async (remoteMessage) => {
         if (remoteMessage) {
-          console.log(
-            "Notification caused app to open from quit state:",
-            remoteMessage.notification
-          );
+          // console.log(
+          //   "Notification caused app to open from quit state:",
+          //   remoteMessage.notification
+          // );
           //  setInitialRoute(remoteMessage.data.type);  e.g. "Settings"
         }
       });
@@ -204,50 +253,81 @@ const Dashboard = () => {
   useFocusEffect(
     React.useCallback(() => {
       async function fetchData() {
-        const response = await getUserDashboardInfo(
-          accountId,
-          accountNumber
-        ).then((res) => {
-          return res;
-        });
-        if(response.status === 401){
-          logout();
-        }else if (response.data.status) {
-          // console.log(response.data);
-          let activeTrades = response.data.data.activeTrades;
-          let activeAlerts = response.data.data.activeAlerts;
-          let problemTrades = response.data.data.troubleSomeTrades;
-          let entries = response.data.data.confirmEntries;
+        try {
+          const response = await getUserDashboardInfo(
+            accountId,
+            accountNumber
+          ).then((res) => {
+            return res;
+          });
+          if (response.status === 401) {
+            logout();
+          } else if (response.data.status) {
+            // console.log(response.data);
+            let activeTrades = response.data.data.activeTrades;
+            let activeAlerts = response.data.data.activeAlerts;
+            let problemTrades = response.data.data.troubleSomeTrades;
+            let entries = response.data.data.confirmEntries;
 
-          setConfirmEntries(entries);
-          setProblemTrades(problemTrades);
-          setAccountDetail(response.data.data.account);
-          updateAccount(response.data.data.account);
-          if (activeTrades.length == 0) {
-            setTradeEmpty(true);
-          } else {
-            setTradeList(activeTrades);
-            setTradeEmpty(false);
-          }
+            setConfirmEntries(entries);
+            setProblemTrades(problemTrades);
+            setAccountDetail(response.data.data.account);
+            updateAccount(response.data.data.account);
+            updatePaymentStatus(response.data.data.account.paidAccount);
+            if (activeTrades.length == 0) {
+              setTradeEmpty(true);
+            } else {
+              setTradeList(activeTrades);
+              setTradeEmpty(false);
+            }
 
-          if (activeAlerts.length == 0) {
-            setAlertEmpty(true);
-          } else {
-            setAlertList(activeAlerts);
-            setAlertEmpty(false);
+            if (activeAlerts.length == 0) {
+              setAlertEmpty(true);
+            } else {
+              setAlertList(activeAlerts);
+              setAlertEmpty(false);
+            }
           }
-        } else {
+        } catch (error) {
           console.log(response.data.message);
+          if (
+            !window.navigator.onLine &&
+            !error.response &&
+            error.code === "ERR_NETWORK"
+          ) {
+            alert("no internet connection");
+          }
+          if (error.toJSON().message === "Network Error") {
+            alert("no internet connection");
+            dispatch({ type: RELOAD });
+          } else {
+            Alert.alert(
+              "Session expired",
+              "Please log in to continue using the app"
+            );
+            logout();
+          }
         }
       }
-      fetchData();
+      if(isPaidAccount){
+        fetchData();
+      }else{
+        setAlertModal(true);
+      }
+        
     }, [accountNumber])
   );
 
-
-  if (isLoading) {
+  if (accountDetails === null) {
     return (
-      <View style={{ backgroundColor: COLORS.appBackground, flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View
+        style={{
+          backgroundColor: COLORS.appBackground,
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <ActivityIndicator size={"large"} />
       </View>
     );
@@ -275,7 +355,22 @@ const Dashboard = () => {
           />
         )}
       </ScrollView>
-      
+
+      <AlertModal 
+        isAlert={alertModal}
+        handleCancel={() => {
+          // navigation.goBack();
+        }}
+        handleConfirm={() => {
+          navigation.navigate("Pricing");
+        }}
+        message={
+          "Please renew your subscription to continue usage. Kindly ignore if your subscription is still active"
+        }
+        showCancelButton={true}
+        showConfirmButton={true}
+        title={"Action required"}
+      />
     </View>
   );
 };

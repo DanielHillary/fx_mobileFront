@@ -1,10 +1,11 @@
-import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import { COLORS, SIZES, FONT } from "../../constants";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../context/AuthContext";
 import { getAllUserAccounts } from "../../api/accountApi";
+import AlertModal from "../../components/modal/AlertModal";
 
 const AccountCard = ({
   item,
@@ -112,6 +113,8 @@ const Account = () => {
   const [userAccounts, setUserAccounts] = useState([]);
   const [totalBalance, setTotalBalance] = useState("");
   const [isClicked, setIsClicked] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [alertModal, setAlertModal] = useState(false);
 
   const navigation = useNavigation();
 
@@ -119,17 +122,22 @@ const Account = () => {
 
   const getUserAccounts = async () => {
     if (accountDetails.accountName != "PsyDStarter") {
-      const response = await getAllUserAccounts(accountDetails.userId).then(
-        (res) => {
-          return res.data;
+      if(accountDetails.paidAccount){
+        const response = await getAllUserAccounts(accountDetails.userId).then(
+          (res) => {
+            return res.data;
+          }
+        );
+  
+        if (response.status) {
+          setUserAccounts(response.data.accountList);
+          setTotalBalance(response.data.totalBalance);
+          setIsLoading(false);
+        } else {
+          console.log(response.message);
         }
-      );
-
-      if (response.status) {
-        setUserAccounts(response.data.accountList);
-        setTotalBalance(response.data.totalBalance);
-      } else {
-        console.log(response.message);
+      }else{
+        setAlertModal(true);
       }
     }
   };
@@ -184,6 +192,16 @@ const Account = () => {
           />
         ))}
       </View>
+
+      <AlertModal 
+        isAlert={alertModal}
+        handleCancel={() => {navigation.goBack()}}
+        handleConfirm={() => {navigation.navigate("Pricing")}}
+        message={"Please renew your subscription to view all your accounts"}
+        showCancelButton={true}
+        showConfirmButton={true}
+        title={"Action required"}
+      />
     </ScrollView>
   );
 };

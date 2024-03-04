@@ -78,7 +78,7 @@ const ExitStrategy = () => {
 
   const setModalVisible = (value) => {
     setIsModalVisible(value);
-  }
+  };
 
   const getAccount = async () => {
     const account = await AsyncStorage.getItem("accountInfo").then((res) => {
@@ -111,17 +111,17 @@ const ExitStrategy = () => {
   };
 
   const checkEmptyLevelsForProfit = () => {
-    if (profitLotSize != 0 && tpValue != 0) {
-      return true;
+    if (profitLotSize == 0 && profitLotSize == 0 && slLossValue == 0) {
+      return false
     }
-    return false;
+    return true;
   };
 
   const checkEmptyLevelsForLoss = () => {
-    if (lossLotSize != 0 && slValue != 0) {
-      return true;
+    if (lossLotSize == 0) {
+      return false;
     }
-    return false;
+    return true;
   };
 
   const registerProfit = async () => {
@@ -172,7 +172,7 @@ const ExitStrategy = () => {
     if (response.status) {
       setIsModalVisible(true);
       setSlValue(0);
-      setLossLotSize(0)
+      setLossLotSize(0);
     } else {
       Alert.alert("Transaction failed", response.message);
     }
@@ -188,7 +188,7 @@ const ExitStrategy = () => {
     registerProfit();
     registerLoss();
 
-    navigation.navigate("RiskManager",{
+    navigation.navigate("RiskManager", {
       account: account,
       tradingPlan: tradingPlan,
     });
@@ -233,7 +233,7 @@ const ExitStrategy = () => {
       <Text
         style={[styles.text, { marginTop: SIZES.medium, fontStyle: "italic" }]}
       >
-        Note: To break-even, set secure profit percent at 0
+        Note: To break-even, set secure profit percent at 1
       </Text>
 
       <View style={{ marginTop: 30 }}>
@@ -244,7 +244,7 @@ const ExitStrategy = () => {
               if (checkEmptyLevelsForProfit()) {
                 setIsProfitAlert(true);
               } else {
-                //Sound an alarm
+                setIsContinue(true);
               }
             }}
           >
@@ -302,7 +302,7 @@ const ExitStrategy = () => {
             />
 
             <Text style={styles.levelText}>
-              % of the current volume/lotSize, and secure
+              % , and set my stopLoss to secure
             </Text>
           </View>
 
@@ -314,7 +314,11 @@ const ExitStrategy = () => {
               keyboardType="numeric"
               numberOfLines={1}
               onChangeText={(text) => {
-                setSlProfitValue(text);
+                if (slLossValue == 0) {
+                  setSlProfitValue(text);
+                } else {
+                  alert("You cannot secure profit because you already set your SL to reduce your risk size")
+                }
               }}
               value={slProfitValue}
               onFocus={() => {
@@ -329,7 +333,7 @@ const ExitStrategy = () => {
           </View>
 
           <View style={{ flexDirection: "row" }}>
-            <Text style={styles.levelText}>Reduce my risk size by </Text>
+            <Text style={styles.levelText}>OR reduce my risk size by </Text>
             <TextInput
               placeholder="0"
               placeholderTextColor={COLORS.darkyellow}
@@ -337,7 +341,11 @@ const ExitStrategy = () => {
               keyboardType="numeric"
               numberOfLines={1}
               onChangeText={(text) => {
-                setSlLossValue(text);
+                if(slProfitValue == 0){
+                  setSlLossValue(text);
+                }else {
+                  alert("You do not have any risks because you already set your SL to secure some profit.")
+                }
               }}
               value={slLossValue}
               onFocus={() => {
@@ -360,7 +368,7 @@ const ExitStrategy = () => {
               if (checkEmptyLevelsForLoss()) {
                 setIsLossAlert(true);
               } else {
-                //Sound an alarm
+                setIsContinue(true);
               }
             }}
           >
@@ -461,7 +469,7 @@ const ExitStrategy = () => {
           "You have some spaces left out. Please fill in the missing figures before you continue"
         }
         showCancelButton={true}
-        showConfirmButton={true}
+        showConfirmButton={false}
         handleCancel={() => {
           setIsContinue(false);
         }}
@@ -496,17 +504,17 @@ const ExitStrategy = () => {
             }
           } else {
             if (lossCount == 0) {
-              if (!checkEmptyLevelsForLoss()) {
-                setIsContinue(true);
-              } else {
+              if (checkEmptyLevelsForLoss()) {
                 setIsLossAlert(true);
+              } else {
+                setIsContinue(true);
               }
             }
             if (profitCount == 0) {
-              if (!checkEmptyLevelsForProfit()) {
-                setIsContinue(true);
-              } else {
+              if (checkEmptyLevelsForProfit()) {
                 setIsProfitAlert(true);
+              } else {
+                setIsContinue(true);
               }
             }
             // setIsContinue(true);
@@ -525,7 +533,9 @@ const ExitStrategy = () => {
         )}
       </TouchableOpacity>
 
-      <View style={{ flexDirection: "row", alignSelf: "center", marginBottom: 60,}}>
+      <View
+        style={{ flexDirection: "row", alignSelf: "center", marginBottom: 60 }}
+      >
         <Text
           style={{
             color: COLORS.lightWhite,

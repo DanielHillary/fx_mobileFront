@@ -2,13 +2,18 @@ import {
   StyleSheet,
   Text,
   View,
-  ScrollView,
+  ActivityIndicator,
   Image,
   FlatList,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useRef, useContext } from "react";
 import { COLORS, FONT, SIZES } from "../../../constants";
+import { Paystack, paystackProps } from "react-native-paystack-webview";
+import AlertModal from "../../../components/modal/AlertModal";
+import { updateAcccountPaymentStatus } from "../../../api/accountApi";
+import { AuthContext } from "../../../context/AuthContext";
+import { useNavigation } from "@react-navigation/native";
 
 const Details = ({ item }) => {
   return (
@@ -34,6 +39,49 @@ const Details = ({ item }) => {
   );
 };
 const Bronze = () => {
+  const [amount, setAmount] = useState(15600);
+  const [alertModal, setAlertModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [successAlert, setSuccessAlert] = useState(false);
+
+  const { accountDetails } = useContext(AuthContext);
+
+  const navigation = useNavigation();
+
+  function generateRefNumber(length) {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const charactersLength = characters.length;
+    let refNumber = "";
+
+    for (let i = 0; i < length; i++) {
+      refNumber += characters.charAt(
+        Math.floor(Math.random() * charactersLength)
+      );
+    }
+
+    return refNumber;
+  }
+
+  const updateAccountPayment = async (data) => {
+    try {
+      const response = await updateAcccountPaymentStatus(
+        accountDetails.accountId,
+        10
+      ).then((res) => {
+        return res.data;
+      });
+      if (response.status) {
+        setIsLoading(false);
+        setSuccessAlert(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const paystackWebViewRef = useRef(paystackProps.PayStackRef);
+
   const data = [
     {
       id: 1,
@@ -85,6 +133,73 @@ const Bronze = () => {
         contentContainerStyle={{ columnGap: SIZES.small - 5 }}
         showsVerticalScrollIndicator={false}
       />
+
+      <Paystack
+        paystackKey="pk_test_4e398e23afb4e1d0be0eb53139b09596290fc2bc"
+        billingEmail="danielibetohillary@gmail.com"
+        amount={amount}
+        billingName="Daniel Ibeto"
+        onCancel={(e) => {
+          setAlertModal(true);
+          setIsLoading(false);
+        }}
+        onSuccess={(res) => {
+          updateAccountPayment(res.data);
+        }}
+        ref={paystackWebViewRef}
+        autoStart={true}
+        currency="NGN"
+        refNumber={generateRefNumber(20)}
+        phone="09024253488"
+      />
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.buttonStyle}
+          onPress={() => {
+            paystackWebViewRef.current.startTransaction();
+            setIsLoading(true);
+          }}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="large" colors={"black"} />
+          ) : (
+            <Text style={styles.buttonText}>Make payment</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      <AlertModal
+        isAlert={alertModal}
+        handleCancel={() => {
+          setAlertModal(false);
+        }}
+        handleConfirm={() => {
+          setAlertModal(false);
+        }}
+        message={
+          "Something went wrong with the payment. Please try again later"
+        }
+        showCancelButton={false}
+        showConfirmButton={true}
+        title={"Failed transaction"}
+      />
+
+      <AlertModal
+        isAlert={successAlert}
+        handleCancel={() => {
+          setSuccessAlert(false);
+        }}
+        handleConfirm={() => {
+          navigation.navigate("Home")
+        }}
+        message={
+          "Congratulations, your payment was successful!. Enjoy your stay"
+        }
+        showCancelButton={false}
+        showConfirmButton={true}
+        title={"Successful!"}
+      />
     </View>
   );
 };
@@ -109,21 +224,39 @@ const styles = StyleSheet.create({
     color: COLORS.lightWhite,
     fontFamily: FONT.regular,
   },
-  button: {
-    // margin: 80,
-    height: 40,
+  buttonStyle: {
     backgroundColor: COLORS.darkyellow,
-    borderRadius: 10,
+    borderColor: COLORS.darkyellow,
+    borderWidth: 0.2,
     width: 300,
-    marginTop: 5,
-    alignSelf: "center",
+    height: 50,
+    borderRadius: SIZES.medium,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: SIZES.small,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: SIZES.large,
+    marginTop: SIZES.small,
+    gap: SIZES.medium,
   },
   buttonText: {
     flex: 1,
     alignSelf: "center",
-    marginTop: 10,
+    padding: 3,
     fontSize: SIZES.large,
     color: "black",
     fontFamily: FONT.bold,
+  },
+  choose: {
+    borderColor: COLORS.darkyellow,
+    borderWidth: 0.5,
+    borderRadius: SIZES.small,
+    width: 200,
+    alignSelf: "flex-start",
+    marginLeft: SIZES.medium,
   },
 });

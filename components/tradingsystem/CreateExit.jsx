@@ -75,6 +75,7 @@ const CreateExit = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [slLossFocused, setSlLossFocused] = useState(false);
   const [slLossValue, setSlLossValue] = useState(0);
+  const [profitSL, setProfitSL] = useState(false);
 
   const setVisibility = (value) => {
     setIsModalVisible(value);
@@ -98,14 +99,14 @@ const CreateExit = () => {
   const dataFrom = route?.params.value || null;
 
   const checkEmptyLevelsForProfit = () => {
-    if (profitLotSize != 0 || slProfitValue != 0) {
+    if (profitLotSize == 0 && slProfitValue == 0 && slLossValue == 0) {
       return false;
     }
     return true;
   };
 
   const checkEmptyLevelsForLoss = () => {
-    if (lossLotSize != 0 || slValue != 0) {
+    if (lossLotSize == 0) {
       return false;
     }
     return true;
@@ -260,18 +261,17 @@ const CreateExit = () => {
             { marginTop: SIZES.medium, fontStyle: "italic" },
           ]}
         >
-          Note: To break-even, set secure profit percent at 0
+          Note: To break-even, set secure profit percent at 1
         </Text>
       )}
 
       {dataFrom == "Edit Profit" ? (
         <View style={{ marginTop: 30 }}>
           <View style={{ flexDirection: "row", gap: SIZES.small }}>
-            <Text style={{ color: COLORS.lightWhite }}>Add Profit Level</Text>
+            <Text style={{ color: COLORS.lightWhite }}>Add Profit Levels</Text>
             <TouchableOpacity
               onPress={() => {
-                console.log(dataFrom);
-                if (!checkEmptyLevelsForProfit()) {
+                if (checkEmptyLevelsForProfit()) {
                   setIsProfitAlert(true);
                 } else {
                   setIsContinue(true);
@@ -344,7 +344,13 @@ const CreateExit = () => {
                 keyboardType="numeric"
                 numberOfLines={1}
                 onChangeText={(text) => {
-                  setSlProfitValue(text);
+
+                  if(slLossValue == 0){
+                    setSlProfitValue(text);
+                  }else{
+                    alert("You cannot secure profit because you already set your SL to reduce your risk size")
+                  }
+                  
                 }}
                 value={slProfitValue}
                 onFocus={() => {
@@ -355,10 +361,10 @@ const CreateExit = () => {
                 }}
               />
 
-              <Text style={styles.levelText}>% of current profit.</Text>
+              <Text style={styles.levelText}>% of my profit target,</Text>
             </View>
             <View style={{ flexDirection: "row" }}>
-              <Text style={styles.levelText}>Reduce my risk size by </Text>
+              <Text style={styles.levelText}>OR reduce my risk size by </Text>
               <TextInput
                 placeholder="0"
                 placeholderTextColor={COLORS.darkyellow}
@@ -366,7 +372,11 @@ const CreateExit = () => {
                 keyboardType="numeric"
                 numberOfLines={1}
                 onChangeText={(text) => {
-                  setSlLossValue(text);
+                  if(slProfitValue == 0){
+                    setSlLossValue(text);
+                  }else{
+                    alert("You do not have any risks because you already set your SL to secure some profit.")
+                  }
                 }}
                 value={slLossValue}
                 onFocus={() => {
@@ -386,10 +396,9 @@ const CreateExit = () => {
             <Text style={{ color: COLORS.lightWhite }}>Add Loss Level</Text>
             <TouchableOpacity
               onPress={() => {
-                if (!checkEmptyLevelsForLoss()) {
+                if (checkEmptyLevelsForLoss()) {
                   setIsLossAlert(true);
                 } else {
-                  //Sound an alarm
                   setIsContinue(true);
                 }
               }}

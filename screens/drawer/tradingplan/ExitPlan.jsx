@@ -581,7 +581,13 @@ const ExitPlan = () => {
     if (response.status) {
       setExitStrategy(response.data);
       setProfitExits(response.data.profitLevels);
+      if(response.data.profitLevels.length === 0){
+        setIsProfitEmpty(true);
+      }
       setLossExits(response.data.lossLevels);
+      if(response.data.lossLevels.length === 0){
+        setIsLossEmpty(true);
+      }
     } else {
       console.log(response.message);
     }
@@ -712,7 +718,7 @@ const ExitPlan = () => {
       <Text
         style={[styles.text, { marginTop: SIZES.medium, fontStyle: "italic" }]}
       >
-        Note: To break-even, set secure profit percent at 0
+        Note: To break-even, set secure profit percent at 1
       </Text>
 
 

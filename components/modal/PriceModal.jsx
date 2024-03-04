@@ -1,12 +1,22 @@
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { COLORS, SIZES, FONT } from "../../constants";
-import React from "react";
+import React, { useRef, useState } from "react";
+import { FlutterWaveButton, closePaymentModal } from "flutterwave-react-v3";
+import { Paystack, paystackProps } from "react-native-paystack-webview";
 
-const PriceModal = ({ setVisibility }) => {
+const PriceModal = ({ setVisibility, accountInfo }) => {
+
   return (
     <View style={styles.container}>
       <View style={styles.modal}>
-        <Text style={[styles.text, {padding: SIZES.small, fontSize: SIZES.medium - 4}]}>Please choose one package</Text>
+        <Text
+          style={[
+            styles.text,
+            { padding: SIZES.small, fontSize: SIZES.medium - 4 },
+          ]}
+        >
+          Please choose one package
+        </Text>
         <View
           style={{
             alignItems: "center",
@@ -27,10 +37,17 @@ const PriceModal = ({ setVisibility }) => {
               <Text style={styles.optionText}>$10</Text>
             </View>
           </TouchableOpacity>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: SIZES.medium }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: SIZES.medium,
+            }}
+          >
             <TouchableOpacity
               onPress={() => {
                 setVisibility(false);
+                
               }}
               style={styles.choose}
             >
@@ -44,32 +61,28 @@ const PriceModal = ({ setVisibility }) => {
                 <Text style={styles.optionText}>$15</Text>
               </View>
             </TouchableOpacity>
-            <Text style={[styles.text, { fontStyle: "italic", fontSize: SIZES.medium - 5}]}> Most popular choice...</Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => {
-              setVisibility(false);
-            }}
-            style={styles.choose}
-          >
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            <Text
+              style={[
+                styles.text,
+                { fontStyle: "italic", fontSize: SIZES.medium - 5 },
+              ]}
             >
-              <Text style={styles.optionText}>Diamond Package</Text>
-              <Text style={styles.optionText}>$25</Text>
-            </View>
-          </TouchableOpacity>
+              {" "}
+              Most popular choice...
+            </Text>
+          </View>
         </View>
 
         <TouchableOpacity
           style={styles.buttonStyle}
           onPress={() => {
-            setVisibility(false)
+            setVisibility(false);
           }}
         >
           <Text style={styles.buttontext}>Cancel</Text>
         </TouchableOpacity>
       </View>
+      
     </View>
   );
 };
@@ -85,7 +98,7 @@ const styles = StyleSheet.create({
   text: {
     color: COLORS.darkyellow,
     fontSize: SIZES.xSmall,
-    fontFamily: FONT.regular
+    fontFamily: FONT.regular,
   },
   optionText: {
     color: COLORS.white,
@@ -119,9 +132,9 @@ const styles = StyleSheet.create({
   },
   modal: {
     backgroundColor: "#09181C",
-    height: 350,
+    height: 280,
     width: "100%",
-    borderRadius: SIZES.medium
+    borderRadius: SIZES.medium,
   },
   choose: {
     borderColor: COLORS.darkyellow,

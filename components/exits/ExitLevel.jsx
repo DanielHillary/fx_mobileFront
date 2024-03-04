@@ -7,11 +7,11 @@ import styles from './exitlevel.style'
 import { useNavigation } from '@react-navigation/native';
 
 
-const ExitLevel = ({ details }) => {
+const ExitLevel = ({ details, isEmpty }) => {
 
 
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(isEmpty)
 
   const { navigate } = useNavigation();
   return (
@@ -24,8 +24,8 @@ const ExitLevel = ({ details }) => {
         <View style={styles.cardsContainer}>
           {isLoading ? (
             <ActivityIndicator size="large" colors={COLORS.primary}/>
-          ) : error ? (
-            <EmptyList message={"Something went wrong"}/>
+          ) : isEmpty ? (
+            <EmptyList message={"No loss exits"}/>
           ) : (
             details?.map((item) => (
               <ExitLevelCard

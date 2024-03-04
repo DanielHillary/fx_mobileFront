@@ -189,7 +189,7 @@ const RiskAnalysis = () => {
           hasTradingPlan={tradeDetails.hasTradingPlan}
         />
 
-        <Text style={styles.tradeID}>Profitability: High</Text>
+        {/* <Text style={styles.tradeID}>Profitability: High</Text> */}
 
         <TouchableOpacity
           onPress={() => {

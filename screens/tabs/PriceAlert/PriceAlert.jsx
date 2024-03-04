@@ -5,6 +5,8 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 
 import { COLORS, FONT, SIZES } from "../../../constants";
@@ -23,48 +25,95 @@ const PriceAlert = () => {
   const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [accountInfo, setAccountInfo] = useState({});
+  const [waiting, setWaiting] = useState(false);
 
   const { accountDetails, logout } = useContext(AuthContext);
 
-  const getAlertList = async () => {
-    const response = await getAllUserAlert(accountDetails.accountId).then(
-      (res) => {
-        return res;
-      }
-    );
-    if(response.status === 401){
-      logout();
-    }else if (response.data.status) {
-      if (response.data.data.activeAlertList == 0) {
-        setIsEmpty(true);
-        setIsLoading(false);
-      } else {
-        setIsLoading(false);
-      }
-      setAlertList(response.data.data);
+  const setAccountUp = async() => {
+    let account = await AsyncStorage.getItem("accountInfo").then((res) => {
+      return JSON.parse(res);
+    })
+    
+    if(account === null && accountDetails === null){
+      setWaiting(true);
     }
-  };
-
-  
+    if(accountDetails === null || accountDetails.length === 0){
+      setAccountInfo(account);
+      try {
+        const response = await getAllUserAlert(account.accountId).then(
+          (res) => {
+            return res;
+          }
+        );
+        if (response.status === 401) {
+          logout();
+        } else if (response.data.status) {
+          if (response.data.data.activeAlertList == 0) {
+            setIsEmpty(true);
+            setIsLoading(false);
+          } else {
+            setIsLoading(false);
+          }
+          setAlertList(response.data.data);
+        }
+      } catch (error) {
+        console.log(error.message);
+      }
+      setWaiting(false);
+    }else{
+      setAccountInfo(accountDetails);
+      try {
+        const response = await getAllUserAlert(accountDetails.accountId).then(
+          (res) => {
+            return res;
+          }
+        );
+        if (response.status === 401) {
+          logout();
+        } else if (response.data.status) {
+          if (response.data.data.activeAlertList == 0) {
+            setIsEmpty(true);
+            setIsLoading(false);
+          } else {
+            setIsLoading(false);
+          }
+          setAlertList(response.data.data);
+        }
+      } catch (error) {
+        console.log(error.message);
+      }
+      setWaiting(false);
+    }
+    
+  }
 
   useEffect(() => {
-    getAlertList();
+    setAccountUp();
   }, [accountDetails]);
 
   useFocusEffect(
     React.useCallback(() => {
-      // async function fetchData() {
-        getAlertList();
-      // }
-      // fetchData();
+      setAccountUp();
     }, [accountDetails])
   );
 
+  if (waiting || accountInfo === null) {
+    return (
+      <View
+        style={{
+          backgroundColor: COLORS.appBackground,
+          flex: 1,
+          justifyContent: "center",
+        }}
+      >
+        <ActivityIndicator size={"large"} />
+      </View>
+    );
+  }
 
-  
   return (
     <View style={styles.baseContainer}>
-      <ActiveAlertsScreen alerts={alertList} account={accountDetails} />
+      <ActiveAlertsScreen alerts={alertList} account={accountInfo} />
     </View>
   );
 };

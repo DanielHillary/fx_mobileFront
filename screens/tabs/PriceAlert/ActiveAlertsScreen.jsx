@@ -8,6 +8,7 @@ import {
   TextInput,
   ActivityIndicator,
   TouchableOpacity,
+  Dimensions,
   Alert,
 } from "react-native";
 import { COLORS, FONT, SIZES } from "../../../constants";
@@ -24,6 +25,8 @@ import EmptyList from "../../../components/EmptyList";
 import { searchForSymbol } from "../../../api/priceAlertApi";
 import { LogBox } from "react-native";
 
+const screenWidth = Dimensions.get('window').width;
+
 const ActiveAlerts = ({ alerts, navigate }) => {
   return (
     <TouchableOpacity
@@ -35,7 +38,7 @@ const ActiveAlerts = ({ alerts, navigate }) => {
         <View
           style={{
             flexDirection: "row",
-            width: 305,
+            width: screenWidth/1.13,
             justifyContent: "space-between",
           }}
         >
@@ -82,6 +85,7 @@ const ActiveAlertsScreen = ({ account, alerts }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [useCurrentList, setUseCurrentList] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [tempList, setTempList] = useState([]);
 
   useEffect(() => {
     let alertLists = alerts.activeAlertList;

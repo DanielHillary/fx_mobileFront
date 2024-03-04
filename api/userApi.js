@@ -10,7 +10,6 @@ export const localHost = "https://fxprodev-production.up.railway.app/api";
 // const host = "http://192.168.43.131:8080/auth/login";
 const host = "https://fxprodev-production.up.railway.app/auth/login"
 const host2 = "http://192.168.252.215:8080/auth/login";
-// const server = "https://psydtrader-3cc7fe7cf4bb.herokuapp.com/auth/login"
 
 const headers = {
   "Content-Type": "application/json",

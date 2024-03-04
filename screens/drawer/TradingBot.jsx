@@ -36,6 +36,7 @@ import { getAllUserAccounts } from "../../api/accountApi";
 import { AuthContext } from "../../context/AuthContext";
 import SuccessModal from "../../components/modal/SuccessModal";
 import ConfirmStrategyModal from "../../components/modal/ConfirmStrategyModal";
+import AlertModal from "../../components/modal/AlertModal";
 
 const DownArrow = () => {
   return (
@@ -369,17 +370,77 @@ const TradingBot = () => {
   const [isFocus, setIsFocus] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEntryModalVisible, setIsEntryModalVisible] = useState(false);
+  const [waiting, setWaiting] = useState(false);
+  const [alertModal, setAlertModal] = useState(false);
   // const [totalTrades, setTotalTrades] = useState(0);
+
+  const { accountDetails, userInfo } = useContext(AuthContext);
+
+  const setAccountUp = async () => {
+    let account = await AsyncStorage.getItem("accountInfo").then((res) => {
+      return JSON.parse(res);
+    });
+
+    if (account === null && accountDetails === null) {
+      setWaiting(true);
+    }
+    if (accountDetails === null || accountDetails.length === 0) {
+      setAccount(account);
+      if (account.accountName != "PsyDStarter") {
+        console.log(account.paidAccount)
+        if (account.paidAccount) {
+          const response = await getAllUserAccounts(account.userId).then(
+            (res) => {
+              return res.data;
+            }
+          );
+          if (response.status) {
+            setUserAccounts(response.data.accountList);
+          } else {
+            //Set an alert modal that retries it.
+            console.log(response.message);
+          }
+          setWaiting(false);
+        } else {
+          setAlertModal(true);
+        }
+      }
+    } else {
+      setAccount(accountDetails);
+      if (accountDetails.accountName != "PsyDStarter") {
+        console.log(accountDetails.paidAccount)
+        if (accountDetails.paidAccount) {
+          const response = await getAllUserAccounts(accountDetails.userId).then(
+            (res) => {
+              return res.data;
+            }
+          );
+          if (response.status) {
+            setUserAccounts(response.data.accountList);
+          } else {
+            //Set an alert modal that retries it.
+            console.log(response.message);
+          }
+          setWaiting(false);
+        } else {
+          setAlertModal(true);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    setAccountUp();
+  }, []);
 
   const setModalVisible = (value) => {
     setIsModalVisible(value);
+    navigation.navigate("Home");
   };
 
   const setEntryModalVisible = (value) => {
     setIsEntryModalVisible(value);
   };
-
-  const { accountDetails, userInfo } = useContext(AuthContext);
 
   const [acctList, setAcctList] = useState([]);
 
@@ -483,30 +544,10 @@ const TradingBot = () => {
     // console.log(acctList);
   };
 
-  const getUserAccounts = async () => {
-    if (accountDetails.accountName != "PsyDStarter") {
-      const response = await getAllUserAccounts(accountDetails.userId).then(
-        (res) => {
-          return res.data;
-        }
-      );
-      if (response.status) {
-        setUserAccounts(response.data.accountList);
-      } else {
-        //Set an alert modal that retries it.
-        console.log(response.message);
-      }
-    }
-  };
-
-  useEffect(() => {
-    setAccount(accountDetails);
-    getUserAccounts();
-  }, []);
-
   useFocusEffect(
     React.useCallback(() => {
       setAcctList([]);
+      setAccountUp();
     }, [])
   );
 
@@ -539,8 +580,6 @@ const TradingBot = () => {
       entryPercent: percentEntry,
     };
 
-    console.log(acctList);
-
     const response = await executeAdvancedOrder(tradeOrder).then((res) => {
       return res.data;
     });
@@ -562,6 +601,21 @@ const TradingBot = () => {
       setEdit(true);
     }
   }, 300);
+
+  if (waiting || account === null) {
+    return (
+      <View
+        style={{
+          backgroundColor: COLORS.appBackground,
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size={"large"} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.baseContainer}>
@@ -623,14 +677,18 @@ const TradingBot = () => {
             padding: 2,
             borderRadius: SIZES.small - 4,
           }}
-          iconStyle={{backgroundColor: "#111"}}
-          data={isCurrencies ? Currencies.map((item) => ({
-            label: item?.label,
-            value: item?.value,
-          })) : Synthetics.map((item) => ({
-            label: item?.label,
-            value: item?.value,
-          }))}
+          iconStyle={{ backgroundColor: "#111" }}
+          data={
+            isCurrencies
+              ? Currencies.map((item) => ({
+                  label: item?.label,
+                  value: item?.value,
+                }))
+              : Synthetics.map((item) => ({
+                  label: item?.label,
+                  value: item?.value,
+                }))
+          }
           search
           maxHeight={300}
           labelField="label"
@@ -756,14 +814,14 @@ const TradingBot = () => {
           />
         </View>
       </View>
-      {accountDetails.accountName != "PsyDStarter" && (
+      {account.accountName != "PsyDStarter" && (
         <Text
           style={[styles.text, { marginLeft: 30, marginTop: SIZES.medium }]}
         >
           Choose trading account(s)
         </Text>
       )}
-      {accountDetails.accountName != "PsyDStarter" && (
+      {account.accountName != "PsyDStarter" && (
         <Text
           style={{
             color: COLORS.lightWhite,
@@ -790,7 +848,7 @@ const TradingBot = () => {
           updateListForAccount={updateArrayForAccount}
         />
       ))}
-      {accountDetails.accountName != "PsyDStarter" ? (
+      {account.accountName != "PsyDStarter" ? (
         <Text
           style={{
             color: COLORS.lightWhite,
@@ -835,7 +893,7 @@ const TradingBot = () => {
         </View>
       )}
 
-      {accountDetails.accountName != "PsyDStarter" && (
+      {account.accountName != "PsyDStarter" && (
         <TouchableOpacity
           onPress={() => {
             if (tradeAsset.length == 0) {
@@ -885,6 +943,20 @@ const TradingBot = () => {
           openTrade={placeTradeOrder}
         />
       </Modal>
+
+      <AlertModal
+        isAlert={alertModal}
+        handleCancel={() => {
+          navigation.navigate("Home");
+        }}
+        handleConfirm={() => {
+          navigation.navigate("Pricing");
+        }}
+        message={"Please renew your subscription to continue usage"}
+        showCancelButton={true}
+        showConfirmButton={true}
+        title={"Action required"}
+      />
     </ScrollView>
   );
 };
@@ -900,7 +972,7 @@ const styles = StyleSheet.create({
     color: COLORS.darkyellow,
     fontSize: SIZES.medium,
     fontFamily: FONT.bold,
-    backgroundColor: "#111"
+    backgroundColor: "#111",
   },
   text: {
     color: COLORS.lightWhite,

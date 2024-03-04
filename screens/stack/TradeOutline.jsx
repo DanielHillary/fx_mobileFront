@@ -26,7 +26,12 @@ import BottomSlide from "../../components/BottomSlide";
 import { useRoute } from "@react-navigation/native";
 import { getResponseRemarks } from "../../api/tradeAnalysisApi";
 import AwesomeAlert from "react-native-awesome-alerts";
-import { getTradeNotes, saveTradingNotes, updateTradeNotes } from "../../api/journalApi";
+import {
+  getTradeNotes,
+  saveTradingNotes,
+  updateTradeNotes,
+} from "../../api/journalApi";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AlertModal = ({
   title,
@@ -131,17 +136,14 @@ const Remark = ({ status, hasTradingPlan, remarks }) => {
 
 const TradeOutline = () => {
   const [note, setNote] = useState("");
-  const [tradeNote, setTradeNote] = useState({})
+  const [tradeNote, setTradeNote] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [remarks, setRemarks] = useState([]);
   const [noteEditMode, setNoteEditMode] = useState(false);
   const [check, setCheck] = useState(false);
   const [count, setCount] = useState(0);
 
-  useEffect(() => {
-    loadCustomFont();
-    loadThemeCustomFont();
-  }, []);
+  
 
   const tradeId = "8003943049";
   const percent = "12%";
@@ -162,18 +164,29 @@ const TradeOutline = () => {
     );
     const resp = await getTradeNotes(details.id).then((res) => {
       return res.data;
-    })
-    if(resp.status){
-      setTradeNote(resp.data)
-    }else{
-      console.log(resp.message);
+    });
+    if (resp.status) {
+      setTradeNote(resp.data);
+    } else {
+      
     }
     if (response.status) {
       setRemarks(response.data);
     } else {
-      console.log(response.message);
+      
     }
   };
+
+  useEffect(() => {
+    loadCustomFont();
+    loadThemeCustomFont();
+
+    AsyncStorage.getItem(details.metaTradeOrderId).then((value) => {
+      if (value !== null) {
+        setNote(value);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     getRemarks();
@@ -184,37 +197,67 @@ const TradeOutline = () => {
       console.log("Do nothing");
     } else if (note.length == 0) {
       //tell the user to input something
-      Alert.alert("Empty fields", "Your text field is empty")
+      Alert.alert("Empty fields", "Your text field is empty");
     } else {
       setCheck(true);
     }
   };
 
-  const saveNote = async() => {
+  const saveNote = async () => {
     let response = {};
-    if(count > 1 || tradeNote.length != 0){
+    if (count > 1 || tradeNote.length != 0) {
       tradeNote.note = note;
+      tradeNote.tradeId = details.id;
+      tradeNote.metaOrderId = details.metaTradeOrderId;
       response = await updateTradeNotes(tradeNote).then((res) => {
         return res.data;
-      })
-    }else{
+      });
+    } else {
       const body = {
         note: note,
         tradeId: details.id,
-        metaOrderId: details.metaTradeOrderId
-      }
+        metaOrderId: details.metaTradeOrderId,
+      };
       response = await saveTradingNotes(body).then((res) => {
         return res.data;
-      })
+      });
     }
-    if(response.status){
+    if (response.status) {
       setTradeNote(response.data);
-      setCount(prev => prev + 1);
+      setCount((prev) => prev + 1);
       setEditMode(false);
-    }else {
+    } else {
       console.log(response.message);
     }
-  }
+  };
+
+  const saveNotes = async (val) => {
+    let response = {};
+    if (count > 1 || tradeNote.length != 0) {
+      tradeNote.note = val;
+      tradeNote.tradeId = details.id;
+      tradeNote.metaOrderId = details.metaTradeOrderId;
+      response = await updateTradeNotes(tradeNote).then((res) => {
+        return res.data;
+      });
+    } else {
+      const body = {
+        note: note,
+        tradeId: details.id,
+        metaOrderId: details.metaTradeOrderId,
+      };
+      response = await saveTradingNotes(body).then((res) => {
+        return res.data;
+      });
+    }
+    if (response.status) {
+      setTradeNote(response.data);
+      setCount((prev) => prev + 1);
+      setEditMode(false);
+    } else {
+      console.log(response.message);
+    }
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -251,6 +294,7 @@ const TradeOutline = () => {
               {details.asset}
             </Text>
           </View>
+          <Text style={styles.text}>{details.openTime}</Text>
         </View>
         <ScrollView style={styles.infoContainer}>
           <View>
@@ -335,33 +379,58 @@ const TradeOutline = () => {
 
           <View style={{ marginTop: 20, marginBottom: 20 }}>
             <Text style={styles.note}>Trade Notes</Text>
-            <View style={styles.commentContainer}>
+            {/* <View style={styles.commentContainer}>
               <View>
                 {editMode ? (
                   <TextInput
                     ref={inputRef}
                     editable={true}
-                    placeholder="Add a note to your trade"
-                    placeholderTextColor={"gray"}
+                    // placeholder="Add a note to your trade"
+                    // placeholderTextColor={"gray"}
                     numberOfLines={4}
                     multiline={true}
                     style={[styles.input]}
                     onChangeText={(text) => {
                       setNote(text);
+                      AsyncStorage.setItem("inputKey", text);
                     }}
                     value={note}
-                    // selection={{
-                    //   start: note.length,
-                    //   end: note.length,
-                    // }}
+                    selection={{
+                      start: note.length,
+                      end: note.length,
+                    }}
                   />
                 ) : (
                   <Text style={styles.input}>{tradeNote.note}</Text>
                 )}
               </View>
+            </View> */}
+
+            <View style={styles.commentContainer}>
+              <View>
+                <TextInput
+                  ref={inputRef}
+                  editable={true}
+                  // placeholder="Add a note to your trade"
+                  // placeholderTextColor={"gray"}
+                  numberOfLines={4}
+                  multiline={true}
+                  style={[styles.input]}
+                  onChangeText={(text) => {
+                    setNote(text);
+                    AsyncStorage.setItem(details.metaTradeOrderId, text);
+                    saveNotes(text)
+                  }}
+                  value={note}
+                  selection={{
+                    start: note.length,
+                    end: note.length,
+                  }}
+                />
+              </View>
             </View>
 
-            {!editMode ? (
+            {/* {!editMode ? (
               <TouchableOpacity
                 onPress={() => {
                   setEditMode(true);
@@ -419,7 +488,7 @@ const TradeOutline = () => {
                   />
                 </TouchableOpacity>
               </View>
-            )}
+            )} */}
           </View>
 
           <Remark status={details.status} remarks={remarks} />
@@ -434,7 +503,6 @@ const TradeOutline = () => {
             handleConfirm={() => {
               setCheck(false);
               saveNote();
-              
             }}
             showCancelButton={true}
             showConfirmButton={true}
@@ -524,6 +592,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderColor: COLORS.darkyellow,
     borderWidth: 0.5,
+    marginTop: 35,
   },
   input: {
     color: COLORS.white,

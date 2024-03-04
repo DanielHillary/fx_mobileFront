@@ -5,6 +5,7 @@ import {
   Image,
   Switch,
   FlatList,
+  ActivityIndicator,
   Modal,
   TouchableOpacity,
 } from "react-native";
@@ -14,11 +15,12 @@ import { COLORS, FONT, SIZES } from "../../constants";
 import ProgressBar from "../../components/ProgressBar";
 import { ScrollView } from "react-native-gesture-handler";
 import DropDownPicker from "react-native-dropdown-picker";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { AuthContext } from "../../context/AuthContext";
 import AwesomeAlert from "react-native-awesome-alerts";
 import StrictModal from "../../components/modal/StrictModal";
 import { updateAccountMode } from "../../api/accountApi";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AlertModal = ({
   title,
@@ -58,6 +60,7 @@ const AlertModal = ({
 const Options = ({ image, option, nav, checkOut }) => {
   const navigation = useNavigation();
   const { logout } = useContext(AuthContext);
+  
 
   return (
     <TouchableOpacity
@@ -143,13 +146,35 @@ const Profile = () => {
   const [isStrict, setIsStrict] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState();
   const [isSigned, setIsSigned] = useState(false);
+  const [waiting, setWaiting] = useState(false);
 
   const { accountDetails, userInfo, logout, updateAccount } =
     useContext(AuthContext);
 
+
   const setVisibility = (value) => {
     setIsModalVisible(value);
   };
+
+  const setAccountUp = async() => {
+    let account = await AsyncStorage.getItem("accountInfo").then((res) => {
+      return JSON.parse(res);
+    })
+    
+    if(account === null && accountDetails === null){
+      setWaiting(true);
+    }
+    if(accountDetails === null || accountDetails.length === 0){
+      setAccount(account);
+      setIsStrict(account.isStrict);
+      setWaiting(false);
+    }else{
+      setAccount(accountDetails);
+      setIsStrict(accountDetails.isStrict)
+      setWaiting(false);
+    }
+    
+  }
 
   const checkOut = (value) => {
     setCheckSignOut(value);
@@ -160,23 +185,46 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    setIsStrict(accountDetails.isStrict);
+    setAccountUp();
     setIsModalVisible(false);
   }, [accountDetails]);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      setAccountUp();
+    }, [accountDetails])
+  );
+
   const updateAccountInfo = async (value) => {
     const response = await updateAccountMode(
-      accountDetails.accountId,
+      account.accountId,
       value
     ).then((res) => {
       return res.data;
+
     });
     if (response.status) {
-      setIsModalVisible(false);
+      setIsModalVisible(false)
     } else {
       console.log(response.message);
     }
   };
+
+
+  if (waiting || account === null) {
+    return (
+      <View
+        style={{
+          backgroundColor: COLORS.appBackground,
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size={"large"} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.base} nestedScrollEnabled={true}>
@@ -201,22 +249,23 @@ const Profile = () => {
               marginLeft: 10,
             }}
           >
-            {accountDetails.accountNumber}
+            {account.accountNumber === null ? "5566559995R" : account.accountNumber}
           </Text>
           <Text
             style={{
               fontFamily: FONT.regular,
               color: COLORS.lightWhite,
               marginLeft: 10,
+
             }}
           >
-            {accountDetails.server}
+            {account.server}
           </Text>
         </View>
       </View>
 
-      {accountDetails.accountName != "PsyDStarter" ? (
-        <ProgressBar status={accountDetails.completionStatus} />
+      {account.accountName != "PsyDStarter" ? (
+        <ProgressBar status={account.completionStatus} />
       ) : (
         <AccountAction />
       )}
@@ -238,7 +287,7 @@ const Profile = () => {
           >
             Account balance
           </Text>
-          {accountDetails.accountName != "PsyDStarter" && (
+          {account.accountName != "PsyDStarter" && (
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Text style={styles.mode}>
                 {!isStrict ? "Strict" : "Flexible"}
@@ -297,7 +346,7 @@ const Profile = () => {
                 marginLeft: 3,
               }}
             >
-              {accountDetails.formattedBalance}
+              {account.formattedBalance}
             </Text>
             <Text
               style={{
@@ -306,7 +355,7 @@ const Profile = () => {
                 marginTop: 18,
               }}
             >
-              .{accountDetails.fraction}
+              .{account.fraction}
             </Text>
           </View>
         </View>
@@ -380,7 +429,7 @@ const Profile = () => {
           setVisibility={setVisibility}
           updateSigned={updateStrict}
           updateAccount={updateAccountInfo}
-          account={accountDetails}
+          account={account}
         />
       </Modal>
     </ScrollView>

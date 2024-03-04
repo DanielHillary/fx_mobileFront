@@ -1,4 +1,4 @@
-import apiAxios, { createAxiosInstance } from "./axios.config"
+import { createAxiosInstance } from "./axios.config"
 import { makeApiCall } from "./fetch.config"
 
 const apiAxios = await createAxiosInstance();

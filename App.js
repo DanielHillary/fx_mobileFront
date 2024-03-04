@@ -13,10 +13,8 @@ import messaging from "@react-native-firebase/messaging";
 import { saveFireBaseToken } from "./api/userApi";
 import { LogBox } from "react-native";
 
-
 const App = () => {
-
-  LogBox.ignoreLogs(['Each child in a list should have a unique key prop']);
+  LogBox.ignoreLogs(["Each child in a list should have a unique key prop"]);
 
   return (
     <AuthProvider>

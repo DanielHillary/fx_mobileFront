@@ -347,7 +347,7 @@ const SetUpTradingPlan = () => {
         )}
       </TouchableOpacity>
 
-      <View style={{ padding: SIZES.large }}>
+      <View style={{ padding: SIZES.large, marginBottom: 50 }}>
         <Text style={styles.text}>
           Don't have a trading plan? Use{" "}
           <Text style={{ color: COLORS.darkyellow, fontSize: SIZES.large }}>

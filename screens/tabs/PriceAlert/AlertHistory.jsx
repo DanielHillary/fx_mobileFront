@@ -10,6 +10,7 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  Dimensions,
 } from "react-native";
 import { COLORS, FONT, SIZES } from "../../../constants";
 import React, { useEffect, useState, useCallback, useContext } from "react";
@@ -18,6 +19,8 @@ import EmptyList from "../../../components/EmptyList";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { AuthContext } from "../../../context/AuthContext";
+
+const screenWidth = Dimensions.get('window').width;
 
 const CustomDate = ({ getStartDate, getEndDate, getAlertsByRagne }) => {
   const [startDate, setStartDate] = useState(false);
@@ -132,7 +135,7 @@ const Alerts = ({ alerts }) => {
   return (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate("AlertDetails", { alertDetails: alerts, fromhistory: true });
+        navigation.navigate("HistoryDetails", { alertDetails: alerts, fromhistory: true });
       }}
     >
       <View style={styles.alertlist}>
@@ -141,7 +144,7 @@ const Alerts = ({ alerts }) => {
             flexDirection: "row",
             justifyContent: "space-between",
             borderBottomWidth: 0.2,
-            width: 320,
+            width: screenWidth/1.13,
           }}
         >
           <View style={{ flexDirection: "row" }}>
@@ -499,6 +502,7 @@ const AlertHistory = () => {
   const [isEmpty, setIsEmpty] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [useCurrentList, setUseCurrentList] = useState(false);
+  const [waiting, setWaiting] = useState(false);
 
   const route = useRoute();
 
@@ -508,9 +512,34 @@ const AlertHistory = () => {
 
   const { accountDetails } = useContext(AuthContext);
 
+  const setAccountUp = async() => {
+    let account = await AsyncStorage.getItem("accountInfo").then((res) => {
+      return JSON.parse(res);
+    })
+    
+    if(account === null && accountDetails === null){
+      setWaiting(true);
+    }
+    if(accountDetails === null || accountDetails.length === 0){
+      setAccountInfo(account);
+      setWaiting(false);
+    }else{
+      setAccountInfo(accountDetails);
+      setWaiting(false);
+    }
+    
+  }
+
   useEffect(() => {
-    if(inactiveAlertList.length === 0){
+    setAccountUp();
+  }, [accountDetails])
+
+  useEffect(() => {
+    if(inactiveAlertList === null){
+      setWaiting(true)
+    }else if(inactiveAlertList.length === 0){
       setIsEmpty(true);
+      setWaiting(false);
     }
   }, []);
 
@@ -523,33 +552,24 @@ const AlertHistory = () => {
     setIsLoading(value);
   }
 
-  // const onRefresh = useCallback(() => {
-  //   setRefreshing(true);
-
-  //   setIsLoading(true);
-  //   setError(false);
-  //   getAllUserAlert(accountDetails.accountId)
-  //     .then((res) => {
-  //       let alerts = res.data.data;
-  //       if (res.data.status) {
-  //         setIsEmpty(false);
-  //         setIsLoading(false);
-  //         setAlertList(alerts.inactiveAlertList);
-  //         // console.log(alerts.inactiveAlertList);
-  //       }
-  //       setRefreshing(false);
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //       setError(true);
-  //       setRefreshing(false);
-  //       setIsLoading(false);
-  //     });
-  // }, []);
+  if (waiting) {
+    return (
+      <View
+        style={{
+          backgroundColor: COLORS.appBackground,
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size={"large"} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.baseContainer}>
-      <SearchFilter id={accountDetails.accountId} updateLoading={updateLoading} updateList={updateList} updateEmpty={setIsEmpty}/>
+      <SearchFilter id={accountInfo.accountId} updateLoading={updateLoading} updateList={updateList} updateEmpty={setIsEmpty}/>
       {isLoading ? (
         <ActivityIndicator size="large" color={COLORS.darkyellow} />
       ) : error ? (

@@ -16,6 +16,7 @@ import styles from "./tradingjournal.style";
 import { COLORS, FONT, SIZES } from "../../constants";
 import { AuthContext } from "../../context/AuthContext";
 import EmptyList from "../../components/EmptyList";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   getAllTradeRecords,
   getTradesByDay,
@@ -183,7 +184,7 @@ const TradingJournal = () => {
       }
       setIsLoading(false);
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       setError(true);
       setIsLoading(false);
     }
@@ -337,7 +338,6 @@ const TradingJournal = () => {
             return res.data;
           }
         );
-
         if (response.status) {
           if (response.data.length == 0) {
             setIsEmpty(true);
@@ -357,6 +357,13 @@ const TradingJournal = () => {
     }
     return search;
   };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getAllRecords();
+    }, [accountDetails])
+    
+  );
   const [searchTerm, setSearchTerm] = useState("");
 
   const searchRecordsBySymbol = async () => {

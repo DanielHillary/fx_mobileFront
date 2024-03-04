@@ -4,7 +4,6 @@ import { COLORS, SIZES, FONT } from "../../../constants";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import Bronze from "./Bronze";
 import Gold from "./Gold";
-import Diamond from "./Diamond";
 import PriceModal from "../../../components/modal/PriceModal";
 
 const TopTab = createMaterialTopTabNavigator();
@@ -24,7 +23,6 @@ const TopTabGroup = () => {
     >
       <TopTab.Screen name="Bronze" component={Bronze} options={{}} />
       <TopTab.Screen name="Gold" component={Gold} />
-      <TopTab.Screen name="Diamond" component={Diamond} />
     </TopTab.Navigator>
   );
 };
@@ -45,16 +43,7 @@ const Pricing = () => {
         <Text style={styles.baseText}>Pricing</Text>
       </View> */}
       <TopTabGroup />
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.buttonStyle}
-          onPress={() => {
-            setIsModalVisible(true);
-          }}
-        >
-          <Text style={styles.text}>Make Payment</Text>
-        </TouchableOpacity>
-      </View>
+      
       <Modal
         visible={isModalVisible}
         onRequestClose={() => {
@@ -86,24 +75,7 @@ const styles = StyleSheet.create({
     fontSize: SIZES.large + 5,
     fontWeight: "500",
   },
-  buttonStyle: {
-    backgroundColor: COLORS.darkyellow,
-    borderColor: COLORS.darkyellow,
-    borderWidth: 0.2,
-    width: 300,
-    borderRadius: SIZES.medium,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: SIZES.small,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: SIZES.large,
-    marginTop: SIZES.small,
-    gap: SIZES.medium,
-  },
+  
   text: {
     color: "black",
     fontSize: SIZES.large,

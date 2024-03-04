@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 15,
     alignContent: "center",
+    marginBottom: 60,
     // gap: SIZES.small - 5,
   },
   text: {

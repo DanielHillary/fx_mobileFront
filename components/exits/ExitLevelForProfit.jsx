@@ -12,10 +12,10 @@ import EmptyList from "../EmptyList";
 import { useNavigation } from "@react-navigation/native";
 import ExitLevelCardForProfit from "./ExitLevelCardForProfit";
 
-const ExitLevelForProfit = ({ details }) => {
+const ExitLevelForProfit = ({ details, isEmpty }) => {
   
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(isEmpty);
 
   const { navigate } = useNavigation();
   return (
@@ -27,8 +27,8 @@ const ExitLevelForProfit = ({ details }) => {
         <View style={styles.cardsContainer}>
           {isLoading ? (
             <ActivityIndicator size="large" colors={COLORS.primary} />
-          ) : error ? (
-            <EmptyList message={"Something went wrong"} />
+          ) : isEmpty ? (
+            <EmptyList message={"No profit exits"} />
           ) : (
             details?.map((item) => (
               <ExitLevelCardForProfit

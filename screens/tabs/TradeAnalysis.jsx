@@ -79,39 +79,53 @@ const TradeAnalysis = ({ screenProps }) => {
   const [selectedLabel, setSelectedLabel] = useState("");
   const [isFocus, setIsFocus] = useState(false);
   const [cIsFocus, setCIsFocus] = useState(false);
+  const [waiting, setWaiting] = useState(false);
 
   const { accountDetails } = useContext(AuthContext);
 
-  const getAccountInfo = async () => {
-    try {
+  const setAccountUp = async() => {
+    let account = await AsyncStorage.getItem("accountInfo").then((res) => {
+      return JSON.parse(res);
+    })
+    
+    if(account === null && accountDetails === null){
+      setWaiting(true);
+    }
+    if(account === null || account.length === 0){
       setAccountInfo(accountDetails);
       setBalance(accountDetails.accountBalance);
-    } catch (error) {
-      console.log(error);
+      setWaiting(false);
+    }else{
+      setAccountInfo(account);
+      setBalance(account.accountBalance);
+      setWaiting(false);
     }
-  };
+    
+  }
 
   useEffect(() => {
-    getAccountInfo();
+    setAccountUp();
   }, []);
 
   const inputRef = useRef(null);
 
-  const body = {
-    entryPrice: entry,
-    lotSize: volume,
-    stopLossPrice: stopLoss,
-    takeProfitPrice: takeProfit,
-    accountBalance: balance,
-    currency: "USD",
-    assetCategory: assetType,
-    symbol: assetValue,
-    assetAbbrev: selectedLabel,
-    tradingPlanId: accountDetails.planId || null,
-    userAccountId: accountDetails.accountId,
-  };
+  
 
-  const checkCat = (body = {}) => {
+  const checkCat = () => {
+    const body = {
+      entryPrice: entry,
+      lotSize: volume,
+      stopLossPrice: stopLoss,
+      takeProfitPrice: takeProfit,
+      accountBalance: balance,
+      currency: "USD",
+      assetCategory: assetType,
+      symbol: assetValue,
+      assetAbbrev: selectedLabel,
+      tradingPlanId: accountInfo.planId || null,
+      userAccountId: accountInfo.accountId,
+  
+    };
     let check = false;
     if (body.assetCategory == "") {
       check = true;
@@ -121,12 +135,27 @@ const TradeAnalysis = ({ screenProps }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      setBalance(accountDetails.accountBalance);
-    }, [accountDetails.metaApiAccountId])
+      setAccountUp();
+    }, [accountDetails])
   );
 
-  const checkField = (body = {}) => {
+  const checkField = () => {
     let check = false;
+
+    const body = {
+      entryPrice: entry,
+      lotSize: volume,
+      stopLossPrice: stopLoss,
+      takeProfitPrice: takeProfit,
+      accountBalance: balance,
+      currency: "USD",
+      assetCategory: assetType,
+      symbol: assetValue,
+      assetAbbrev: selectedLabel,
+      tradingPlanId: accountInfo.planId || null,
+      userAccountId: accountInfo.accountId,
+  
+    };
     if (
       body.entryPrice == "" ||
       body.stopLossPrice == "" ||
@@ -165,6 +194,21 @@ const TradeAnalysis = ({ screenProps }) => {
     { label: "Synthetics", value: "Synthetic" },
     { label: "Currencies", value: "Currencies" },
   ];
+
+
+  if (waiting || accountInfo === null) {
+    return (
+      <View
+        style={{
+          backgroundColor: COLORS.appBackground,
+          flex: 1,
+          justifyContent: "center",
+        }}
+      >
+        <ActivityIndicator size={"large"} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.base}>
@@ -435,9 +479,9 @@ const TradeAnalysis = ({ screenProps }) => {
         </View>
         <TouchableOpacity
           onPress={() => {
-            if (checkCat(body)) {
+            if (checkCat()) {
               Alert.alert("", "Please choose a category");
-            } else if (checkField(body)) {
+            } else if (checkField()) {
               Alert.alert(
                 "",
                 "Please enter valid details in the field provided"

@@ -48,7 +48,7 @@ const AlertModal = ({
   );
 };
 
-const AlertDetails = () => {
+const HistoryDetails = () => {
   const [asset, setAsset] = useState("");
   const [postion, setPosition] = useState("");
   const [isPressed, setIsPressed] = useState(true);
@@ -156,38 +156,30 @@ const AlertDetails = () => {
 
       <View style={{ flexDirection: "row" }}>
         {/* <TouchableOpacity
-          onPress={() => setIsPressed(!isPressed)}
-          style={{ marginLeft: 20, marginTop: 10 }}
-        >
-          <View>
-            {isPressed ? (
-              <Image
-                source={require("../../../assets/icons/checkbox.png")}
-                resizeMethod="scale"
-                style={styles.image}
-              />
-            ) : (
-              <View style={styles.checkbox} />
-            )}
-          </View>
-        </TouchableOpacity> */}
+            onPress={() => setIsPressed(!isPressed)}
+            style={{ marginLeft: 20, marginTop: 10 }}
+          >
+            <View>
+              {isPressed ? (
+                <Image
+                  source={require("../../../assets/icons/checkbox.png")}
+                  resizeMethod="scale"
+                  style={styles.image}
+                />
+              ) : (
+                <View style={styles.checkbox} />
+              )}
+            </View>
+          </TouchableOpacity> */}
 
         {/* <View style={{ marginTop: 40 }}>
-          <Text
-            style={[styles.text, { marginLeft: 10, fontSize: SIZES.small }]}
-          >
-            Disable this alert once it triggers.
-          </Text>
-        </View> */}
+            <Text
+              style={[styles.text, { marginLeft: 10, fontSize: SIZES.small }]}
+            >
+              Disable this alert once it triggers.
+            </Text>
+          </View> */}
       </View>
-      {!history && <TouchableOpacity
-        onPress={() => {
-          setCheck(true);
-        }}
-        style={styles.button}
-      >
-        <Text style={styles.buttonText}>Disable this alert</Text>
-      </TouchableOpacity>}
       <AlertModal
         isAlert={check}
         showCancelButton={true}
@@ -207,7 +199,7 @@ const AlertDetails = () => {
   );
 };
 
-export default AlertDetails;
+export default HistoryDetails;
 
 const styles = StyleSheet.create({
   base: {

@@ -13,6 +13,7 @@ import { COLORS, FONT, SIZES } from "../../constants";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AuthContext, AuthProvider } from "../../context/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SignIn = () => {
   const navigation = useNavigation();
@@ -26,7 +27,7 @@ const SignIn = () => {
   const [password, setPassword] = useState(null);
   const [hide, setHide] = useState(true);
 
-  const { userInfo } = useContext(AuthContext);
+  const { userInfo, updateAccount } = useContext(AuthContext);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -113,7 +114,11 @@ const SignIn = () => {
           </View>
         </View>
 
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("ForgotPassword")
+          }}
+        >
           <Text
             style={{
               color: COLORS.darkyellow,
@@ -129,14 +134,16 @@ const SignIn = () => {
 
       <TouchableOpacity
         onPress={async () => {
-          setIsClicked(true);
+          // setIsClicked(true);
+          let account = await AsyncStorage.getItem("accountInfo");
           const response = await login(email, password);
-          if(response){
-            // navigation.navigate("Home");
+          if(account === null || account === ""){
+            updateAccount(response.data.account) 
           }else{
             console.log(response);
+            // setIsClicked(false);
           }
-          setIsClicked(false);
+          // setIsClicked(false);
         }}
         style={styles.button}
       >

@@ -58,5 +58,13 @@ export const getWeeklyReport = async(accountId, val) => {
   return response;
 }
 
+export const updateAcccountPaymentStatus = async (accountId, fee) => {
+  const apiAxios = await createAxiosInstance();
+  const response = await apiAxios.get("/account/updatepaymentstatus", {
+    params: { accountId: accountId, amount: fee}
+  })
+  return response;
+}
+
 
 

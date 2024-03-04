@@ -18,24 +18,24 @@ const WelcomeSlider = () => {
   }, [])
 
   return (
-    <Swiper style={styles.wrapper} activeDotColor={COLORS.darkyellow}>
+    <Swiper style={styles.wrapper} activeDotColor={COLORS.darkyellow} >
       <View style={styles.slider1}>
         <Image source={require("../../../assets/images/1.png")} 
-          style={{height: 400, width: 500, alignSelf:"center", marginRight: SIZES.large * 3, marginTop: SIZES.large * 3}}
+          style={{height: 350, width: 500, alignSelf:"center", marginRight: SIZES.large * 3, marginTop: SIZES.large * 3}}
         />
-        <Text style={styles.heading}>We mirror you trading plan across all your trades</Text>
+        <Text style={styles.heading}>We mirror your trading plan across all your trades</Text>
         <Text style={styles.caption}>We help you implement your own trading plan from risk management to exit strategies</Text>
       </View>
       <View style={styles.slider2}>
         <Image source={require("../../../assets/images/2.png")} 
-          style={{height: 400, width: 500, alignSelf: "center", marginRight: SIZES.large * 3.5, marginTop: SIZES.large * 3}}
+          style={{height: 350, width: 500, alignSelf: "center", marginRight: SIZES.large * 3.5, marginTop: SIZES.large * 3}}
         />
-        <Text style={styles.heading}>Price Alert for over 50 assets</Text>
+        <Text style={styles.heading}>Price alert for over 50 assets</Text>
         <Text style={styles.caption}>Set Alerts on all your favourite pairs/assets for both Synthetics and Currencies markets</Text>
       </View>
       <View style={styles.slider3}>
         <Image source={require("../../../assets/images/3.png")} 
-          style={{height: 400, width: 500, alignSelf: "center", marginRight: SIZES.large * 3.5, marginTop: SIZES.large * 3}}
+          style={{height: 350, width: 500, alignSelf: "center", marginRight: SIZES.large * 3.5, marginTop: SIZES.large * 3}}
         />
         <Text style={styles.heading}>Automatic Trade Journaling and many more...</Text>
         <Text style={styles.caption}>Explore a wide range of tools to give you insight into your trading culture and make sure you stay profitable</Text>
@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
     width: 80,
     // padding: SIZES.medium,
     alignSelf: "flex-end",
+    marginBottom: 20
   },
   buttonText: {
     flex: 1,

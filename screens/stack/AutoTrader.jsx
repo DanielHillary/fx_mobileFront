@@ -22,6 +22,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { getAllUserAccounts } from "../../api/accountApi";
 import SuccessModal from "../../components/modal/SuccessModal";
 import ConfirmStrategyModal from "../../components/modal/ConfirmStrategyModal";
+import AlertModal from "../../components/modal/AlertModal";
 
 const DownArrow = () => {
   return (
@@ -182,30 +183,73 @@ const AutoTrader = () => {
   const [isPressed, setIsPressed] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEntryModalVisible, setIsEntryModalVisible] = useState(false);
+  const [waiting, setWaiting] = useState(false);
+  const [alertModal, setAlertModal] = useState(false);
+
+  const { accountDetails, userInfo } = useContext(AuthContext);
+
+  const setAccountUp = async () => {
+    let account = await AsyncStorage.getItem("accountInfo").then((res) => {
+      return JSON.parse(res);
+    });
+
+    if (account === null && accountDetails === null) {
+      setWaiting(true);
+    }
+    if (accountDetails === null || accountDetails.length === 0) {
+      setAccount(account);
+      if (account.accountName != "PsyDStarter") {
+        if (account.paidAccount) {
+          const response = await getAllUserAccounts(account.userId).then(
+            (res) => {
+              return res.data;
+            }
+          );
+          if (response.status) {
+            setUserAccounts(response.data.accountList);
+          } else {
+            //Set an alert modal that retries it.
+            console.log(response.message);
+          }
+          setWaiting(false);
+        } else {
+          setAlertModal(true);
+        }
+      }
+    } else {
+      setAccount(accountDetails);
+      if (accountDetails.accountName != "PsyDStarter") {
+        if (accountDetails.paidAccount) {
+          const response = await getAllUserAccounts(accountDetails.userId).then(
+            (res) => {
+              return res.data;
+            }
+          );
+          if (response.status) {
+            setUserAccounts(response.data.accountList);
+          } else {
+            //Set an alert modal that retries it.
+            console.log(response.message);
+          }
+          setWaiting(false);
+        } else {
+          setAlertModal(true);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    setAccountUp();
+  }, []);
 
   const setModalVisible = (value) => {
     setIsModalVisible(value);
+    navigation.goBack();
   };
 
   const setEntryModalVisible = (value) => {
     setIsEntryModalVisible(value);
-  };
-
-  const { accountDetails, userInfo } = useContext(AuthContext);
-
-  const getUserAccounts = async () => {
-    if (accountDetails.accountName != "PsyDStarter") {
-      const response = await getAllUserAccounts(accountDetails.userId).then(
-        (res) => {
-          return res.data;
-        }
-      );
-      if (response.status) {
-        setUserAccounts(response.data.accountList);
-      } else {
-        console.log(response.message);
-      }
-    }
   };
 
   const [acctList, setAcctList] = useState([]);
@@ -248,11 +292,6 @@ const AutoTrader = () => {
     console.log(acctList);
   };
 
-  useEffect(() => {
-    getUserAccounts();
-    setAccount(accountDetails);
-  }, []);
-
   const navigation = useNavigation();
   const route = useRoute();
 
@@ -288,19 +327,12 @@ const AutoTrader = () => {
         entryPercent: percentEntry,
       };
 
-      console.log(tradeOrder);
-
       const response = await executeAdvancedOrder(tradeOrder).then((res) => {
         return res.data;
       });
 
       setIsClicked(false);
       if (response.status) {
-        // Toast.show({
-        //   type: "success",
-        //   text1: "Successful Trade",
-        //   text2: "Go to Dashboard to see your trades",
-        // });
         setIsModalVisible(true);
       } else {
         setAlert(true);
@@ -613,14 +645,13 @@ const AutoTrader = () => {
       {accountDetails.accountName != "PsyDStarter" && (
         <TouchableOpacity
           onPress={() => {
-            if(acctList.length === 0){
-              Alert.alert("","Please choose an account");
-            }else if(acctList[0].tradeAmount === 0){
-              Alert.alert("","Please choose the number of positions to place");
-            }else{
+            if (acctList.length === 0) {
+              Alert.alert("", "Please choose an account");
+            } else if (acctList[0].tradeAmount === 0) {
+              Alert.alert("", "Please choose the number of positions to place");
+            } else {
               setIsEntryModalVisible(true);
             }
-              
           }}
           style={styles.button}
         >
@@ -656,6 +687,22 @@ const AutoTrader = () => {
           openTrade={placeTradeOrder}
         />
       </Modal>
+
+      <AlertModal
+        isAlert={alertModal}
+        handleCancel={() => {
+          navigation.goBack();
+        }}
+        handleConfirm={() => {
+          navigation.navigate("Pricing");
+        }}
+        message={
+          "Please renew your subscription to continue using this feature"
+        }
+        showCancelButton={true}
+        showConfirmButton={true}
+        title={"Action required"}
+      />
     </ScrollView>
   );
 };

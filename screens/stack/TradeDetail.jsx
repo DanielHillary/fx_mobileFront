@@ -26,6 +26,8 @@ const TradeDetail = () => {
   const [position, setPosition] = useState();
   const [hasFetched, setHasFetched] = useState(false);
   const [exitLevels, setExitLevels] = useState({});
+  const [lossLevelEmpty, setLossLevelEmpty] = useState(false);
+  const [profitLevelEmpty, setProfitLevelEmpty] = useState(false);
 
   const route = useRoute();
 
@@ -40,6 +42,12 @@ const TradeDetail = () => {
 
     if(response.status){
       setExitLevels(response.data);
+      if(response.data.lossLevels.length === 0){
+        setLossLevelEmpty(true)
+      }
+      if(response.data.profitLevels.length === 0){
+        setProfitLevelEmpty(true)
+      }
       setHasFetched(true);
     }else{
       console.log(response.message);
@@ -159,8 +167,8 @@ const TradeDetail = () => {
               Slide up to see your exit levels
             </Text>
           )}
-          <ExitLevelForProfit details={exitLevels.profitLevels}/>
-          <ExitLevel details={exitLevels.lossLevels}/>
+          <ExitLevelForProfit details={exitLevels.profitLevels} isEmpty={profitLevelEmpty}/>
+          <ExitLevel details={exitLevels.lossLevels} isEmpty={lossLevelEmpty}/>
         </BottomSheetScrollView>
       </BottomSheet>
     </View>

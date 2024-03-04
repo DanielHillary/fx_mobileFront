@@ -16,6 +16,7 @@ import { AuthContext } from "../../../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAlert } from "../../../api/priceAlertApi";
 import SuccessModal from "../../../components/modal/SuccessModal";
+import AlertModal from "../../../components/modal/AlertModal";
 
 const DownArrow = () => {
   return (
@@ -61,6 +62,8 @@ const SetAlert = () => {
   const [note, setNote] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [alertModal, setAlertModal] = useState(false);
 
   const { accountDetails, userInfo } = useContext(AuthContext);
 
@@ -104,7 +107,8 @@ const SetAlert = () => {
       if(response.status){
         setIsModalVisible(true);
       }else{
-        Alert.alert("Failed transaction", response.message)
+        setAlertModal(true)
+        setMessage(response.message);
       }
     }catch(error){
       console.log(error);
@@ -363,6 +367,20 @@ const SetAlert = () => {
       >
         <SuccessModal setVisibility={setVisibility} />
       </Modal>
+
+      <AlertModal 
+        isAlert={alertModal}
+        handleCancel={() => {
+          navigation.goBack();
+        }}
+        handleConfirm={() => {
+          navigation.navigate("Pricing");
+        }}
+        message={message}
+        showCancelButton={true}
+        showConfirmButton={true}
+        title={"Action required"}
+      />
     </ScrollView>
   );
 };

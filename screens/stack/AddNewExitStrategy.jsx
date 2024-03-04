@@ -290,7 +290,7 @@ const AddNewExitStrategy = () => {
             />
 
             <Text style={styles.levelText}>
-              % of the current volume/lotSize, and secure
+              % and set my stopLoss to secure
             </Text>
           </View>
 
@@ -317,7 +317,7 @@ const AddNewExitStrategy = () => {
           </View>
 
           <View style={{ flexDirection: "row" }}>
-            <Text style={styles.levelText}>Reduce my risk size by </Text>
+            <Text style={styles.levelText}>OR reduce my risk size by </Text>
             <TextInput
               placeholder="0"
               placeholderTextColor={COLORS.darkyellow}

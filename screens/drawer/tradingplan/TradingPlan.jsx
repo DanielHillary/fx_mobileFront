@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useState, useEffect } from "react";
+import { StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
+import React, { useState, useEffect, useContext } from "react";
 import { COLORS, SIZES, FONT } from "../../../constants";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import EntryPlan from "./EntryPlan";
@@ -7,6 +7,7 @@ import ExitPlan from "./ExitPlan";
 import RiskRegister from "./RiskRegister";
 import NoTradePlan from "./NoTradePlan";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthContext } from "../../../context/AuthContext";
 
 const TopTab = createMaterialTopTabNavigator();
 
@@ -35,6 +36,7 @@ const TradingPlan = () => {
   const [regular, setRegular] = useState(true);
   const [strict, setStrict] = useState(false);
   const [accountInfo, setAccountInfo] = useState({});
+  const [waiting, setWaiting] = useState(false);
 
   const getAccount = async () => {
     const account = await AsyncStorage.getItem("accountInfo").then((res) => {
@@ -44,9 +46,45 @@ const TradingPlan = () => {
     console.log(account.hasCompleteTradingPlan);
   };
 
+  const { accountDetails } = useContext(AuthContext);
+
+  const setAccountUp = async() => {
+    let account = await AsyncStorage.getItem("accountInfo").then((res) => {
+      return JSON.parse(res);
+    })
+    
+    if(account === null && accountDetails === null){
+      setWaiting(true);
+    }
+    if(accountDetails === null || accountDetails.length === 0){
+      setAccountInfo(account);
+      setWaiting(false);
+    }else{
+      setAccountInfo(accountDetails);
+      setWaiting(false);
+    }
+    
+  }
+
   useEffect(() => {
-    getAccount();
+    // getAccount();
+    setAccountUp();
   }, []);
+
+  if (waiting || accountInfo === null) {
+    return (
+      <View
+        style={{
+          backgroundColor: COLORS.appBackground,
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size={"large"} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.base}>

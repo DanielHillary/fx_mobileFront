@@ -16,6 +16,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { getAlertCategory, getNotifications, removeFromList } from "../../api/notificationApi";
 import { getTradeAnalysis } from "../../api/tradeAnalysisApi";
 import EmptyList from "../../components/EmptyList";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const NotificationCard = ({ item, updateNoteList }) => {
   const navigation = useNavigation();
@@ -37,11 +38,8 @@ const NotificationCard = ({ item, updateNoteList }) => {
   };
 
   const checkPriceAlert = async() => {
-    try {
-      
-    } catch (error) {
-      
-    }
+    navigation.navigate("AlertHistory");
+    markAsRead();
   }
 
   const markAsRead = async () => {
@@ -124,6 +122,10 @@ const NotificationCard = ({ item, updateNoteList }) => {
             if(item.notificationCategory == "Price Alert"){
               checkPriceAlert()
             }
+            if(item.notificationCategory == "Exit Level"){
+              navigation.navigate("Home")
+              markAsRead();
+            }
           }}
         >
           <Text style={{ color: COLORS.darkyellow }}>View</Text>
@@ -143,8 +145,30 @@ const Notification = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [notification, setNotification] = useState([]);
   const [analysisPressed, setAnalysisPressed] = useState(false);
+  const [accountInfo, setAccountInfo] = useState(false);
+  const [waiting, setWaiting] = useState(false);
 
   const { accountDetails, updateNotification } = useContext(AuthContext);
+
+  const setAccountUp = async() => {
+    let account = await AsyncStorage.getItem("accountInfo").then((res) => {
+      return JSON.parse(res);
+    })
+    
+    if(account === null && accountDetails === null){
+      setWaiting(true);
+    }
+    if(accountDetails === null || accountDetails.length === 0){
+      setAccountInfo(account);
+      setWaiting(false)
+      getAllNotification(account.accountId);
+    }else{
+      setAccountInfo(accountDetails);
+      setWaiting(false);
+      getAllNotification(accountDetails.accountId);
+    }
+    
+  }
 
   const id = accountDetails.accountId;
 
@@ -180,7 +204,7 @@ const Notification = () => {
   const getCategoryNotification = async (category) => {
     setIsLoading(true);
     try {
-      const response = await getAlertCategory(accountDetails.accountId, category).then((res) => {
+      const response = await getAlertCategory(accountInfo.accountId, category).then((res) => {
         return res.data;
       });
       if (response.status) {
@@ -205,7 +229,8 @@ const Notification = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    getAllNotification(accountDetails.accountId);
+    setAccountUp();
+    
   }, []);
 
   const onRefresh = useCallback(() => {
@@ -255,6 +280,21 @@ const Notification = () => {
     }
     return search;
   };
+
+  if(waiting || accountInfo === null){
+    return (
+      <View
+        style={{
+          backgroundColor: COLORS.appBackground,
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size={"large"} />
+      </View>
+    )
+  }
 
   return (
     <View style={styles.base}>

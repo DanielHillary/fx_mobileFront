@@ -20,6 +20,7 @@ import {
 import AwesomeAlert from "react-native-awesome-alerts";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../../context/AuthContext";
+import EmptyList from "../../../components/EmptyList";
 
 const Options = ({ item }) => {
   return (
@@ -224,7 +225,12 @@ const EntryPlan = () => {
                   analyze every trade before entry and stick to an entry
                   strategy.
                 </Text>
-                <Text style={[styles.text, {color: COLORS.darkyellow, fontStyle: "italic"}]}>{`Please ensure that you really want to make a change before you click the "Edit" button`}</Text>
+                <Text
+                  style={[
+                    styles.text,
+                    { color: COLORS.darkyellow, fontStyle: "italic" },
+                  ]}
+                >{`Please ensure that you really want to make a change before you click the "Edit" button`}</Text>
               </View>
             )}
           </View>
@@ -258,37 +264,59 @@ const EntryPlan = () => {
           </View>
         )}
 
-        <View style={{ alignItems: "center" }}>
-          {!isEdit && (
-            <Text
-              style={{
-                color: COLORS.lightWhite,
-                marginVertical: SIZES.medium - 4,
-                fontSize: SIZES.large,
-              }}
-            >
-              {number}
-            </Text>
-          )}
-          {!isEdit ? (
-            <Options key={data} item={initialData ? data : entryData} />
-          ) : (
-            <></>
-          )}
-        </View>
+        {number !== 0 ? (
+          <View style={{ alignItems: "center" }}>
+            {!isEdit && (
+              <Text
+                style={{
+                  color: COLORS.lightWhite,
+                  marginVertical: SIZES.medium - 4,
+                  fontSize: SIZES.large,
+                }}
+              >
+                {number}
+              </Text>
+            )}
+            {!isEdit ? (
+              <Options key={data} item={initialData ? data : entryData} />
+            ) : (
+              <></>
+            )}
+          </View>
+        ) : (
+          <EmptyList message={"You do not have an entry strategy"} />
+        )}
 
-        <TouchableOpacity
-          onPress={() => {
-            submit(isEdit);
-          }}
-          style={styles.button(isEdit)}
-        >
-          {isClicked ? (
-            <ActivityIndicator size="large" colors={"black"} />
-          ) : (
-            <Text style={styles.buttonText}>{!isEdit ? text2 : text1}</Text>
-          )}
-        </TouchableOpacity>
+        {number !== 0 ? (
+          <TouchableOpacity
+            onPress={() => {
+              submit(isEdit);
+            }}
+            style={styles.button(isEdit)}
+          >
+            {isClicked ? (
+              <ActivityIndicator size="large" colors={"black"} />
+            ) : (
+              <Text style={styles.buttonText}>{!isEdit ? text2 : text1}</Text>
+            )}
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("AddNewEntryStrategies", {
+                account: accountDetails,
+                tradePlan: accountDetails
+              });
+            }}
+            style={styles.buttonContinue}
+          >
+            {isClicked ? (
+              <ActivityIndicator size="large" colors={"black"} />
+            ) : (
+              <Text style={styles.buttonText}>Register Strategy</Text>
+            )}
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* {!isEdit && (

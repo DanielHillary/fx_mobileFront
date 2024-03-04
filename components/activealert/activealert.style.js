@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
     fontSize: SIZES.medium,
     fontFamily: FONT.medium,
     color: COLORS.lightWhite,
+    marginRight: 5,
   },
   cardsContainer: {
     marginTop: SIZES.medium,

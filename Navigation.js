@@ -66,6 +66,9 @@ import SuccessPage from "./components/SuccessPage";
 import AccountReport from "./screens/stack/AccountReport";
 import TradeJournal from "./screens/drawer/TradeJournal";
 import WelcomeSlider from "./components/onboarding/slider/WelcomeSlider";
+import ForgotPassword from "./components/onboarding/forgotpassword/ForgotPassword";
+import ResetPassword from "./components/onboarding/forgotpassword/ResetPassword";
+import HistoryDetails from "./screens/tabs/PriceAlert/HistoryDetails";
 
 const Tab = createBottomTabNavigator();
 
@@ -81,16 +84,35 @@ const AuthStack = () => {
         headerTintColor: "white",
       }}
     >
-      <AuthenticationStack.Screen
-        name="PsyDTrader"
-        component={WelcomeSlider}
-      />
+      <AuthenticationStack.Screen name="PsyDTrader" component={WelcomeSlider} />
       <AuthenticationStack.Screen name="SignIn" component={SignIn} />
       <AuthenticationStack.Screen name="SignUp" component={SignUp} />
       <AuthenticationStack.Screen name="AddAccount" component={AddAccount} />
       <AuthenticationStack.Screen
         name="EntryStrategy"
         component={EntryStrategy}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <AuthenticationStack.Screen
+        name="ForgotPassword"
+        component={ForgotPassword}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <AuthenticationStack.Screen
+        name="ResetPassword"
+        component={ResetPassword}
         options={{
           presentation: "modal",
           headerStyle: styles.header,
@@ -313,6 +335,17 @@ const StackNavigation = () => {
       <Stack.Screen
         name="ChangePassword"
         component={ChangePassword}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="HistoryDetails"
+        component={HistoryDetails}
         options={{
           presentation: "modal",
           headerStyle: styles.header,
@@ -688,10 +721,12 @@ const Navigation = () => {
   }
 
   return (
-    <NavigationContainer>
-      {userToken == null ? <AuthStack /> : <StackNavigation />}
-      <StatusBar style="light" />
-    </NavigationContainer>
+    <>
+      <NavigationContainer>
+        {userToken == null ? <AuthStack /> : <StackNavigation />}
+        <StatusBar style="light" />
+      </NavigationContainer>
+    </>
   );
 };
 

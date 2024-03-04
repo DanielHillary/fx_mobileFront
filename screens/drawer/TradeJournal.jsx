@@ -5,21 +5,68 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import TradingJournal from "./TradingJournal";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { COLORS, SIZES, FONT } from "../../constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const TradeJournal = () => {
   const [isClicked, setIsClicked] = useState(false);
+  const [accountInfo, setAccountInfo] = useState({});
+  const [waiting, setWaiting] = useState(false);
 
   const { accountDetails } = useContext(AuthContext);
   const navigation = useNavigation();
 
+  const setAccountUp = async() => {
+    let account = await AsyncStorage.getItem("accountInfo").then((res) => {
+      return JSON.parse(res);
+    })
+    
+    if(account === null && accountDetails === null){
+      setWaiting(true);
+    }
+    if(accountDetails === null || accountDetails.length === 0){
+      setAccountInfo(account);
+      setWaiting(false)
+    }else{
+      setAccountInfo(accountDetails);
+      setWaiting(false);
+    }
+    
+  }
+
+  useEffect(() => {
+    setAccountUp();
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setAccountUp();
+    }, [accountDetails])
+
+  );
+
+  if(waiting || accountInfo === null){
+    return (
+      <View
+        style={{
+          backgroundColor: COLORS.appBackground,
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size={"large"} />
+      </View>
+    )
+  }
+
   return (
     <View style={styles.container}>
-      {accountDetails.accountName != "PsyDStarter" ? (
+      {accountInfo.accountName != "PsyDStarter" ? (
         <TradingJournal />
       ) : (
         <View>
@@ -61,6 +108,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.appBackground,
+    },
+    text: {
+      color: COLORS.white,
+      fontFamily: FONT.bold,
+      fontSize: SIZES.medium,
     },
   button: {
     // margin: 80,
