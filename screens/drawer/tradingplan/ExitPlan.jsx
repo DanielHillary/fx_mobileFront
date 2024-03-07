@@ -228,7 +228,7 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
 
             <Text style={styles.levelText}>
               {item.slPlacementPercentIsForProfit
-                ? "% of current profit."
+                ? "% of my profit target."
                 : "%"}
             </Text>
           </View>

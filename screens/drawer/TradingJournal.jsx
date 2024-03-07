@@ -358,12 +358,12 @@ const TradingJournal = () => {
     return search;
   };
 
-  useFocusEffect(
-    React.useCallback(() => {
-      getAllRecords();
-    }, [accountDetails])
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     getAllRecords();
+  //   }, [accountDetails])
     
-  );
+  // );
   const [searchTerm, setSearchTerm] = useState("");
 
   const searchRecordsBySymbol = async () => {

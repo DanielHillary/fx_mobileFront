@@ -4,6 +4,9 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  Alert,
+  Modal,
+  ScrollView,
 } from "react-native";
 import React, { useState, useEffect, useContext } from "react";
 import { COLORS, SIZES, FONT } from "../../constants";
@@ -11,6 +14,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { createRiskRegister } from "../../api/tradingplanApi";
 import { AuthContext } from "../../context/AuthContext";
+import SuccessModal from "../modal/SuccessModal";
 
 const RiskManager = () => {
   const [lossPerTrade, setLossPerTrade] = useState(0);
@@ -25,10 +29,16 @@ const RiskManager = () => {
   const [minutes, setMinutes] = useState("00");
   const [isClicked, setIsClicked] = useState(false);
   const [timing, setTiming] = useState("AM");
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const navigation = useNavigation();
 
   const { updateCompleted } = useContext(AuthContext);
+
+  const setVisibility = (val) => {
+    setIsModalVisible(val);
+    navigation.navigate("SignIn");
+  }
 
   const route = useRoute();
 
@@ -60,11 +70,11 @@ const RiskManager = () => {
     });
 
     if (response.status) {
-      console.log(response.message);
       updateCompleted(true);
-      navigation.navigate("SignIn");
+      setIsModalVisible(true);
     } else {
       console.log(response.message);
+      Alert.alert("Failed", response.message);
     }
   };
 
@@ -91,7 +101,7 @@ const RiskManager = () => {
     }
   };
   return (
-    <View style={styles.baseContainer}>
+    <ScrollView style={styles.baseContainer}>
       <Text style={styles.intro}>Risk Register</Text>
       <Text style={[styles.text, { fontSize: SIZES.medium }]}>
         Your risk register is your check against every trade you take to ensure
@@ -249,8 +259,9 @@ const RiskManager = () => {
           { marginTop: 30, fontStyle: "italic", color: COLORS.darkyellow },
         ]}
       >
-        Please note: If you do not provide a time, the default time would be set
-        to 12:00AM of your local time
+        Note: If you do not provide a time, the default time would be set
+        to 12:00AM of your local time. We use your daily start time to reset
+        daily limits eg. Max Account loss % per day...
       </Text>
 
       <TouchableOpacity
@@ -265,7 +276,40 @@ const RiskManager = () => {
           <Text style={styles.buttonText}>Finish</Text>
         )}
       </TouchableOpacity>
-    </View>
+
+      <View
+        style={{
+          flexDirection: "row",
+          padding: SIZES.small,
+          alignSelf: "center",
+          gap: 2,
+          bottom: 5,
+          alignItems: "center"
+        }}
+      >
+        <Text style={[styles.text, {marginTop: 4}]}>Don't have a entry plan yet? </Text>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("SignIn");
+          }}
+        >
+          <Text style={{ color: COLORS.darkyellow, fontSize: SIZES.large }}>
+            Skip
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <Modal
+       visible={isModalVisible}
+       onRequestClose={() => {
+         setIsModalVisible(false);
+       }}
+       animationType="slide"
+       transparent={true}
+      >
+        <SuccessModal setVisibility={setVisibility}/>
+      </Modal>
+    </ScrollView>
   );
 };
 
@@ -330,7 +374,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.darkyellow,
     borderRadius: 10,
     width: 200,
-    marginTop: 200,
+    marginTop: 130,
     alignSelf: "center",
   },
   buttonText: {

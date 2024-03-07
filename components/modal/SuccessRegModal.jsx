@@ -9,7 +9,7 @@ import {
   import React, { useEffect, useState } from "react";
   import { COLORS, FONT, SIZES } from "../../constants";
   
-  const SuccessRegModal = ({ setVisibility, nexPage }) => {
+  const SuccessRegModal = ({ setVisibility, message }) => {
     return (
       <View style={styles.container}>
         <View style={styles.modal}>
@@ -18,16 +18,15 @@ import {
               source={require("../../assets/icons/good.png")}
               style={{ height: 50, width: 50 }}
             />
-            <Text style={styles.note}>Transaction Successful</Text>
+            <Text style={styles.note}>{message}</Text>
   
             <TouchableOpacity
               onPress={() => {
                 setVisibility(false);
-                nexPage();
               }}
               style={styles.button}
             >
-              <Text style={styles.buttonText}>Done</Text>
+              <Text style={styles.buttonText}>Continue</Text>
             </TouchableOpacity>
           </View>
         </View>

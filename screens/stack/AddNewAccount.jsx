@@ -8,6 +8,8 @@ import {
   ActivityIndicator,
   Modal,
   Alert,
+  Linking,
+  ScrollView,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -145,6 +147,7 @@ const AddNewAccount = () => {
   const [option, setOption] = useState("");
   const [accountInfo, setAccountInfo] = useState({});
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   const { updateAccount, accountDetails, userInfo } = useContext(AuthContext);
 
@@ -153,6 +156,12 @@ const AddNewAccount = () => {
     navigation.navigate("SetupNewTradingPlan", {
       account: accountInfo,
     });
+  };
+
+  const openURL = (url) => {
+    Linking.openURL(url).catch((err) =>
+      console.error("An error occurred", err)
+    );
   };
 
   const navigation = useNavigation();
@@ -184,43 +193,49 @@ const AddNewAccount = () => {
   }, []);
 
   const registerAccount = async () => {
-    const account = {
-      brokerServer: brokerValue,
-      login: loginValue,
-      metaPassWord: passValue,
-      platForm: option,
-      userId: userInfo.user.userId,
-      userName: userInfo.user.userName,
-      defaultAccount: false,
-      hadPsyDStarter:
-        accountDetails.accountName === "PsyDStarter" ? true : false,
-    };
-
-    const resp = await registerMetaApiAccount(account).then((res) => {
-      return res.data;
-    });
-    setIsClicked(false);
-    if (resp.status) {
-      if (accountDetails.accountName === "PsyDStarter") {
-        // updateAccount(response.data.account);
-        // AsyncStorage.setItem(
-        //   "accountInfo",
-        //   JSON.stringify(response.data.account)
-        // );
+    if(brokerValue.length === 0 || loginValue.length === 0 || passValue.length === 0){
+      Alert.alert("", "Please fill out ALL the fields before you register account")
+      setIsClicked(false);
+    }else{
+      const account = {
+        brokerServer: brokerValue,
+        login: loginValue,
+        metaPassWord: passValue,
+        platForm: option,
+        userId: userInfo.user.userId,
+        userName: userInfo.user.userName,
+        defaultAccount: accountDetails.accountName === "PsyDStarter" ? true : false,
+        hadPsyDStarter:
+          accountDetails.accountName === "PsyDStarter" ? true : false,
+      };
+  
+      const resp = await registerMetaApiAccount(account).then((res) => {
+        return res.data;
+      });
+      setIsClicked(false);
+      if (resp.status) {
+        console.log(accountDetails.accountName);
+        if (accountDetails.accountName === "PsyDStarter") {
+          updateAccount(resp.data.account);
+          AsyncStorage.setItem(
+            "accountInfo",
+            JSON.stringify(resp.data.account)
+          );
+        }
+        setAccountInfo(resp.data.account);
+        setIsModalVisible(true);
+      } else {
+        console.log(resp.message);
+        Alert.alert("Failed", resp.message);
       }
-      setAccountInfo(resp.data.account);
-      console.log("This was successful");
-      setIsModalVisible(true);
-    } else {
-      console.log(resp.message);
-      Alert.alert("Failed", resp.message);
     }
+    
   };
 
   return (
-    <View style={styles.baseContainer}>
+    <ScrollView style={styles.baseContainer}>
       <View style={styles.introContainer}>
-        <Text style={styles.intro}>Trading Account Registration</Text>
+        <Text style={styles.intro}>MetaTrader Account Registration</Text>
         <Text style={styles.text}>
           All information shared with us are private and secure. We do not
           intend to share them with third-party.
@@ -325,6 +340,32 @@ const AddNewAccount = () => {
 
       <Options setAccount={setAccountType} />
 
+      <View style={{ flexDirection: "row", gap: SIZES.medium, marginTop: SIZES.large * 2, width: "85%", alignItems: 'center'}}>
+        <TouchableOpacity
+          onPress={() => {
+            setAgreed(!agreed);
+          }}
+        >
+          {agreed ? (
+            <Image
+              source={require("../../assets/icons/checkbox.png")}
+              style={styles.image}
+            />
+          ) : (
+            <View style={styles.checkbox} />
+          )}
+        </TouchableOpacity>
+        <Text style={styles.text}>
+          I have read and agree to the{" "}
+          <TouchableOpacity
+            onPress={() => {
+              openURL("https://pysd-trader.vercel.app/")
+            }}
+          ><Text style={styles.terms}>TERMS AND CONDITIONS</Text></TouchableOpacity> associated
+          with account creation and the refund policy on PsyDTrader.
+        </Text>
+      </View>
+
       <Modal
         visible={isModalVisible}
         onRequestClose={() => {
@@ -340,7 +381,12 @@ const AddNewAccount = () => {
         onPress={() => {
           //   navigate("AutoTrader");
           setIsClicked(true);
-          registerAccount();
+          if(agreed){
+            registerAccount();
+          }else{
+            Alert.alert("", "Please, you have agree to the terms and condition before linking your trading account.")
+            setIsClicked(false);
+          }
         }}
         style={styles.button}
       >
@@ -350,7 +396,7 @@ const AddNewAccount = () => {
           <Text style={styles.buttonText}>Register Account</Text>
         )}
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -366,6 +412,11 @@ const styles = StyleSheet.create({
     color: COLORS.lightWhite,
     fontFamily: FONT.bold,
     fontSize: SIZES.xxLarge,
+  },
+  terms: {
+    color: COLORS.darkyellow,
+    fontSize: SIZES.medium - 3,
+    fontFamily: FONT.bold,
   },
   text: {
     color: COLORS.lightWhite,
@@ -409,7 +460,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.darkyellow,
     borderRadius: 10,
     width: 300,
-    marginTop: 60,
+    marginVertical: 60,
     alignSelf: "center",
   },
   buttonText: {

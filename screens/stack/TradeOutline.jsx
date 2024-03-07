@@ -411,8 +411,6 @@ const TradeOutline = () => {
                 <TextInput
                   ref={inputRef}
                   editable={true}
-                  // placeholder="Add a note to your trade"
-                  // placeholderTextColor={"gray"}
                   numberOfLines={4}
                   multiline={true}
                   style={[styles.input]}
@@ -422,73 +420,9 @@ const TradeOutline = () => {
                     saveNotes(text)
                   }}
                   value={note}
-                  selection={{
-                    start: note.length,
-                    end: note.length,
-                  }}
                 />
               </View>
             </View>
-
-            {/* {!editMode ? (
-              <TouchableOpacity
-                onPress={() => {
-                  setEditMode(true);
-                  inputRef.current?.focus();
-                }}
-                style={{
-                  flexDirection: "row",
-                  alignSelf: "flex-end",
-                  alignItems: "center",
-                  padding: SIZES.small,
-                  marginRight: SIZES.small,
-                }}
-              >
-                <Text
-                  style={{
-                    color: COLORS.lightWhite,
-                    marginRight: SIZES.small - 4,
-                  }}
-                >
-                  Edit
-                </Text>
-                <Image
-                  source={require("../../assets/icons/EditFirst.png")}
-                  resizeMode="cover"
-                  style={styles.logImage}
-                />
-              </TouchableOpacity>
-            ) : (
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignSelf: "flex-end",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    color: COLORS.lightWhite,
-                  }}
-                >
-                  Save
-                </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    saveTradeNote();
-                  }}
-                  style={{ padding: SIZES.small, marginRight: SIZES.small }}
-                >
-                  <Image
-                    source={require("../../assets/icons/save.png")}
-                    style={{
-                      height: 25,
-                      width: 25,
-                    }}
-                  />
-                </TouchableOpacity>
-              </View>
-            )} */}
           </View>
 
           <Remark status={details.status} remarks={remarks} />

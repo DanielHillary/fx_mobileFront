@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ScrollView,
 } from "react-native";
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { COLORS, SIZES, FONT } from "../../../constants";
@@ -164,7 +165,13 @@ const RiskRegister = () => {
 
   if (!hasRisk) {
     return (
-      <View style={{flex:1, backgroundColor: COLORS.appBackground, paddingTop: 30}}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: COLORS.appBackground,
+          paddingTop: 30,
+        }}
+      >
         <EmptyList
           message={"You do not have a risk register. Kindly register one"}
         />
@@ -187,7 +194,7 @@ const RiskRegister = () => {
   }
 
   return (
-    <View style={styles.baseContainer}>
+    <ScrollView style={styles.baseContainer}>
       <Text style={styles.intro}>Risk Register</Text>
       <Text style={[styles.text, { fontSize: SIZES.medium }]}>
         Your risk register is your check against every trade you take to ensure
@@ -223,15 +230,11 @@ const RiskRegister = () => {
               // placeholder="0.0%"
               keyboardType="numeric"
               numberOfLines={1}
-              value={lossPerTrade}
               style={[styles.input]}
               onChangeText={(text) => {
                 setLossPerTrade(text);
               }}
-              selection={{
-                start: lossPerTrade.length,
-                end: lossPerTrade.length,
-              }}
+              value={lossPerTrade}
             />
           ) : (
             <Text style={styles.textInput}>
@@ -259,10 +262,6 @@ const RiskRegister = () => {
                 setLossPerDay(num);
               }}
               value={lossPerDay}
-              selection={{
-                start: lossPerDay.length,
-                end: lossPerDay.length,
-              }}
             />
           ) : (
             <Text style={styles.textInput}>
@@ -292,10 +291,6 @@ const RiskRegister = () => {
                 setMinRRR(text);
               }}
               value={minRRR}
-              selection={{
-                start: minRRR.length,
-                end: minRRR.length,
-              }}
             />
           ) : (
             <Text style={styles.textInput}>{riskManager.riskRewardRatio}</Text>
@@ -320,10 +315,10 @@ const RiskRegister = () => {
                 setMinProfitPerTrade(text);
               }}
               value={minProfitPerTrade}
-              selection={{
-                start: minProfitPerTrade.length,
-                end: minProfitPerTrade.length,
-              }}
+              // selection={{
+              //   start: minProfitPerTrade.length,
+              //   end: minProfitPerTrade.length,
+              // }}
             />
           ) : (
             <Text style={styles.textInput}>
@@ -353,10 +348,6 @@ const RiskRegister = () => {
                 setDefaultVolume(text);
               }}
               value={defaultVolume}
-              selection={{
-                start: defaultVolume.length,
-                end: defaultVolume.length,
-              }}
             />
           ) : (
             <Text style={styles.textInput}>{riskManager.defaultVolume}</Text>
@@ -382,10 +373,6 @@ const RiskRegister = () => {
                 setTargetProfit(text);
               }}
               value={targetProfit}
-              selection={{
-                start: targetProfit.length,
-                end: targetProfit.length,
-              }}
             />
           ) : (
             <Text style={styles.textInput}>
@@ -449,19 +436,35 @@ const RiskRegister = () => {
       />
 
       {editMode ? (
-        <TouchableOpacity
-          onPress={() => {
-            // navigation.navigate("Plan");
-            setCheckAlert(true);
+        <View
+          style={{
+            flexDirection: "row",
+            gap: SIZES.medium * 2,
+            alignSelf: "center",
           }}
-          style={styles.buttonContinue(editMode)}
         >
-          {isClicked ? (
-            <ActivityIndicator size="large" colors={"black"} />
-          ) : (
-            <Text style={styles.buttonText(editMode)}>Save</Text>
-          )}
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              // navigation.navigate("Plan");
+              setCheckAlert(true);
+            }}
+            style={styles.buttonContinue(editMode)}
+          >
+            {isClicked ? (
+              <ActivityIndicator size="large" colors={"black"} />
+            ) : (
+              <Text style={styles.buttonText(editMode)}>Save</Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setEditMode(!editMode);
+            }}
+            style={styles.buttonContinue(!editMode)}
+          >
+            <Text style={styles.buttonText(!editMode)}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <TouchableOpacity
           onPress={() => {
@@ -478,7 +481,7 @@ const RiskRegister = () => {
           )}
         </TouchableOpacity>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
@@ -567,7 +570,7 @@ const styles = StyleSheet.create({
     marginTop: 100,
     alignSelf: "center",
   }),
-  button:{
+  button: {
     // margin: 80,
     height: 40,
     backgroundColor: COLORS.darkyellow,
@@ -591,5 +594,5 @@ const styles = StyleSheet.create({
     fontSize: SIZES.medium,
     color: "black",
     fontFamily: FONT.bold,
-  }
+  },
 });

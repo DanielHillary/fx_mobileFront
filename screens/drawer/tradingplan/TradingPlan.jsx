@@ -1,4 +1,10 @@
-import { StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import React, { useState, useEffect, useContext } from "react";
 import { COLORS, SIZES, FONT } from "../../../constants";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
@@ -38,33 +44,24 @@ const TradingPlan = () => {
   const [accountInfo, setAccountInfo] = useState({});
   const [waiting, setWaiting] = useState(false);
 
-  const getAccount = async () => {
-    const account = await AsyncStorage.getItem("accountInfo").then((res) => {
-      return JSON.parse(res);
-    });
-    setAccountInfo(account);
-    console.log(account.hasCompleteTradingPlan);
-  };
-
   const { accountDetails } = useContext(AuthContext);
 
-  const setAccountUp = async() => {
+  const setAccountUp = async () => {
     let account = await AsyncStorage.getItem("accountInfo").then((res) => {
       return JSON.parse(res);
-    })
-    
-    if(account === null && accountDetails === null){
+    });
+
+    if (account === null && accountDetails === null) {
       setWaiting(true);
     }
-    if(accountDetails === null || accountDetails.length === 0){
+    if (accountDetails === null || accountDetails.length === 0) {
       setAccountInfo(account);
       setWaiting(false);
-    }else{
+    } else {
       setAccountInfo(accountDetails);
       setWaiting(false);
     }
-    
-  }
+  };
 
   useEffect(() => {
     // getAccount();
@@ -88,14 +85,15 @@ const TradingPlan = () => {
 
   return (
     <View style={styles.base}>
-      {accountInfo.completionStatus != 25 ||
-      accountInfo.completionStatus != 0 ? (
-        <TopTabGroup />
-      ) : (
+      {accountInfo.completionStatus === 25 ||
+      accountInfo.completionStatus === 0 ? (
         <NoTradePlan accountInfo={accountInfo} />
+      ) : (
+        <TopTabGroup />
       )}
       <View style={styles.buttonContainer}></View>
     </View>
+
   );
 };
 

@@ -74,10 +74,11 @@ const TradeJournal = () => {
             style={{
               color: COLORS.lightWhite,
               textAlign: "center",
-              fontSize: SIZES.medium - 5,
+              fontSize: SIZES.medium - 3,
               paddingHorizontal: SIZES.medium,
               marginVertical: SIZES.medium,
               marginTop: SIZES.large * 2,
+              fontFamily: FONT.medium,
             }}
           >
             Please register a real trading account in order able to use this

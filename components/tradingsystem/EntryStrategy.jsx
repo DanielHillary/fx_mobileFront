@@ -260,10 +260,8 @@ const EntryStrategy = () => {
               },
             ]}
           >
-            In order to use this service, you have to agree to our terms and
-            condition. This service strictly monitors ALL your trades and would
-            shut down any trade that is not in compliance with your trading
-            plan.
+            We urge our users to stick to their trading plan always. Always analyze the market thoroughly before
+            taking a position. Remember, sometimes the short-cut is usually the longest cut.
           </Text>
           <TouchableOpacity
             onPress={() => {
@@ -280,6 +278,32 @@ const EntryStrategy = () => {
         </View>
       )}
 
+      <View
+        style={{
+          flexDirection: "row",
+          padding: SIZES.small,
+          alignSelf: "center",
+          gap: 2,
+          position: "absolute",
+          bottom: 40,
+          alignItems: "center"
+        }}
+      >
+        <Text style={[styles.text, {marginTop: 4}]}>Don't have a entry plan yet? </Text>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("ExitStrategy", {
+              account: accountInfo,
+              tradingPlan: tradePlan,
+            });
+          }}
+        >
+          <Text style={{ color: COLORS.darkyellow, fontSize: SIZES.large }}>
+            Skip
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <Modal
         visible={isModalVisible}
         onRequestClose={() => {
@@ -288,7 +312,7 @@ const EntryStrategy = () => {
         animationType="slide"
         transparent={true}
       >
-        <SuccessModal setVisibility={setVisibility}/>
+        <SuccessModal setVisibility={setVisibility} />
       </Modal>
 
       <AlertModal

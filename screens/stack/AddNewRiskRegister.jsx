@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   Modal,
+  Alert,
 } from "react-native";
 import React, { useState, useEffect, useContext } from "react";
 import { COLORS, SIZES, FONT } from "../../constants";
@@ -74,6 +75,7 @@ const AddNewRiskManager = () => {
       setIsModalVisible(true);
     } else {
       console.log(response.message);
+      Alert.alert("Failed transaction", response.message)
     }
   };
 
@@ -257,8 +259,9 @@ const AddNewRiskManager = () => {
           { marginTop: 30, fontStyle: "italic", color: COLORS.darkyellow },
         ]}
       >
-        Please note: If you do not provide a time, the default time would be set
-        to 12:00AM of your local time
+        Note: If you do not provide a time, the default time would be set
+        to 12:00AM of your local time. We use your daily start time to reset
+        daily limits eg. Max Account loss % per day...
       </Text>
 
       <Modal

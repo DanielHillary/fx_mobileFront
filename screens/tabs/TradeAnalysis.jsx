@@ -91,13 +91,13 @@ const TradeAnalysis = ({ screenProps }) => {
     if(account === null && accountDetails === null){
       setWaiting(true);
     }
-    if(account === null || account.length === 0){
-      setAccountInfo(accountDetails);
-      setBalance(accountDetails.accountBalance);
-      setWaiting(false);
-    }else{
+    if(accountDetails === null || accountDetails.length === 0){
       setAccountInfo(account);
       setBalance(account.accountBalance);
+      setWaiting(false);
+    }else{
+      setAccountInfo(accountDetails);
+      setBalance(accountDetails.accountBalance);
       setWaiting(false);
     }
     
@@ -124,8 +124,8 @@ const TradeAnalysis = ({ screenProps }) => {
       assetAbbrev: selectedLabel,
       tradingPlanId: accountInfo.planId || null,
       userAccountId: accountInfo.accountId,
-  
     };
+
     let check = false;
     if (body.assetCategory == "") {
       check = true;
@@ -169,6 +169,20 @@ const TradeAnalysis = ({ screenProps }) => {
   };
 
   const postAPI = async () => {
+    const body = {
+      entryPrice: entry,
+      lotSize: volume,
+      stopLossPrice: stopLoss,
+      takeProfitPrice: takeProfit,
+      accountBalance: balance,
+      currency: "USD",
+      assetCategory: assetType,
+      symbol: assetValue,
+      assetAbbrev: selectedLabel,
+      tradingPlanId: accountInfo.planId || null,
+      userAccountId: accountInfo.accountId,
+  
+    };
     setIsClicked(true);
     let response = {
       status: false,
@@ -266,7 +280,6 @@ const TradeAnalysis = ({ screenProps }) => {
             } else {
               setIsCurrencies(true);
             }
-            body.assetCategory = item.value;
             setCIsFocus(false);
           }}
           containerStyle={{
@@ -354,7 +367,6 @@ const TradeAnalysis = ({ screenProps }) => {
               style={[styles.input]}
               onChangeText={(num) => {
                 setEntry(num);
-                body.entryPrice = entry;
               }}
               value={entry}
             />
@@ -375,7 +387,6 @@ const TradeAnalysis = ({ screenProps }) => {
               // onPressIn={() => setLossFocus(true)}
               onChangeText={(text) => {
                 setStopLoss(text);
-                body.stopLossPrice = stopLoss;
               }}
               value={stopLoss}
             />
@@ -392,7 +403,6 @@ const TradeAnalysis = ({ screenProps }) => {
               style={[styles.input]}
               onChangeText={(text) => {
                 setTakeProfit(text);
-                body.takeProfitPrice = takeProfit;
               }}
               value={takeProfit}
             />

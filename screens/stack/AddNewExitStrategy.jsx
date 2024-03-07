@@ -100,17 +100,17 @@ const AddNewExitStrategy = () => {
   };
 
   const checkEmptyLevelsForProfit = () => {
-    if ((profitLotSize != 0 || slProfitValue != 0) && tpValue != 0) {
-      return true;
+    if (profitLotSize == 0 && slProfitValue == 0 && slLossValue == 0) {
+      return false
     }
-    return false;
+    return true;
   };
 
   const checkEmptyLevelsForLoss = () => {
-    if (lossLotSize != 0 || slValue != 0) {
-      return true;
+    if (lossLotSize == 0) {
+      return false;
     }
-    return false;
+    return true;
   };
 
   const registerProfit = async () => {
@@ -232,7 +232,7 @@ const AddNewExitStrategy = () => {
               if (checkEmptyLevelsForProfit()) {
                 setIsProfitAlert(true);
               } else {
-                //Sound an alarm
+                setIsContinue(true);
               }
             }}
           >
@@ -302,7 +302,12 @@ const AddNewExitStrategy = () => {
               keyboardType="numeric"
               numberOfLines={1}
               onChangeText={(text) => {
-                setSlProfitValue(text);
+                if (slLossValue == 0) {
+                  setSlProfitValue(text);
+                } else {
+                  setSlProfitValue(0);
+                  alert("You cannot secure profit because you already set your SL to reduce your risk size")
+                }
               }}
               value={slProfitValue}
               onFocus={() => {
@@ -325,7 +330,12 @@ const AddNewExitStrategy = () => {
               keyboardType="numeric"
               numberOfLines={1}
               onChangeText={(text) => {
-                setSlLossValue(text);
+                if(slProfitValue == 0){
+                  setSlLossValue(text);
+                }else {
+                  setSlLossValue(0);
+                  alert("You do not have any risks because you already set your SL to secure some profit.")
+                }
               }}
               value={slLossValue}
               onFocus={() => {
@@ -348,7 +358,7 @@ const AddNewExitStrategy = () => {
               if (checkEmptyLevelsForLoss()) {
                 setIsLossAlert(true);
               } else {
-                //Sound an alarm
+                setIsContinue(true);
               }
             }}
           >
@@ -451,7 +461,7 @@ const AddNewExitStrategy = () => {
           "You have some spaces left out. Please fill in the missing figures before you continue"
         }
         showCancelButton={true}
-        showConfirmButton={true}
+        showConfirmButton={false}
         handleCancel={() => {
           setIsContinue(false);
         }}

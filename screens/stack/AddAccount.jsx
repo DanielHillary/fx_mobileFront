@@ -7,12 +7,19 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  Linking,
+  ScrollView,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, FONT, SIZES } from "../../constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getUserAccont, registerDummyAccount, registerMetaApiAccount, registerNewMetaApiAccount } from "../../api/accountApi";
+import {
+  getUserAccont,
+  registerDummyAccount,
+  registerMetaApiAccount,
+  registerNewMetaApiAccount,
+} from "../../api/accountApi";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { AuthContext } from "../../context/AuthContext";
 import AwesomeAlert from "react-native-awesome-alerts";
@@ -153,6 +160,7 @@ const AddAccount = () => {
   const [option, setOption] = useState("");
   const [accountInfo, setAccountInfo] = useState({});
   const [check, setCheck] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   const navigation = useNavigation();
 
@@ -161,6 +169,12 @@ const AddAccount = () => {
   const route = useRoute();
 
   const userInfo = route.params?.user || null;
+
+  const openURL = (url) => {
+    Linking.openURL(url).catch((err) =>
+      console.error("An error occurred", err)
+    );
+  };
 
   const setAccountType = (data) => {
     setOption(data);
@@ -188,7 +202,7 @@ const AddAccount = () => {
     fetchUserData();
   }, []);
 
-  const createDummyAccount = async() => {
+  const createDummyAccount = async () => {
     const account = {
       brokerServer: "Server",
       login: "Login",
@@ -209,14 +223,14 @@ const AddAccount = () => {
         "accountInfo",
         JSON.stringify(response.data.account)
       );
-      navigation.navigate("SetupNewTradingPlan", {
+      navigation.navigate("SignIn", {
         account: response.data.account,
       });
     } else {
       console.log(response.message);
       Alert.alert("Failed Request", "Something went wrong. Please try again");
     }
-  }
+  };
 
   const registerAccount = async () => {
     const account = {
@@ -249,9 +263,9 @@ const AddAccount = () => {
   };
 
   return (
-    <View style={styles.baseContainer}>
+    <ScrollView style={styles.baseContainer}>
       <View style={styles.introContainer}>
-        <Text style={styles.intro}>Trading Account Registration</Text>
+        <Text style={styles.intro}>MetaTrader Account Registration</Text>
         <Text style={styles.text}>
           All information shared with us are private and secure. We do not
           intend to share them with third-party.
@@ -356,11 +370,45 @@ const AddAccount = () => {
 
       <Options setAccount={setAccountType} />
 
+      <View style={{ flexDirection: "row", gap: SIZES.medium, marginTop: SIZES.large * 1.2, width: "85%", alignItems: 'center'}}>
+        <TouchableOpacity
+          onPress={() => {
+            setAgreed(!agreed)
+          }}
+        >
+          {agreed ? (
+            <Image
+              source={require("../../assets/icons/checkbox.png")}
+              style={styles.image}
+            />
+          ) : (
+            <View style={styles.checkbox} />
+          )}
+        </TouchableOpacity>
+        <Text style={styles.text}>
+          I have read and agree to the{" "}
+          <TouchableOpacity
+            onPress={() => {
+              openURL("https://pysd-trader.vercel.app/")
+            }}
+          ><Text style={styles.terms}>TERMS AND CONDITIONS</Text></TouchableOpacity> associated
+          with account creation and the refund policy on PsyDTrader.
+        </Text>
+      </View>
+
       <TouchableOpacity
         onPress={() => {
           //   navigate("AutoTrader");
           setIsClicked(true);
-          registerAccount();
+          if(brokerValue.length === 0 || loginValue.length === 0 || passValue.length === 0){
+            Alert.alert("", "Please fill out ALL the fields before you register account")
+            setIsClicked(false);
+          }else if(!agreed){
+            Alert.alert("", "Please, you have agree to the terms and condition before linking your trading account.")
+            setIsClicked(false);
+          }else{
+            registerAccount();
+          }
         }}
         style={styles.button}
       >
@@ -371,7 +419,7 @@ const AddAccount = () => {
         )}
       </TouchableOpacity>
 
-      <View style={{ flexDirection: "row", alignContent: "center" }}>
+      <View style={{ flexDirection: "row", alignSelf: "center", marginBottom: 70 }}>
         <Text
           style={{
             color: COLORS.lightWhite,
@@ -413,7 +461,7 @@ const AddAccount = () => {
         }}
         isAlert={check}
       />
-    </View>
+    </ScrollView>
   );
 };
 
@@ -435,6 +483,11 @@ const styles = StyleSheet.create({
     fontSize: SIZES.small,
     fontFamily: FONT.regular,
     marginTop: SIZES.small,
+  },
+  terms:{
+    color: COLORS.darkyellow,
+    fontSize: SIZES.medium - 3,
+    fontFamily: FONT.bold
   },
   email: (focused) => ({
     borderColor: focused ? COLORS.darkyellow : COLORS.gray,
@@ -472,7 +525,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.darkyellow,
     borderRadius: 10,
     width: 300,
-    marginTop: 60,
+    marginTop: 50,
     alignSelf: "center",
   },
   buttonText: {

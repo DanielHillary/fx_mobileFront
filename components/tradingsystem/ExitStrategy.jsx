@@ -111,7 +111,7 @@ const ExitStrategy = () => {
   };
 
   const checkEmptyLevelsForProfit = () => {
-    if (profitLotSize == 0 && profitLotSize == 0 && slLossValue == 0) {
+    if (profitLotSize == 0 && slProfitValue == 0 && slLossValue == 0) {
       return false
     }
     return true;
@@ -317,6 +317,7 @@ const ExitStrategy = () => {
                 if (slLossValue == 0) {
                   setSlProfitValue(text);
                 } else {
+                  setSlProfitValue(0);
                   alert("You cannot secure profit because you already set your SL to reduce your risk size")
                 }
               }}
@@ -344,6 +345,7 @@ const ExitStrategy = () => {
                 if(slProfitValue == 0){
                   setSlLossValue(text);
                 }else {
+                  setSlLossValue(0);
                   alert("You do not have any risks because you already set your SL to secure some profit.")
                 }
               }}

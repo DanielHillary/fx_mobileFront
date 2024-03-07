@@ -170,8 +170,6 @@ const Notification = () => {
     
   }
 
-  const id = accountDetails.accountId;
-
   const updateList = (item) => {
     const newArray = notification.filter((obj) => obj.id !== item.id);
     setNotification(newArray);
@@ -230,13 +228,12 @@ const Notification = () => {
   useEffect(() => {
     setIsLoading(true);
     setAccountUp();
-    
   }, []);
 
   const onRefresh = useCallback(() => {
     // Set refreshing to true to show the loading indicator
     setRefreshing(true);
-    getAllNotification(accountDetails.accountId);
+    getAllNotification(accountInfo.accountId);
     setRefreshing(false);
   }, []);
 
@@ -255,7 +252,7 @@ const Notification = () => {
       setOngoingPressed(false);
       setExitPressed(false);
       setAnalysisPressed(false);
-      getAllNotification(accountDetails.accountId);
+      getAllNotification(accountInfo.accountId);
     } else if (item == "Trades") {
       search = item;
       setExitPressed(false);

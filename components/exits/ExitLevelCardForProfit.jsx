@@ -21,13 +21,13 @@ const ExitLevelCardForProfit = ({ item, handleNavigate }) => {
         </View>
 
         
-        <View>
+        {item.lotSize != 0 && <View>
           <Text style={styles.jobType}>Reduce lotSize</Text>
           <View style={{flexDirection: 'row',}}>
              <Text style={{color: COLORS.lightWhite, marginTop: 3}}>by</Text>
              <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large, marginLeft: 6, alignSelf: 'flex-end'}}>{item?.lotSize}</Text>
           </View>
-        </View>
+        </View>}
 
         <View>
           <Text style={styles.jobType}>Set stopLoss</Text>

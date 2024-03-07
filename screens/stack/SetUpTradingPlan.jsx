@@ -106,9 +106,12 @@ const Options = ({ setAccount, setAgreed }) => {
               },
             ]}
           >
-            This is the basic service we provide for traders. You would get a
-            warning and be scored poorly if you neglect any of your trading
-            plans for every trade that you take.
+            This is the basic service we provide for traders. If you continue
+            with this mode, you would get a warning and be scored poorly if you
+            neglect any of your trading plans for every trade that you take. We
+            are under no obligation to implement your trading plan and as such,
+            it is your responsibility to make sure you are within your trading
+            strategy at all times.
           </Text>
         ) : (
           <ScrollView>
@@ -220,10 +223,13 @@ const SetUpTradingPlan = () => {
           return res.data;
         });
         if (response.status) {
-          navigation.navigate("EntryStrategy", { account: account, tradePlan : response.data });
+          navigation.navigate("EntryStrategy", {
+            account: account,
+            tradePlan: response.data,
+          });
           console.log("Successful");
           console.log(isAgree, accountType);
-        }else{
+        } else {
           console.log(response.message);
         }
       } else {
@@ -235,9 +241,12 @@ const SetUpTradingPlan = () => {
         return res.data;
       });
       if (response.status) {
-        navigation.navigate("EntryStrategy", { account: account, tradePlan : response.data });
+        navigation.navigate("EntryStrategy", {
+          account: account,
+          tradePlan: response.data,
+        });
         console.log(isAgree, accountType);
-      }else{
+      } else {
         console.log(response.message);
       }
     }
@@ -251,7 +260,8 @@ const SetUpTradingPlan = () => {
 
       <Text style={[styles.text, { fontStyle: "italic" }]}>
         Every trader is encouraged to have a trading plan. Trading the forex
-        market without a trading plan is like driving without any controls
+        market without a trading plan is like driving without any directions or
+        destination.
       </Text>
       <Text style={styles.text}>
         Your Trading plan typically has{"  "}
@@ -347,12 +357,20 @@ const SetUpTradingPlan = () => {
         )}
       </TouchableOpacity>
 
-      <View style={{ padding: SIZES.large, marginBottom: 50 }}>
+      <View
+        style={{ padding: SIZES.small, alignSelf: "center", marginBottom: 50 }}
+      >
         <Text style={styles.text}>
-          Don't have a trading plan? Use{" "}
-          <Text style={{ color: COLORS.darkyellow, fontSize: SIZES.large }}>
-            PsyDTrader
-          </Text>
+          Don't have a trading plan yet?{" "}
+          <TouchableOpacity
+           onPress={() => {
+            // navigation.navigate("SignIn");
+           }}
+          >
+            <Text style={{ color: COLORS.darkyellow, fontSize: SIZES.large }}>
+              Skip
+            </Text>
+          </TouchableOpacity>
         </Text>
       </View>
     </ScrollView>

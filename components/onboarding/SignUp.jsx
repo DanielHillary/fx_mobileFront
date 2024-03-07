@@ -1,6 +1,7 @@
 import {
   Alert,
   SafeAreaView,
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -26,42 +27,55 @@ const SignUp = () => {
   const [fullName, setFullName] = useState("");
   const [userName, setUserName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [isClicked, setIsClicked] = useState("");
 
   const [hide, setHide] = useState(true);
 
+  const { navigate } = useNavigation();
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   const registerUser = async () => {
-    let individualNames = fullName.split(" ");
+    setIsClicked(true);
 
-    const newUser = {
-      email: email,
-      firstName: individualNames[0],
-      lastName: individualNames[1],
-      password: passWord,
-      phoneNumber: phoneNumber,
-      userName: userName,
-      hasMetaAccount: false,
-      hasCompleteTradingPlan: false,
-    };
-
-    const response = await registerNewUser(newUser).then((res) => {
-      return res.data;
-    })
-
-    
-    if(response.status){
-      Toast.show({
-        type: "success",
-        text1: "Successful Registration",
-        text2: "Please register your trading account",
-      });
-      navigate("AddAccount", { user : response.data });
+    if(email.length === 0 || userName.length === 0 
+      || passWord.length === 0 || fullName.length === 0 || phoneNumber.length === 0){
+        Alert.alert("", "Please fill out ALL the fields before proceeding");
+    }else if(!emailRegex.test(email)){
+      Alert.alert("", "The email you provided doesn't match the right format. Please check and try again");
     }else{
-      console.log(response.message)
-      Alert.alert("Failed transaction", response.message)
+      let individualNames = fullName.split(" ");
+      const newUser = {
+        email: email,
+        firstName: individualNames[0],
+        lastName: individualNames[1],
+        password: passWord,
+        phoneNumber: phoneNumber,
+        userName: userName,
+        hasMetaAccount: false,
+        hasCompleteTradingPlan: false,
+      };
+  
+      const response = await registerNewUser(newUser).then((res) => {
+        return res.data;
+      })
+  
+      if(response.status){
+        Toast.show({
+          type: "success",
+          text1: "Successful Registration",
+          text2: "You have been registered successfully",
+        });
+        navigate("VerifyEmail", { data : response.data});
+      }else{
+        console.log(response.message)
+        Alert.alert("Failed transaction", response.message)
+      }
     }
+    setIsClicked(false);
   };
 
-  const { navigate } = useNavigation();
+  
   return (
     <ScrollView style={styles.container}>
       <View
@@ -215,7 +229,11 @@ const SignUp = () => {
         }}
         style={styles.button}
       >
-        <Text style={styles.buttonText}>Register</Text>
+        {isClicked ? (
+            <ActivityIndicator size="large" colors={"black"} />
+          ) : (
+            <Text style={styles.buttonText}>Register</Text>
+        )}
       </TouchableOpacity>
 
       <View style={{ flexDirection: "row", alignSelf: "center" }}>

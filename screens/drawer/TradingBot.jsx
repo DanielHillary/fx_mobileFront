@@ -387,7 +387,6 @@ const TradingBot = () => {
     if (accountDetails === null || accountDetails.length === 0) {
       setAccount(account);
       if (account.accountName != "PsyDStarter") {
-        console.log(account.paidAccount)
         if (account.paidAccount) {
           const response = await getAllUserAccounts(account.userId).then(
             (res) => {
@@ -408,7 +407,6 @@ const TradingBot = () => {
     } else {
       setAccount(accountDetails);
       if (accountDetails.accountName != "PsyDStarter") {
-        console.log(accountDetails.paidAccount)
         if (accountDetails.paidAccount) {
           const response = await getAllUserAccounts(accountDetails.userId).then(
             (res) => {

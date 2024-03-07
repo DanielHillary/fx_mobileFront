@@ -305,7 +305,7 @@ const EntryPlan = () => {
             onPress={() => {
               navigation.navigate("AddNewEntryStrategies", {
                 account: accountDetails,
-                tradePlan: accountDetails
+                tradePlan: accountDetails,
               });
             }}
             style={styles.buttonContinue}
@@ -338,6 +338,19 @@ const EntryPlan = () => {
           </Text>
         </View>
       )} */}
+
+      {isEdit && <TouchableOpacity
+        onPress={() => {
+          setIsEdit(!isEdit)
+        }}
+        style={[styles.buttonContinue, {position: "absolute", bottom: 40}]}
+      >
+        {isClicked ? (
+          <ActivityIndicator size="large" colors={"black"} />
+        ) : (
+          <Text style={styles.buttonText}>Cancel</Text>
+        )}
+      </TouchableOpacity>}
 
       <AlertModal
         isAlert={isEmpty}

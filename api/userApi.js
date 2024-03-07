@@ -5,10 +5,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // const authToken = await AsyncStorage.getItem("jwtToken");
 
 // export const localHost = "http://192.168.43.131:8080/api";
-export const localHost = "https://fxprodev-production.up.railway.app/api";
+export const localHost = "https://psydtrader.uc.r.appspot.com/api";
 
 // const host = "http://192.168.43.131:8080/auth/login";
-const host = "https://fxprodev-production.up.railway.app/auth/login"
+const host = "https://psydtrader.uc.r.appspot.com/auth/login"
 const host2 = "http://192.168.252.215:8080/auth/login";
 
 const headers = {
@@ -44,7 +44,24 @@ export const fetchUser = async (userName, password) => {
 // };
 
 export const registerNewUser = async (body) => {
-  const response = await axios.post(`${localHost}/registration/registerNewUser`, body);
+  const response = await axios.post(
+    `${localHost}/registration/registerNewUser`,
+    body
+  );
+  return response;
+};
+
+export const emailVerification = async (otp, mail) => {
+  const response = await axios.get(`${localHost}/registration/verifycode`, {
+    params: { verificationOtp: otp, email: mail },
+  });
+  return response;
+};
+
+export const resentOtpCode = async (mail) => {
+  const response = await axios.get(`${localHost}/registration/resendOTP`, {
+    params: { email: mail },
+  });
   return response;
 };
 

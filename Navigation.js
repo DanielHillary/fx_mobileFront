@@ -69,6 +69,7 @@ import WelcomeSlider from "./components/onboarding/slider/WelcomeSlider";
 import ForgotPassword from "./components/onboarding/forgotpassword/ForgotPassword";
 import ResetPassword from "./components/onboarding/forgotpassword/ResetPassword";
 import HistoryDetails from "./screens/tabs/PriceAlert/HistoryDetails";
+import VerifyEmail from "./components/onboarding/forgotpassword/VerifyEmail";
 
 const Tab = createBottomTabNavigator();
 
@@ -135,6 +136,16 @@ const AuthStack = () => {
       <AuthenticationStack.Screen
         name="RiskManager"
         component={RiskManager}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+      <AuthenticationStack.Screen
+        name="VerifyEmail"
+        component={VerifyEmail}
         options={{
           presentation: "modal",
           headerStyle: styles.header,
