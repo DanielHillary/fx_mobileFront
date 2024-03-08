@@ -60,7 +60,6 @@ const AlertModal = ({
 const Options = ({ image, option, nav, checkOut }) => {
   const navigation = useNavigation();
   const { logout } = useContext(AuthContext);
-  
 
   return (
     <TouchableOpacity
@@ -148,33 +147,33 @@ const Profile = () => {
   const [isSigned, setIsSigned] = useState(false);
   const [waiting, setWaiting] = useState(false);
 
+  const navigation = useNavigation();
+
   const { accountDetails, userInfo, logout, updateAccount } =
     useContext(AuthContext);
-
 
   const setVisibility = (value) => {
     setIsModalVisible(value);
   };
 
-  const setAccountUp = async() => {
+  const setAccountUp = async () => {
     let account = await AsyncStorage.getItem("accountInfo").then((res) => {
       return JSON.parse(res);
-    })
-    
-    if(account === null && accountDetails === null){
+    });
+
+    if (account === null && accountDetails === null) {
       setWaiting(true);
     }
-    if(accountDetails === null || accountDetails.length === 0){
+    if (accountDetails === null || accountDetails.length === 0) {
       setAccount(account);
-      setIsStrict(account.isStrict);
+      setIsStrict(account.strict)
       setWaiting(false);
-    }else{
+    } else {
       setAccount(accountDetails);
-      setIsStrict(accountDetails.isStrict)
+      setIsStrict(accountDetails.strict);
       setWaiting(false);
     }
-    
-  }
+  };
 
   const checkOut = (value) => {
     setCheckSignOut(value);
@@ -196,20 +195,17 @@ const Profile = () => {
   );
 
   const updateAccountInfo = async (value) => {
-    const response = await updateAccountMode(
-      account.accountId,
-      value
-    ).then((res) => {
-      return res.data;
-
-    });
+    const response = await updateAccountMode(account.accountId, value).then(
+      (res) => {
+        return res.data;
+      }
+    );
     if (response.status) {
-      setIsModalVisible(false)
+      setIsModalVisible(false);
     } else {
       console.log(response.message);
     }
   };
-
 
   if (waiting || account === null) {
     return (
@@ -249,19 +245,33 @@ const Profile = () => {
               marginLeft: 10,
             }}
           >
-            {account.accountNumber === null ? "5566559995R" : account.accountNumber}
+            {account.accountNumber === null
+              ? "5566559995R"
+              : account.accountNumber}
           </Text>
           <Text
             style={{
               fontFamily: FONT.regular,
               color: COLORS.lightWhite,
               marginLeft: 10,
-
             }}
           >
             {account.server}
           </Text>
         </View>
+
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("UpdateInfo");
+          }}
+          style={{marginTop: 10, marginLeft: 20}}
+        >
+          <Image
+            source={require("../../assets/icons/edit.png")}
+            resizeMethod="auto"
+            style={{ height: 20, width: 20 }}
+          />
+        </TouchableOpacity>
       </View>
 
       {account.accountName != "PsyDStarter" ? (
@@ -290,13 +300,13 @@ const Profile = () => {
           {account.accountName != "PsyDStarter" && (
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Text style={styles.mode}>
-                {!isStrict ? "Strict" : "Flexible"}
+                {isStrict ? "Strict" : "Flexible"}
               </Text>
               <Switch
-                value={!isStrict}
+                value={isStrict}
                 onValueChange={() => {
                   setIsStrict((prev) => !prev);
-                  if (isStrict) {
+                  if (!isStrict) {
                     setIsModalVisible(true);
                   } else {
                     updateAccountInfo(false);
@@ -490,6 +500,6 @@ const styles = StyleSheet.create({
   mode: {
     color: COLORS.white,
     fontSize: SIZES.medium,
-    fontFamily: FONT.bold
-  }
+    fontFamily: FONT.bold,
+  },
 });

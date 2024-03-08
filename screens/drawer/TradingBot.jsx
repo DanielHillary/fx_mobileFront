@@ -560,7 +560,7 @@ const TradingBot = () => {
     const tradeOrder = {
       assetCategory: isCurrencies ? "Currencies" : "Synthetic",
       comments: "title",
-      lotSize: 1,
+      lotSize: 0,
       metaAccountId: account.metaApiAccountId,
       numberOfTradesToExecute: entry,
       stopLossPrice: stopLoss,
@@ -577,6 +577,8 @@ const TradingBot = () => {
       confirmEntries: confirmEntries,
       entryPercent: percentEntry,
     };
+
+    console.log(acctList);
 
     const response = await executeAdvancedOrder(tradeOrder).then((res) => {
       return res.data;

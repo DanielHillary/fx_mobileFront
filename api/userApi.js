@@ -23,26 +23,6 @@ export const fetchUser = async (userName, password) => {
   return response;
 };
 
-// export const fetchUser = (userName, password) => {
-//   const requestOptions = {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json", // Set the content type to JSON
-//       // Add any additional headers as needed
-//     },
-//     body: JSON.stringify({ userName: userName, userPassword: password }), // Convert the data to JSON format
-//   };
-//   const response = fetch(host, requestOptions).then((res) => {
-
-//     if (!res.ok) {
-//       console.log("something went wrong in here");
-//     }
-//     return res.json();
-//   });
-
-//   return response;
-// };
-
 export const registerNewUser = async (body) => {
   const response = await axios.post(
     `${localHost}/registration/registerNewUser`,
@@ -70,6 +50,12 @@ export const saveFireBaseToken = async (token, accountId) => {
   const response = await apiAxios.get("/registration/savefirebasetoken", {
     params: { token: token, userId: accountId },
   });
+  return response;
+};
+
+export const updateUserInformation = async (body) => {
+  const apiAxios = await createAxiosInstance();
+  const response = await apiAxios.put("/registration/updateuserinfo", body);
   return response;
 };
 

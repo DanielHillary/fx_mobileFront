@@ -142,7 +142,7 @@ const AddNewAccount = () => {
   const [loginValue, setLoginValue] = useState("");
   const [passValue, setPassValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [hide, setHide] = useState(false);
+  const [hide, setHide] = useState(true);
   const [userData, setUserData] = useState({});
   const [option, setOption] = useState("");
   const [accountInfo, setAccountInfo] = useState({});

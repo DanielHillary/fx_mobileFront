@@ -10,12 +10,18 @@ import {
 import { COLORS, SIZES, FONT } from "../../constants";
 import React, { useEffect, useState } from "react";
 
-const StrictModal = ({ setVisibility, updateSigned, updateAccount, account }) => {
+const StrictModal = ({
+  setVisibility,
+  updateSigned,
+  updateAccount,
+  account,
+}) => {
   const [isPressed, setIsPressed] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
 
   useEffect(() => {
     setIsPressed(account.hasSignedStrictAgreement);
-  }, [])
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -47,50 +53,55 @@ const StrictModal = ({ setVisibility, updateSigned, updateAccount, account }) =>
             per trade
           </Text>
           <Text style={styles.text}>
-            Therefore, you might lose money due to broker spread or market volatility
-            everytime you open a trade and we have to shut it down. Also your stop levels
-            might not be the exact prices as set when purchasing your positions.
+            Therefore, you might lose money due to broker spread or market
+            volatility everytime you open a trade and we have to shut it down.
+            Also your stop levels might not be the exact prices as set when
+            purchasing your positions.
           </Text>
         </ScrollView>
-        {!account.hasSignedStrictAgreement && <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 80,
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => {
-                setIsPressed(!isPressed)
-                
-            }}
+        {!account.hasSignedStrictAgreement && (
+          <View
             style={{
-              marginTop: 10,
               flexDirection: "row",
               alignItems: "center",
+              marginBottom: 80,
             }}
           >
-            <View>
-              {isPressed ? (
-                <Image
-                  source={require("../../assets/icons/checkbox.png")}
-                  resizeMethod="scale"
-                  style={styles.image}
-                />
-              ) : (
-                <View style={styles.checkbox} />
-              )}
-            </View>
+            <TouchableOpacity
+              onPress={() => {
+                setIsPressed(!isPressed);
+              }}
+              style={{
+                marginTop: 10,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <View>
+                {isPressed ? (
+                  <Image
+                    source={require("../../assets/icons/checkbox.png")}
+                    resizeMethod="scale"
+                    style={styles.image}
+                  />
+                ) : (
+                  <View style={styles.checkbox} />
+                )}
+              </View>
 
-            <View style={{ marginTop: 3 }}>
-              <Text
-                style={[styles.text, { marginLeft: 10, fontSize: SIZES.small }]}
-              >
-                I have read and agree to the terms and conditions above.
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>}
+              <View style={{ marginTop: 3 }}>
+                <Text
+                  style={[
+                    styles.text,
+                    { marginLeft: 10, fontSize: SIZES.small },
+                  ]}
+                >
+                  I have read and agree to the terms and conditions above.
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
         <View
           style={{
             flexDirection: "row",
@@ -111,17 +122,25 @@ const StrictModal = ({ setVisibility, updateSigned, updateAccount, account }) =>
             <Text style={styles.buttontext}>Cancel</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            
             onPress={() => {
-              if(!isPressed){
-                Alert.alert("","Please tick the agreement box to enable this feature");
-              }else{
+              if (!isPressed) {
+                Alert.alert(
+                  "",
+                  "Please tick the agreement box to enable this feature"
+                );
+              } else {
+                setIsClicked(true);
                 updateAccount(true);
+                setIsClicked(false);
               }
             }}
             style={styles.button}
           >
-            <Text style={styles.buttontextCont(isPressed)}>Continue</Text>
+            {isClicked ? (
+              <ActivityIndicator size="large" colors={"black"} />
+            ) : (
+              <Text style={styles.buttontextCont(isPressed)}>Continue</Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -187,14 +206,14 @@ const styles = StyleSheet.create({
     fontSize: SIZES.large,
     fontFamily: FONT.bold,
     alignSelf: "center",
-    margin: SIZES.small - 3
+    margin: SIZES.small - 3,
   }),
   buttontext: {
     color: "black",
     fontSize: SIZES.large,
     fontFamily: FONT.bold,
     alignSelf: "center",
-    margin: SIZES.small - 3
+    margin: SIZES.small - 3,
   },
   modal: {
     backgroundColor: "#09181C",

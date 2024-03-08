@@ -135,7 +135,7 @@ const CreateExit = () => {
     return levels;
   };
 
-  const registerProfit = () => {
+  const registerProfit = async () => {
     const body = {
       accountId: accountInfo.accountId,
       count: profitCount,
@@ -149,7 +149,7 @@ const CreateExit = () => {
       tradingPlanId: accountInfo.planId,
     };
 
-    const response = registerNewProfitExitStrategy(body).then((res) => {
+    const response = await registerNewProfitExitStrategy(body).then((res) => {
       return res.data;
     });
     if (response.status) {
@@ -162,7 +162,7 @@ const CreateExit = () => {
     }
   };
 
-  const registerLoss = () => {
+  const registerLoss = async () => {
     const body = {
       accountId: accountInfo.accountId,
       allowedLossLevelPercentage: slValue,
@@ -176,11 +176,13 @@ const CreateExit = () => {
       tradingPlanId: accountInfo.planId,
     };
 
-    const response = registerNewLossExitStrategy(body).then((res) => {
+    const response = await registerNewLossExitStrategy(body).then((res) => {
       return res.data;
     });
     if (response.status) {
       setIsModalVisible(true);
+      setSlValue(0);
+      setLossLotSize(0);
     } else {
       Alert.alert("Failed", response.message);
     }

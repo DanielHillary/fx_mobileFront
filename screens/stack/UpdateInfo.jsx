@@ -8,40 +8,59 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Modal,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { COLORS, FONT, SIZES } from "../../constants";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { registerNewUser } from "../../api/userApi";
+import { registerNewUser, updateUserInformation } from "../../api/userApi";
 import Toast from "react-native-toast-message";
+import { AuthContext } from "../../context/AuthContext";
+import SuccessModal from "../../components/modal/SuccessModal";
+import AlertModal from "../../components/modal/AlertModal";
 
-const SignUp = () => {
-  const [isPFocused, setIsPFocused] = useState(false);
+const UpdateInfo = () => {
   const [isEFocused, setIsEFocused] = useState(false);
   const [isNFocused, setIsNFocused] = useState(false);
   const [isPNFocused, setIsPNFocused] = useState(false);
   const [isUNFocused, setIsUNFocused] = useState(false);
   const [email, setEmail] = useState("");
+  const [previousEmail, setPreviousEmail] = useState("");
   const [passWord, setPassWord] = useState("");
   const [fullName, setFullName] = useState("");
   const [userName, setUserName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isClicked, setIsClicked] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [check, setCheck] = useState(false);
 
-  const [hide, setHide] = useState(true);
+  const setVisibility = (val) => {
+    setIsModalVisible(val);
+    logout();
+  };
 
-  const { navigate } = useNavigation();
+  const navigation = useNavigation();
+
+  const { userInfo, updateUserInfo, logout } = useContext(AuthContext);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const registerUser = async () => {
+  const setUserInfo = () => {
+    let user = userInfo.user;
+    setFullName(user.firstName + " " + user.lastName);
+    setUserName(user.userName);
+    setEmail(user.email);
+    setPreviousEmail(user.email);
+    setPhoneNumber(user.phoneNumber);
+  };
+
+  const updateDetails = async () => {
     setIsClicked(true);
 
     if (
       email.length === 0 ||
       userName.length === 0 ||
-      passWord.length === 0 ||
       fullName.length === 0 ||
       phoneNumber.length === 0
     ) {
@@ -53,18 +72,18 @@ const SignUp = () => {
       );
     } else {
       let individualNames = fullName.split(" ");
-      const newUser = {
-        email: email,
-        firstName: individualNames[0],
-        lastName: individualNames[1],
-        password: passWord,
-        phoneNumber: phoneNumber,
-        userName: userName,
-        hasMetaAccount: false,
-        hasCompleteTradingPlan: false,
-      };
 
-      const response = await registerNewUser(newUser).then((res) => {
+      let user = userInfo.user;
+
+      user.email = email;
+      user.firstName = individualNames[0];
+      user.lastName = individualNames[1];
+      user.phoneNumber = phoneNumber;
+      user.userName = userName;
+
+      console.log(user);
+
+      const response = await updateUserInformation(user).then((res) => {
         return res.data;
       });
 
@@ -72,9 +91,14 @@ const SignUp = () => {
         Toast.show({
           type: "success",
           text1: "Successful Registration",
-          text2: "You have been registered successfully",
+          text2: "You have successfully updated your profile",
         });
-        navigate("VerifyEmail", { data: response.data });
+        if (previousEmail !== email) {
+          navigation.navigate("VerifyUpdateEmail", { data: user });
+        } else {
+          setIsModalVisible(true);
+          setIsClicked(false);
+        }
       } else {
         console.log(response.message);
         Alert.alert("Failed transaction", response.message);
@@ -82,6 +106,10 @@ const SignUp = () => {
     }
     setIsClicked(false);
   };
+
+  useEffect(() => {
+    setUserInfo();
+  }, []);
 
   return (
     <ScrollView style={styles.container}>
@@ -91,7 +119,7 @@ const SignUp = () => {
           marginBottom: SIZES.medium,
         }}
       >
-        <Text style={styles.signIn}>Kindly register with us</Text>
+        <Text style={styles.signIn}>Edit your profile</Text>
       </View>
 
       <View style={{ width: "80%", marginTop: SIZES.medium }}>
@@ -159,57 +187,6 @@ const SignUp = () => {
 
       <View style={{ width: "80%", marginTop: SIZES.medium }}>
         <Text style={{ color: COLORS.lightWhite, padding: SIZES.small - 5 }}>
-          Password
-        </Text>
-        <View
-          style={{
-            borderColor: isPFocused ? COLORS.darkyellow : COLORS.gray,
-            borderWidth: 0.5,
-            borderRadius: SIZES.small,
-            height: 50,
-            padding: SIZES.small,
-            alignContent: "center",
-            flexDirection: "row",
-          }}
-        >
-          <TextInput
-            secureTextEntry={hide}
-            placeholder="Enter your password"
-            placeholderTextColor={COLORS.gray}
-            onFocus={() => {
-              setIsPFocused(true);
-            }}
-            onBlur={() => {
-              setIsPFocused(false);
-            }}
-            onChangeText={(value) => {
-              setPassWord(value);
-            }}
-            value={passWord}
-            style={styles.password(isPFocused)}
-          />
-          <TouchableOpacity
-            style={{
-              alignSelf: "center",
-              justifyContent: "center",
-              marginLeft: 5,
-            }}
-            onPress={() => {
-              setHide(!hide);
-            }}
-          >
-            <MaterialCommunityIcons
-              name="eye-outline"
-              size={SIZES.large}
-              color={"white"}
-              style={{ justifyContent: "center" }}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={{ width: "80%", marginTop: SIZES.medium }}>
-        <Text style={{ color: COLORS.lightWhite, padding: SIZES.small - 5 }}>
           Phone Number
         </Text>
         <TextInput
@@ -230,51 +207,62 @@ const SignUp = () => {
         />
       </View>
 
+      <Text
+        style={[
+          styles.text,
+          { marginTop: 30, fontStyle: "italic", color: COLORS.darkyellow },
+        ]}
+      >
+        Note: If you change your email, You will need to verify this new email
+        to continue using the application.
+      </Text>
+
       <TouchableOpacity
         onPress={() => {
-          registerUser();
+          setCheck(true);
         }}
         style={styles.button}
       >
         {isClicked ? (
           <ActivityIndicator size="large" colors={"black"} />
         ) : (
-          <Text style={styles.buttonText}>Register</Text>
+          <Text style={styles.buttonText}>Update profile</Text>
         )}
       </TouchableOpacity>
 
-      <View style={{ flexDirection: "row", alignSelf: "center" }}>
-        <Text
-          style={{
-            color: COLORS.lightWhite,
-            padding: SIZES.small - 3,
-          }}
-        >
-          Already have an account?
-        </Text>
-        <TouchableOpacity
-          style={{ justifyContent: "center", alignItems: "center" }}
-          onPress={() => {
-            navigate("SignIn");
-          }}
-        >
-          <Text
-            style={{
-              color: COLORS.darkyellow,
-              alignSelf: "center",
-              fontWeight: "500",
-            }}
-          >
-            Login
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <AlertModal
+        isAlert={check}
+        handleCancel={() => {
+          setCheck(false);
+        }}
+        handleConfirm={() => {
+          setCheck(false);
+          updateDetails();
+        }}
+        message={
+          'Please be sure to confirm that the details provided are accurate. If so, click "Continue" to proceed'
+        }
+        showCancelButton={true}
+        showConfirmButton={true}
+        title={"Check Details"}
+      />
+
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => {
+          setIsModalVisible(false);
+        }}
+      >
+        <SuccessModal setVisibility={setVisibility} />
+      </Modal>
       <Toast />
     </ScrollView>
   );
 };
 
-export default SignUp;
+export default UpdateInfo;
 
 const styles = StyleSheet.create({
   container: {
@@ -287,6 +275,12 @@ const styles = StyleSheet.create({
     fontFamily: FONT.bold,
     fontSize: SIZES.large,
     alignSelf: "center",
+  },
+  text: {
+    color: COLORS.white,
+    fontSize: SIZES.small,
+    fontFamily: FONT.regular,
+    marginTop: SIZES.small,
   },
   email: (focused) => ({
     borderColor: focused ? COLORS.darkyellow : COLORS.gray,
@@ -306,7 +300,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.darkyellow,
     borderRadius: 10,
     width: 300,
-    marginTop: 60,
+    marginTop: 80,
     alignSelf: "center",
   },
   buttonText: {

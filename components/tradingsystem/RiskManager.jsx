@@ -3,6 +3,7 @@ import {
   Text,
   View,
   TextInput,
+  ActivityIndicator,
   TouchableOpacity,
   Alert,
   Modal,
@@ -37,6 +38,7 @@ const RiskManager = () => {
 
   const setVisibility = (val) => {
     setIsModalVisible(val);
+    setIsClicked(false);
     navigation.navigate("SignIn");
   }
 
@@ -76,6 +78,7 @@ const RiskManager = () => {
       console.log(response.message);
       Alert.alert("Failed", response.message);
     }
+    setIsClicked(false);
   };
 
   const onChange = (e, selectedDate) => {
@@ -266,6 +269,7 @@ const RiskManager = () => {
 
       <TouchableOpacity
         onPress={() => {
+          setIsClicked(true);
           finishPlanRegistration();
         }}
         style={styles.buttonContinue}

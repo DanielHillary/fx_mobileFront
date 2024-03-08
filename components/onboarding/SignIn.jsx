@@ -18,7 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const SignIn = () => {
   const navigation = useNavigation();
 
-  const { login } = useContext(AuthContext);
+  const { login, isLoading } = useContext(AuthContext);
 
   const [isPFocused, setIsPFocused] = useState(false);
   const [isEFocused, setIsEFocused] = useState(false);
@@ -134,16 +134,17 @@ const SignIn = () => {
 
       <TouchableOpacity
         onPress={async () => {
-          // setIsClicked(true);
+          setIsClicked(true);
           let account = await AsyncStorage.getItem("accountInfo");
           const response = await login(email, password);
+          setIsClicked(false);
           if(account === null || account === ""){
             updateAccount(response.data.account) 
           }else{
             console.log(response);
-            // setIsClicked(false);
+            setIsClicked(false);
           }
-          // setIsClicked(false);
+          setIsClicked(false);
         }}
         style={styles.button}
       >

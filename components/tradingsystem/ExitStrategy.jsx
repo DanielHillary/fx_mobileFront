@@ -5,6 +5,7 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
   ScrollView,
   Alert,
   Modal,
@@ -241,6 +242,7 @@ const ExitStrategy = () => {
           <Text style={{ color: COLORS.lightWhite }}>Add Profit Level</Text>
           <TouchableOpacity
             onPress={() => {
+              setIsClicked(true);
               if (checkEmptyLevelsForProfit()) {
                 setIsProfitAlert(true);
               } else {
@@ -367,6 +369,7 @@ const ExitStrategy = () => {
           <Text style={{ color: COLORS.lightWhite }}>Add Loss Level</Text>
           <TouchableOpacity
             onPress={() => {
+              setIsClicked(true);
               if (checkEmptyLevelsForLoss()) {
                 setIsLossAlert(true);
               } else {
@@ -440,11 +443,14 @@ const ExitStrategy = () => {
         showConfirmButton={true}
         handleCancel={() => {
           setIsProfitAlert(false);
+          setIsClicked(false);
         }}
         handleConfirm={() => {
           setProfitCount((prev) => prev + 1);
           registerProfit();
+          setIsClicked(false);
           setIsProfitAlert(false);
+          
         }}
         isAlert={isProfitAlert}
       />
@@ -457,10 +463,12 @@ const ExitStrategy = () => {
         showConfirmButton={true}
         handleCancel={() => {
           setIsLossAlert(false);
+          setIsClicked(false);
         }}
         handleConfirm={() => {
           setLossCount((prev) => prev + 1);
           registerLoss();
+          setIsClicked(false);
           setIsLossAlert(false);
         }}
         isAlert={isLossAlert}

@@ -4,6 +4,7 @@ import {
   View,
   ScrollView,
   Image,
+  ActivityIndicator,
   TouchableOpacity,
   Alert,
   Modal,
@@ -51,6 +52,7 @@ const ConfirmEntry = () => {
   const [chosen, setChosen] = useState([]);
   const [entryNum, setEntryNum] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
 
   const { accountDetails } = useContext(AuthContext);
 
@@ -115,7 +117,7 @@ const ConfirmEntry = () => {
         setIsModalVisible(true);
       }
     }
-    
+    setIsClicked(false);
   };
 
   return (
@@ -134,11 +136,16 @@ const ConfirmEntry = () => {
 
       <TouchableOpacity
         onPress={() => {
+          setIsClicked(true);
           confirmEntry();
         }}
         style={styles.button}
       >
-        <Text style={styles.buttonText}>Confirm Entries</Text>
+        {isClicked ? (
+          <ActivityIndicator size="large" colors={"black"} />
+        ) : (
+          <Text style={styles.buttonText}>Confirm Entries</Text>
+        )}
       </TouchableOpacity>
 
       <Modal

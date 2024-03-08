@@ -70,6 +70,8 @@ import ForgotPassword from "./components/onboarding/forgotpassword/ForgotPasswor
 import ResetPassword from "./components/onboarding/forgotpassword/ResetPassword";
 import HistoryDetails from "./screens/tabs/PriceAlert/HistoryDetails";
 import VerifyEmail from "./components/onboarding/forgotpassword/VerifyEmail";
+import UpdateInfo from "./screens/stack/UpdateInfo";
+import VerifyUpdateEmail from "./screens/stack/VerifyUpdateEmail";
 
 const Tab = createBottomTabNavigator();
 
@@ -478,6 +480,28 @@ const StackNavigation = () => {
       <Stack.Screen
         name="EntryStrategy"
         component={EntryStrategy}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="UpdateInfo"
+        component={UpdateInfo}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="VerifyUpdateEmail"
+        component={VerifyUpdateEmail}
         options={{
           presentation: "modal",
           headerStyle: styles.header,

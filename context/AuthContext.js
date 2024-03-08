@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
     // const userId = '';
     let check = true;
     try {
-      setIsLoading(false);
+      // setIsLoading(true);
       const response = await fetchUser(email, password).then((res) => {
         return res.data;
       });
@@ -58,6 +58,7 @@ export const AuthProvider = ({ children }) => {
       console.log(error.response.status);
       setIsLoading(false);
       Alert.alert("Invalid credentials", "Please enter valid username and password");
+    
     }
   };
 
@@ -97,6 +98,10 @@ export const AuthProvider = ({ children }) => {
     setAccountDetails(account);
   };
 
+  const updateUserInfo = (info) => {
+    setUserInfo(info);
+  }
+
   const updatePaymentStatus = (value) => {
     setIsPaidAccount(value);
   }
@@ -118,6 +123,7 @@ export const AuthProvider = ({ children }) => {
         userToken,
         userInfo,
         isPaidAccount,
+        updateUserInfo,
         updateAccount,
         updateCompleted,
         updateNotification,

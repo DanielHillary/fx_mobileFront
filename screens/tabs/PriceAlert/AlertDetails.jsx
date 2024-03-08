@@ -2,6 +2,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  ActivityIndicator,
   View,
   Image,
   TouchableOpacity,
@@ -55,9 +56,10 @@ const AlertDetails = () => {
   const [watchPrice, setWatchPrice] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [isAssetOpen, setIsAssetOpen] = useState(false);
-  const [currentValue, setCurrentValue] = useState();
+  const [currentValue, setCurrentValue] = useState();     
   const [currentAsset, setCurrentAsset] = useState();
   const [check, setCheck] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
 
   const route = useRoute();
 
@@ -155,39 +157,21 @@ const AlertDetails = () => {
       {/* conditionally render this guy based on the alert details */}
 
       <View style={{ flexDirection: "row" }}>
-        {/* <TouchableOpacity
-          onPress={() => setIsPressed(!isPressed)}
-          style={{ marginLeft: 20, marginTop: 10 }}
-        >
-          <View>
-            {isPressed ? (
-              <Image
-                source={require("../../../assets/icons/checkbox.png")}
-                resizeMethod="scale"
-                style={styles.image}
-              />
-            ) : (
-              <View style={styles.checkbox} />
-            )}
-          </View>
-        </TouchableOpacity> */}
 
-        {/* <View style={{ marginTop: 40 }}>
-          <Text
-            style={[styles.text, { marginLeft: 10, fontSize: SIZES.small }]}
-          >
-            Disable this alert once it triggers.
-          </Text>
-        </View> */}
       </View>
-      {!history && <TouchableOpacity
+      <TouchableOpacity
         onPress={() => {
+          setIsClicked(true);
           setCheck(true);
         }}
         style={styles.button}
       >
-        <Text style={styles.buttonText}>Disable this alert</Text>
-      </TouchableOpacity>}
+        {isClicked ? (
+          <ActivityIndicator size="large" colors={"black"} />
+        ) : (
+          <Text style={styles.buttonText}>Disable this alert</Text>
+        )}
+      </TouchableOpacity>
       <AlertModal
         isAlert={check}
         showCancelButton={true}
@@ -197,10 +181,12 @@ const AlertDetails = () => {
         }
         handleCancel={() => {
           setCheck(false);
+          setIsClicked(false)
         }}
         handleConfirm={() => {
           setCheck(false);
           disableAlert();
+          setIsClicked(false);
         }}
       />
     </View>

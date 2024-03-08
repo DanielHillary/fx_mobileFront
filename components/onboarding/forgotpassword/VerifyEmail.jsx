@@ -111,7 +111,12 @@ const VerifyEmail = () => {
       <TouchableOpacity
         style={styles.buttonStyle}
         onPress={() => {
-          verifyYourEmail();
+          if(otp.length === 0){
+            Alert.alert("", "Please enter the OTP sent to you")
+          }else{
+            verifyYourEmail();
+          }
+          
         }}
       >
         {isLoading ? (
