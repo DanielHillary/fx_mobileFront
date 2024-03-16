@@ -29,7 +29,7 @@ import {
   useRoute,
 } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { executeAdvancedOrder, executeTrade } from "../../api/placeTradeApi";
+import { executeAdvancedOrder, executeTrade, voiceTradeOrder } from "../../api/placeTradeApi";
 import Toast from "react-native-toast-message";
 import _ from "lodash";
 import { getAllUserAccounts } from "../../api/accountApi";
@@ -37,6 +37,7 @@ import { AuthContext } from "../../context/AuthContext";
 import SuccessModal from "../../components/modal/SuccessModal";
 import ConfirmStrategyModal from "../../components/modal/ConfirmStrategyModal";
 import AlertModal from "../../components/modal/AlertModal";
+import Speech from "../../components/Speech";
 
 const DownArrow = () => {
   return (
@@ -122,6 +123,7 @@ const Details = ({ selectCategory }) => {
           borderColor: COLORS.darkyellow,
           borderRadius: SIZES.small,
         }}
+        activeColor="#111"
       />
     </View>
   );
@@ -372,6 +374,7 @@ const TradingBot = () => {
   const [isEntryModalVisible, setIsEntryModalVisible] = useState(false);
   const [waiting, setWaiting] = useState(false);
   const [alertModal, setAlertModal] = useState(false);
+  const [entryAlert, setEntryAlert] = useState(false);
   // const [totalTrades, setTotalTrades] = useState(0);
 
   const { accountDetails, userInfo } = useContext(AuthContext);
@@ -430,6 +433,8 @@ const TradingBot = () => {
   useEffect(() => {
     setAccountUp();
   }, []);
+
+  
 
   const setModalVisible = (value) => {
     setIsModalVisible(value);
@@ -550,6 +555,54 @@ const TradingBot = () => {
   );
 
   const navigation = useNavigation();
+
+  const placeVoiceOrder = async(request) =>{
+    if (!account.hasRiskManagement) {
+      Alert.alert(
+        "Strict Account",
+        "Please create a risk register, else you would not be allowed to trade"
+      );
+      return;
+    }
+    setIsClicked(true);
+    const body = {
+      userId: account.userId,
+      accountId: account.accountId,
+      orderText: request,
+      metaAccountId: account.metaApiAccountId,
+      tradingPlanId: account.planId,
+    }
+
+    const response = await voiceTradeOrder(body).then((res) => {
+      return res.data
+    })
+    if(response.status){
+      setIsModalVisible(true);
+    }else{
+      Alert.alert("", response.message);
+    }
+    setIsClicked(false);
+    
+  }
+
+  const placeOrderForTrade = (ignoreEntries, confirmEntries, percentEntry) => {
+    if (account.strict & !account.hasRiskManagement) {
+      Alert.alert(
+        "Strict Account",
+        "Please create a risk register, else you would not be allowed to trade"
+      );
+    } else if (stopLoss.length === 0 & takeProfit.length === 0) {
+      console.log("It is empty indeed")
+      if (account.strict & !account.hasRiskManagement) {
+        Alert.alert(
+          "Strict Account",
+          "Please create a risk register, else you need to provide your SL/TP prices"
+        );
+      } else {
+        placeTradeOrder(ignoreEntries, confirmEntries, percentEntry);
+      }
+    }
+  };
 
   const placeTradeOrder = async (
     ignoreEntries,
@@ -712,7 +765,7 @@ const TradingBot = () => {
           selectedTextProps={{
             style: styles.placeholder,
           }}
-          // itemContainerStyle={{backgroundColor: "black"}}
+          activeColor="#111"
         />
       </View>
 
@@ -834,7 +887,8 @@ const TradingBot = () => {
         >
           Attention!!: Please note that if you do not specify a volume, we would
           open each trade using the recommended volume for each account based on
-          your risk management plan
+          your risk management plan. If you do not have a risk register, a default
+          volume of 1.0 will be used.
         </Text>
       )}
       {userAccounts?.map((item) => (
@@ -906,6 +960,8 @@ const TradingBot = () => {
               Alert.alert("", "Please choose an account");
             } else if (acctList[0].tradeAmount === 0) {
               Alert.alert("", "Please choose the number of positions to place");
+            } else if (!account.hasEntryStrategy) {
+              setEntryAlert(true);
             } else {
               setIsEntryModalVisible(true);
             }
@@ -920,6 +976,7 @@ const TradingBot = () => {
         </TouchableOpacity>
       )}
       <Toast />
+      <Speech placeAudioOrder={placeVoiceOrder}/>
       <Modal
         visible={isModalVisible}
         onRequestClose={() => {
@@ -940,7 +997,7 @@ const TradingBot = () => {
       >
         <ConfirmStrategyModal
           setVisibility={setEntryModalVisible}
-          openTrade={placeTradeOrder}
+          openTrade={placeOrderForTrade}
         />
       </Modal>
 
@@ -953,6 +1010,22 @@ const TradingBot = () => {
           navigation.navigate("Pricing");
         }}
         message={"Please renew your subscription to continue usage"}
+        showCancelButton={true}
+        showConfirmButton={true}
+        title={"Action required"}
+      />
+
+      <AlertModal
+        isAlert={entryAlert}
+        handleCancel={() => {
+          setEntryAlert(false);
+          // navigation.navigate("Plan");
+        }}
+        handleConfirm={() => {
+          setEntryAlert(false);
+          placeOrderForTrade(true, false, 0);
+        }}
+        message={"You do not have a registerd entry strategy. Are you sure you want to proceed with this trade?"}
         showCancelButton={true}
         showConfirmButton={true}
         title={"Action required"}

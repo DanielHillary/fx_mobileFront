@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   FlatList,
+  Linking,
   Image,
 } from "react-native";
 import React, { useContext, useEffect, useState, useCallback } from "react";
@@ -20,6 +21,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const NotificationCard = ({ item, updateNoteList }) => {
   const navigation = useNavigation();
+
+  const openURL = (url) => {
+    Linking.openURL(url).catch((err) =>
+      console.error("An error occurred", err)
+    );
+  };
 
   const checkTradeNotification = async () => {
     let response = await getTradeAnalysis(item.responseId).then((res) => {
@@ -125,6 +132,14 @@ const NotificationCard = ({ item, updateNoteList }) => {
             if(item.notificationCategory == "Exit Level"){
               navigation.navigate("Home")
               markAsRead();
+            }
+            if(item.notificationCategory == "Telegram"){
+              openURL("https://t.me/PsyDTradingBot")
+              markAsRead();
+            }
+            if(item.notificationCategory === "Limit"){
+              navigation.navigate("Plan");
+              markAsRead()
             }
           }}
         >

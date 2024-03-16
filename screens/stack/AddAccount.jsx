@@ -389,7 +389,7 @@ const AddAccount = () => {
           I have read and agree to the{" "}
           <TouchableOpacity
             onPress={() => {
-              openURL("https://pysd-trader.vercel.app/")
+              openURL("https://pysd-trader.vercel.app/refund")
             }}
           ><Text style={styles.terms}>TERMS AND CONDITIONS</Text></TouchableOpacity> associated
           with account creation and the refund policy on PsyDTrader.

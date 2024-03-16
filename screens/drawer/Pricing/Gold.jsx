@@ -43,6 +43,7 @@ const Gold = () => {
   const [alertModal, setAlertModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [successAlert, setSuccessAlert] = useState(false);
+  const [makePayment, setMakePayment] = useState(false);
 
   const { accountDetails, updatePaymentStatus } = useContext(AuthContext);
 
@@ -100,6 +101,10 @@ const Gold = () => {
       stat: true,
       detail: "Auto alerts on all exit",
     },
+    {
+      stat: true,
+      detail: "Seamless trading without parameters",
+    },
   ];
 
   return (
@@ -124,8 +129,9 @@ const Gold = () => {
         <TouchableOpacity
           style={styles.buttonStyle}
           onPress={() => {
+            // paystackWebViewRef.current.startTransaction();
             setIsLoading(true);
-            paystackWebViewRef.current.startTransaction();
+            setMakePayment(true);
           }}
         >
           {isLoading ? (
@@ -136,7 +142,7 @@ const Gold = () => {
         </TouchableOpacity>
       </View>
 
-      <Paystack
+      {makePayment && <Paystack
         paystackKey="pk_test_4e398e23afb4e1d0be0eb53139b09596290fc2bc"
         billingEmail="danielibetohillary@gmail.com"
         amount={amount}
@@ -144,16 +150,19 @@ const Gold = () => {
         onCancel={(e) => {
           setAlertModal(true);
           setIsLoading(false);
+          setMakePayment(false);
         }}
         onSuccess={(res) => {
           updateAccountPayment(res.data)
+          setMakePayment(false);
+          console.log("Payment successful");
         }}
         ref={paystackWebViewRef}
         autoStart={true}
         currency="NGN"
         refNumber={generateRefNumber(20)}
         phone="09024253488"
-      />
+      />}
     </View>
   );
 };

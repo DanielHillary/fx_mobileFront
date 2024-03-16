@@ -250,7 +250,7 @@ const TradeAnalysis = ({ screenProps }) => {
           itemTextStyle={{
             fontFamily: FONT.bold,
             color: COLORS.darkyellow,
-            backgroundColor: "#111",
+            // backgroundColor: "#111",
           }}
           inputSearchStyle={{
             color: COLORS.white,
@@ -287,6 +287,7 @@ const TradeAnalysis = ({ screenProps }) => {
             borderColor: COLORS.darkyellow,
             borderRadius: SIZES.small,
           }}
+          activeColor="#111"
         />
       </View>
 
@@ -310,7 +311,7 @@ const TradeAnalysis = ({ screenProps }) => {
               itemTextStyle={{
                 fontFamily: FONT.bold,
                 color: COLORS.darkyellow,
-                backgroundColor: "#111",
+                // backgroundColor: "#111",
               }}
               inputSearchStyle={{
                 color: COLORS.white,
@@ -353,6 +354,7 @@ const TradeAnalysis = ({ screenProps }) => {
               selectedTextProps={{
                 style: styles.placeholder,
               }}
+              activeColor="#111"
               // itemContainerStyle={{backgroundColor: "black"}}
             />
           </View>

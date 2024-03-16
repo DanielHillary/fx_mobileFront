@@ -126,6 +126,7 @@ const ExitStrategy = () => {
   };
 
   const registerProfit = async () => {
+    setIsClicked(true);
     const body = {
       count: profitCount,
       inProfit: true,
@@ -151,9 +152,11 @@ const ExitStrategy = () => {
     } else {
       Alert.alert("Transaction failed", response.message);
     }
+    setIsClicked(false);
   };
 
   const registerLoss = async () => {
+    setIsClicked(true);
     const body = {
       allowedLossLevelPercentage: slValue,
       count: lossCount,
@@ -177,6 +180,7 @@ const ExitStrategy = () => {
     } else {
       Alert.alert("Transaction failed", response.message);
     }
+    setIsClicked(false);
   };
 
   const registerExits = () => {

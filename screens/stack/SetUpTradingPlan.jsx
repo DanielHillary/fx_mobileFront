@@ -3,6 +3,7 @@ import {
   Text,
   View,
   ScrollView,
+  ActivityIndicator,
   TouchableOpacity,
   Image,
 } from "react-native";
@@ -250,6 +251,7 @@ const SetUpTradingPlan = () => {
         console.log(response.message);
       }
     }
+    setIsClicked(false);
   };
 
   return (
@@ -344,8 +346,7 @@ const SetUpTradingPlan = () => {
 
       <TouchableOpacity
         onPress={() => {
-          //   navigate("AutoTrader");
-          // setIsClicked(true);
+          setIsClicked(true);
           continueToRegister();
         }}
         style={styles.button}

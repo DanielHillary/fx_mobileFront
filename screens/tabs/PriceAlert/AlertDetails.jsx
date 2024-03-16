@@ -81,6 +81,7 @@ const AlertDetails = () => {
     } catch (error) {
       console.error(error);
     }
+    setIsClicked(false);
   };
 
   return (
@@ -186,7 +187,6 @@ const AlertDetails = () => {
         handleConfirm={() => {
           setCheck(false);
           disableAlert();
-          setIsClicked(false);
         }}
       />
     </View>

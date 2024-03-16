@@ -53,6 +53,7 @@ const ConfirmEntry = () => {
   const [entryNum, setEntryNum] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
+  const [isEmpty, setIsEmpty] = useState(false);
 
   const { accountDetails } = useContext(AuthContext);
 
@@ -62,11 +63,10 @@ const ConfirmEntry = () => {
 
   let details = route.params?.tradeDetail || null;
 
-
   const setVisibility = (val) => {
     setIsModalVisible(val);
     navigation.goBack();
-  }
+  };
 
   const getEntryTechs = async () => {
     const response = await getEntryTechniques(accountDetails.accountId).then(
@@ -77,8 +77,10 @@ const ConfirmEntry = () => {
     if (response.status) {
       setEntries(response.data);
       setEntryNum(response.data.length);
-    }else{
-      console.log(response.message);
+    } else {
+      if(response.data.length === 0){
+        setIsEmpty(true);
+      }
     }
   };
 
@@ -103,17 +105,19 @@ const ConfirmEntry = () => {
   };
 
   const confirmEntry = async () => {
-    if(chosen.length == 0){
+    if (chosen.length == 0) {
       Alert.alert("Empty", "You haven't selected any entries yet");
-    }else{
+    } else {
       let percentEntry = 0;
       if (entryNum !== 0) {
         percentEntry = (chosen.length / entryNum) * 100;
       }
-      const response = await confirmEntries(details, percentEntry).then((res) => {
-        return res;
-      })
-      if(response.status){
+      const response = await confirmEntries(details, percentEntry).then(
+        (res) => {
+          return res;
+        }
+      );
+      if (response.status) {
         setIsModalVisible(true);
       }
     }
@@ -122,11 +126,18 @@ const ConfirmEntry = () => {
 
   return (
     <ScrollView style={styles.base}>
-      <Text style={styles.text}>
-        Please tick as many indicators as you saw before taking the trade. This
-        helps you to know whether your strategy is effective or not.
-      </Text>
-      <Text style={styles.indic}>Indicators</Text>
+      {!isEmpty ? (
+        <Text style={styles.text}>
+          Please tick as many indicators as you saw before taking the trade.
+          This helps you to know whether your strategy is effective or not.
+        </Text>
+      ) : (
+        <Text style={styles.text}>
+          Unfortunately, you haven't registered your entry strategy with us.
+          Kindly do so to score better on your trades.
+        </Text>
+      )}
+      {!isEmpty && <Text style={styles.indic}>Indicators</Text>}
 
       <View style={styles.optionContainer}>
         {entries?.map((item) => (
@@ -134,19 +145,34 @@ const ConfirmEntry = () => {
         ))}
       </View>
 
-      <TouchableOpacity
-        onPress={() => {
-          setIsClicked(true);
-          confirmEntry();
-        }}
-        style={styles.button}
-      >
-        {isClicked ? (
-          <ActivityIndicator size="large" colors={"black"} />
-        ) : (
-          <Text style={styles.buttonText}>Confirm Entries</Text>
-        )}
-      </TouchableOpacity>
+      {isEmpty ? (
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("Plan");
+          }}
+          style={styles.button}
+        >
+          {isClicked ? (
+            <ActivityIndicator size="large" colors={"black"} />
+          ) : (
+            <Text style={styles.buttonText}>Setup Entry plan</Text>
+          )}
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          onPress={() => {
+            setIsClicked(true);
+            confirmEntry();
+          }}
+          style={styles.button}
+        >
+          {isClicked ? (
+            <ActivityIndicator size="large" colors={"black"} />
+          ) : (
+            <Text style={styles.buttonText}>Confirm Entries</Text>
+          )}
+        </TouchableOpacity>
+      )}
 
       <Modal
         visible={isModalVisible}
@@ -175,7 +201,7 @@ const styles = StyleSheet.create({
     fontSize: SIZES.xLarge,
     fontFamily: FONT.bold,
     alignSelf: "center",
-    marginTop: SIZES.large
+    marginTop: SIZES.large,
   },
   select: {
     color: COLORS.darkyellow,

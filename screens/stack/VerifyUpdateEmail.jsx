@@ -31,7 +31,7 @@ import { AuthContext } from "../../context/AuthContext";
   
     const setVisibility = (val) => {
       setIsModalVisible(val);
-      logout();
+      navigation.navigate("Settings");
     };
   
     const resendOTP = async () => {
@@ -53,8 +53,6 @@ import { AuthContext } from "../../context/AuthContext";
       }
     };
     const verifyYourEmail = async () => {
-      console.log(otp);
-      console.log(userData);
       const resp = await emailVerification(otp, userData.email).then((res) => {
         return res;
       });

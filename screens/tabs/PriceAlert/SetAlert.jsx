@@ -5,6 +5,7 @@ import {
   View,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
   ScrollView,
   Alert,
   Modal,
@@ -96,6 +97,7 @@ const SetAlert = () => {
     subject: "PriceAlert",
     symbolCategory: isCurrencies ? "Currencies" : "Synthetic",
     watchPrice: watchPrice,
+    forProfit: true,
   };
 
   const addToWatchList = async() =>{
@@ -354,7 +356,11 @@ const SetAlert = () => {
         }}
         style={styles.button}
       >
-        <Text style={styles.buttonText}>Create alert</Text>
+        {isLoading ? (
+            <ActivityIndicator size="large" colors={"black"} />
+          ) : (
+            <Text style={styles.buttonText}>Calculate</Text>
+          )}
       </TouchableOpacity>
 
       <Modal

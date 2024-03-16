@@ -32,6 +32,15 @@
       "eas": {
         "projectId": "83ac8ad4-c0d9-4bcc-a24a-dfffc0580745"
       }
-    }
+    },
+    "plugins": [
+      [
+        "@react-native-voice/voice",
+        {
+          "microphonePermission": "CUSTOM: Allow PsyDTrader to access the microphone",
+          "speechRecognitionPermission": "CUSTOM: Allow PsyDTrader to securely recognize user speech"
+        }
+      ]
+    ]
   }
 }

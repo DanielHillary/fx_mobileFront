@@ -7,6 +7,8 @@ const ProgressBar = ({ status }) => {
   
   let complete = "Complete Account";
   let incomplete = "Setup Your Account";
+
+  let number = 4 - ((status/100) * 4);
   return (
     <View style={styles.progress}>
       <View style={{ flexDirection: "row", alignItems: 'center' }}>
@@ -37,7 +39,7 @@ const ProgressBar = ({ status }) => {
                 fontSize: SIZES.small,
               }}
             >
-              You have 2 more steps to go. Please endeavor to complete your
+              You have {number} more steps to go. Please endeavor to complete your
               trading plan.
             </Text>
           ) : (

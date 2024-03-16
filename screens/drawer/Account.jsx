@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, TouchableOpacity, Image, ActivityIndicator } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import { COLORS, SIZES, FONT } from "../../constants";
@@ -121,25 +128,22 @@ const Account = () => {
   const { accountDetails, updateAccount } = useContext(AuthContext);
 
   const getUserAccounts = async () => {
+    setIsClicked(true);
     if (accountDetails.accountName != "PsyDStarter") {
-      if(accountDetails.paidAccount){
-        const response = await getAllUserAccounts(accountDetails.userId).then(
-          (res) => {
-            return res.data;
-          }
-        );
-  
-        if (response.status) {
-          setUserAccounts(response.data.accountList);
-          setTotalBalance(response.data.totalBalance);
-          setIsLoading(false);
-        } else {
-          console.log(response.message);
+      const response = await getAllUserAccounts(accountDetails.userId).then(
+        (res) => {
+          return res.data;
         }
-      }else{
-        setAlertModal(true);
+      );
+
+      if (response.status) {
+        setUserAccounts(response.data.accountList);
+        setTotalBalance(response.data.totalBalance);
+      } else {
+        console.log(response.message);
       }
     }
+    setIsClicked(false);
   };
 
   useEffect(() => {
@@ -193,10 +197,14 @@ const Account = () => {
         ))}
       </View>
 
-      <AlertModal 
+      <AlertModal
         isAlert={alertModal}
-        handleCancel={() => {navigation.goBack()}}
-        handleConfirm={() => {navigation.navigate("Pricing")}}
+        handleCancel={() => {
+          navigation.goBack();
+        }}
+        handleConfirm={() => {
+          navigation.navigate("Pricing");
+        }}
         message={"Please renew your subscription to view all your accounts"}
         showCancelButton={true}
         showConfirmButton={true}

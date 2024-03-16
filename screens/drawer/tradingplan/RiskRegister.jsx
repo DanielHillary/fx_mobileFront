@@ -220,7 +220,7 @@ const RiskRegister = () => {
           <Text
             style={{ color: "white", width: 120, fontSize: SIZES.medium - 3 }}
           >
-            Max loss% per trade
+            Max Acct% loss per trade
           </Text>
 
           {editMode ? (
@@ -248,7 +248,7 @@ const RiskRegister = () => {
           <Text
             style={{ color: "white", width: 120, fontSize: SIZES.medium - 3 }}
           >
-            Max loss% per day
+            Max Acct% loss per day
           </Text>
 
           {editMode ? (
@@ -277,7 +277,7 @@ const RiskRegister = () => {
           <Text
             style={{ color: "white", width: 80, fontSize: SIZES.medium - 3 }}
           >
-            Minimum RRR
+            Minimum Risk/Reward Ratio
           </Text>
 
           {editMode ? (
@@ -301,7 +301,7 @@ const RiskRegister = () => {
           <Text
             style={{ color: "white", width: 120, fontSize: SIZES.medium - 3 }}
           >
-            Min profit% per trade
+            Min Acct% profit per trade
           </Text>
 
           {editMode ? (
@@ -334,7 +334,7 @@ const RiskRegister = () => {
           <Text
             style={{ color: "white", width: 120, fontSize: SIZES.medium - 3 }}
           >
-            Default Vol. per trade
+            Default Volume/LotSize per trade
           </Text>
 
           {editMode ? (
@@ -359,7 +359,7 @@ const RiskRegister = () => {
           <Text
             style={{ color: "white", width: 100, fontSize: SIZES.medium - 3 }}
           >
-            Daily profit target
+            Daily Acct% profit target
           </Text>
 
           {editMode ? (

@@ -15,6 +15,12 @@ export const executeAdvancedOrder = async (tradeDetails) => {
   return response;
 };
 
+export const voiceTradeOrder = async (body) =>{
+  const apiAxios = await createAxiosInstance();
+  const response = await apiAxios.post("/trade/audiorequest", body);
+  return response;
+}
+
 export const confirmEntries = async (orderId, percent) => {
   const apiAxios = await createAxiosInstance();
   const response = await apiAxios.get("/trade/confirmentries", {

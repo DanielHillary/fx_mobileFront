@@ -186,6 +186,20 @@ const EntryPlan = () => {
     setIsClicked(false);
   };
 
+  if(entryValue.length === 0){
+    return (
+      <View
+        style={{
+          backgroundColor: COLORS.appBackground,
+          flex: 1,
+          justifyContent: "center",
+        }}
+      >
+        <ActivityIndicator size={"large"} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.baseContainer}>
       <View>

@@ -95,6 +95,7 @@ const ChangePassword = () => {
       setIsClicked(false);
       console.log(error);
     }
+    setIsClicked(false);
   };
 
   return (

@@ -4,6 +4,7 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
   Modal,
   Alert,
 } from "react-native";
@@ -45,6 +46,12 @@ const AddNewRiskManager = () => {
   const tradingPlan = route.params?.tradingPlan || null;
 
   const finishPlanRegistration = async () => {
+    if(defaultVolume === 0 | lossPerDay === 0 | minProfitPerTrade === 0 |
+      minRRR === 0 | lossPerTrade === 0 | targetProfit === 0){
+        Alert.alert("", "Please fill out all the positions");
+        return;
+    }
+    setIsClicked(true);
     const body = {
       accountId: accountInfo.accountId,
       accountNumber: accountInfo.accountNumber,
@@ -77,6 +84,7 @@ const AddNewRiskManager = () => {
       console.log(response.message);
       Alert.alert("Failed transaction", response.message)
     }
+    setIsClicked(false);
   };
 
   const onChange = (e, selectedDate) => {
@@ -109,7 +117,7 @@ const AddNewRiskManager = () => {
       <View style={styles.infocontainer}>
         <View style={styles.infoEntry}>
           <Text style={{ color: "white", width: 80, fontSize: SIZES.xSmall }}>
-            Max loss% per trade
+            Max Acct% loss per trade
           </Text>
 
           <TextInput
@@ -127,7 +135,7 @@ const AddNewRiskManager = () => {
         </View>
         <View style={[styles.infoEntry, { marginLeft: 15 }]}>
           <Text style={{ color: "white", width: 80, fontSize: SIZES.xSmall }}>
-            Max loss% per day
+            Max Acct% loss per day
           </Text>
 
           <TextInput
@@ -148,7 +156,7 @@ const AddNewRiskManager = () => {
       <View style={styles.infocontainer}>
         <View style={styles.infoEntry}>
           <Text style={{ color: "white", width: 80, fontSize: SIZES.xSmall }}>
-            Minimum RRR
+            Minimum Risk/Reward ratio
           </Text>
 
           <TextInput
@@ -166,7 +174,7 @@ const AddNewRiskManager = () => {
         </View>
         <View style={[styles.infoEntry, { marginLeft: 15 }]}>
           <Text style={{ color: "white", width: 90, fontSize: SIZES.xSmall }}>
-            Min profit% per trade
+            Min Acct% profit per trade
           </Text>
 
           <TextInput
@@ -187,7 +195,7 @@ const AddNewRiskManager = () => {
       <View style={styles.infocontainer}>
         <View style={styles.infoEntry}>
           <Text style={{ color: "white", width: 100, fontSize: SIZES.xSmall }}>
-            Default Volume per trade
+            Default Volume/LotSize per trade
           </Text>
 
           <TextInput
@@ -206,7 +214,7 @@ const AddNewRiskManager = () => {
 
         <View style={styles.infoEntry}>
           <Text style={{ color: "white", width: 80, fontSize: SIZES.xSmall }}>
-            Daily profit target
+            Daily Acct% profit target
           </Text>
 
           <TextInput

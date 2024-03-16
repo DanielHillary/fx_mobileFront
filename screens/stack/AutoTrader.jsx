@@ -16,7 +16,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { ScrollView } from "react-native-gesture-handler";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { executeAdvancedOrder, executeTrade } from "../../api/placeTradeApi";
+import { executeAdvancedOrder, executeTrade, } from "../../api/placeTradeApi";
 import Toast from "react-native-toast-message";
 import { AuthContext } from "../../context/AuthContext";
 import { getAllUserAccounts } from "../../api/accountApi";
@@ -547,9 +547,10 @@ const AutoTrader = () => {
             marginTop: SIZES.small,
           }}
         >
-          Attention!!: Please note that if you do not specify a volume, we would
+          Attention!!!: Please note that if you do not specify a volume, we would
           open each trade using the recommended volume for each account based on
-          your risk management plan
+          your risk management plan. If you do not have a risk register, a default
+          volume of 1.0 will be used.
         </Text>
       )}
       {userAccounts?.map((item) => (
@@ -662,6 +663,8 @@ const AutoTrader = () => {
           )}
         </TouchableOpacity>
       )}
+
+      {/* <Speech placeAudioOrder={placeVoiceOrder}/> */} 
       <Toast />
       <Modal
         visible={isModalVisible}

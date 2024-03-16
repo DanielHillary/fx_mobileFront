@@ -28,6 +28,7 @@ import { LogBox } from "react-native";
 const screenWidth = Dimensions.get('window').width;
 
 const ActiveAlerts = ({ alerts, navigate }) => {
+  const [isProfit, setIsProfit] = useState(alerts.forProfit);
   return (
     <TouchableOpacity
       onPress={() => {
@@ -57,7 +58,7 @@ const ActiveAlerts = ({ alerts, navigate }) => {
               <Text style={styles.text}>{alerts.symbol}</Text>
               <Text style={[styles.text, { marginLeft: 10 }]}>
                 Watch Price:{" "}
-                <Text style={styles.trigger}>{alerts.watchPrice}</Text>
+                <Text style={styles.trigger(isProfit)}>{alerts.watchPrice}</Text>
               </Text>
             </View>
           </View>
@@ -319,12 +320,12 @@ const styles = StyleSheet.create({
     fontFamily: FONT.bold,
     marginLeft: 10,
   },
-  trigger: {
+  trigger: (forProfit) => ({
     marginLeft: 10,
     fontFamily: FONT.bold,
     fontSize: SIZES.medium,
-    color: COLORS.darkyellow,
-  },
+    color: forProfit ? "green" : "red",
+  }),
   button: {
     // margin: 80,
     height: 40,

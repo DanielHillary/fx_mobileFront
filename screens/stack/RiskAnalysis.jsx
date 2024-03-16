@@ -1,11 +1,12 @@
 import { StyleSheet, Text, View, Image } from "react-native";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ScrollView } from "react-native";
 import { COLORS, FONT, SIZES } from "../../constants";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { getResponseRemarks } from "../../api/tradeAnalysisApi";
 
-const Remark = ({ status, hasTradingPlan }) => {
+const Remark = ({ status, hasTradingPlan, remarks }) => {
   return (
     <View>
       <View style={styles.remarks}>
@@ -48,29 +49,49 @@ const Remark = ({ status, hasTradingPlan }) => {
           </Text>
         )}
       </View>
-      <View>
+      <View style={{marginBottom: 40}}>
         {status ? (
           <Text style={[styles.text, { marginHorizontal: 30 }]}>
             We analyzed the parameters you provided against your trading plan
             and it looks all good
           </Text>
         ) : (
-          <Text style={[styles.text, { marginHorizontal: 30 }]}>
-            This trade setup defiles you trading plan and isn't considered
-            psychoanalytically sound to be executed. Please review your
-            parameters and work with your trading plan.
-          </Text>
+          <View style={{rowGap: SIZES.medium, marginBottom: 5}}>
+            {remarks?.map((item) => (
+              <Text key={item.id} style={[styles.text, { marginHorizontal: 30 }]}>{item.remark}</Text>
+            ))}
+          </View>
         )}
       </View>
     </View>
   );
 };
 const RiskAnalysis = () => {
+
+  const [remarks, setRemarks] = useState([]);
+
   const { navigate } = useNavigation();
 
   const route = useRoute();
 
   const tradeDetails = route.params?.data || null;
+
+  const getRemarks = async () => {
+    const response = await getResponseRemarks(tradeDetails.responseId).then(
+      (res) => {
+        return res.data;
+      }
+    );
+    if (response.status) {
+      setRemarks(response.data);
+    } else {
+      console.log(response.message);
+    }
+  };
+
+  // useEffect(() => {
+  //   getRemarks();
+  // }, []);
 
   return (
     <ScrollView style={styles.baseContainer}>
@@ -185,8 +206,9 @@ const RiskAnalysis = () => {
         </View>
 
         <Remark
-          status={tradeDetails.hasRiskManagement}
+          status={tradeDetails.goodTrade}
           hasTradingPlan={tradeDetails.hasTradingPlan}
+          remarks={remarks}
         />
 
         {/* <Text style={styles.tradeID}>Profitability: High</Text> */}

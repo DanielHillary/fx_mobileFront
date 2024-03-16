@@ -204,7 +204,7 @@ const TradeReport = () => {
         </View>
 
         <Remark
-          status={tradeDetails.isGoodTrade}
+          status={tradeDetails.goodTrade}
           hasTradingPlan={tradeDetails.hasTradingPlan}
           remarks={remarks}
         />

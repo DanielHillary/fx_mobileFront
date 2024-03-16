@@ -3,6 +3,7 @@ import {
   Text,
   View,
   TextInput,
+  ActivityIndicator,
   TouchableOpacity,
   Alert,
   Modal,
@@ -32,6 +33,7 @@ const VerifyEmail = () => {
   };
 
   const resendOTP = async () => {
+    setIsLoading(true);
     try {
       const response = await resentOtpCode(userData.email).then((res) => {
         return res;
@@ -48,9 +50,10 @@ const VerifyEmail = () => {
         console.log(error.message);
         Alert.alert("Failed Transaction", "Something went wrong. Please try again");
     }
+    setIsLoading(false);
   };
   const verifyYourEmail = async () => {
-    console.log(otp);
+    setIsLoading(true);
     const resp = await emailVerification(otp, userData.email).then((res) => {
       return res;
     });
@@ -60,6 +63,7 @@ const VerifyEmail = () => {
     } else {
       Alert.alert("Failed Transaction", response.message);
     }
+    setIsLoading(false);
   };
 
   return (

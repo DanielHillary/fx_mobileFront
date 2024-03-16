@@ -106,7 +106,7 @@ const PriceAlert = () => {
           justifyContent: "center",
         }}
       >
-        <ActivityIndicator size={"large"} />
+        <ActivityIndicator size={"large"} color={"black"} />
       </View>
     );
   }

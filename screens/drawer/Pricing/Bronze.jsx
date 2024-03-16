@@ -43,6 +43,7 @@ const Bronze = () => {
   const [alertModal, setAlertModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [successAlert, setSuccessAlert] = useState(false);
+  const [makePayment, setMakePayment] = useState(false);
 
   const { accountDetails } = useContext(AuthContext);
 
@@ -118,6 +119,11 @@ const Bronze = () => {
       stat: true,
       detail: "Limited alerts on all asset (50/month)",
     },
+    {
+      id: 8,
+      stat: true,
+      detail: "Account analysis for trades",
+    },
   ];
 
   return (
@@ -134,7 +140,7 @@ const Bronze = () => {
         showsVerticalScrollIndicator={false}
       />
 
-      <Paystack
+      {makePayment && <Paystack
         paystackKey="pk_test_4e398e23afb4e1d0be0eb53139b09596290fc2bc"
         billingEmail="danielibetohillary@gmail.com"
         amount={amount}
@@ -142,22 +148,26 @@ const Bronze = () => {
         onCancel={(e) => {
           setAlertModal(true);
           setIsLoading(false);
+          setMakePayment(false);
         }}
         onSuccess={(res) => {
           updateAccountPayment(res.data);
+          setMakePayment(false);
+          console.log("Payment successful")
         }}
         ref={paystackWebViewRef}
         autoStart={true}
         currency="NGN"
         refNumber={generateRefNumber(20)}
         phone="09024253488"
-      />
+      />}
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.buttonStyle}
           onPress={() => {
-            paystackWebViewRef.current.startTransaction();
+            setMakePayment(true);
+            // paystackWebViewRef.current.startTransaction();
             setIsLoading(true);
           }}
         >

@@ -79,12 +79,10 @@ const AccountReport = () => {
       } else {
         setEnoughTrades(true);
         setIsLoading(false);
-        console.log(response.message);
       }
     } catch (error) {
       setEnoughTrades(true);
       setIsLoading(false);
-      console.log(error.message);
     }
   };
 
@@ -109,7 +107,6 @@ const AccountReport = () => {
         } else {
           setEnoughTrades(true);
           setIsLoading(false);
-          console.log(response.message);
         }
       } catch (error) {
         setIsLoading(false);
@@ -616,13 +613,13 @@ const AccountReport = () => {
           />
           {report.tradeProfitRatio < 50 ? (
             <Text style={styles.note}>
-              For every 10 trades with your current success rate, you could be
-              profitable
+              With your current success rate, you should be consistently profitable. 
+              Always stick to a minimum RRR of 1:2 to stay profitable.
             </Text>
           ) : (
             <Text style={styles.note}>
-              At this success rate, you have to aim for a minimum RRR or 1:2.5
-              and above to be profitable per 10 trades
+              We encourage you to always aim for a minimum Risk/Reward ratio of
+              1:2 per trade to stay profitable.
             </Text>
           )}
         </View>

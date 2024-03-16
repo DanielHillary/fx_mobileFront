@@ -4,11 +4,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // const authToken = await AsyncStorage.getItem("jwtToken");
 
-// export const localHost = "http://192.168.43.131:8080/api";
-export const localHost = "https://psydtrader.uc.r.appspot.com/api";
+export const localHost = "http://192.168.43.131:8080/api";
+// export const localHost = "https://psydtrader.uc.r.appspot.com/api";
 
-// const host = "http://192.168.43.131:8080/auth/login";
-const host = "https://psydtrader.uc.r.appspot.com/auth/login"
+const host = "http://192.168.43.131:8080/auth/login";
+// const host = "https://psydtrader.uc.r.appspot.com/auth/login"
 const host2 = "http://192.168.252.215:8080/auth/login";
 
 const headers = {

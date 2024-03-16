@@ -27,6 +27,7 @@ const UpdateInfo = () => {
   const [isUNFocused, setIsUNFocused] = useState(false);
   const [email, setEmail] = useState("");
   const [previousEmail, setPreviousEmail] = useState("");
+  const [previousUserName, setPreviousUserName] = useState("");
   const [passWord, setPassWord] = useState("");
   const [fullName, setFullName] = useState("");
   const [userName, setUserName] = useState("");
@@ -35,12 +36,16 @@ const UpdateInfo = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [check, setCheck] = useState(false);
 
+  const navigation = useNavigation();
+
   const setVisibility = (val) => {
     setIsModalVisible(val);
-    logout();
+    if(userName !== previousUserName){
+      logout();
+    }else(
+      navigation.goBack()
+    )
   };
-
-  const navigation = useNavigation();
 
   const { userInfo, updateUserInfo, logout } = useContext(AuthContext);
 
@@ -50,6 +55,7 @@ const UpdateInfo = () => {
     let user = userInfo.user;
     setFullName(user.firstName + " " + user.lastName);
     setUserName(user.userName);
+    setPreviousUserName(user.userName);
     setEmail(user.email);
     setPreviousEmail(user.email);
     setPhoneNumber(user.phoneNumber);
@@ -81,8 +87,6 @@ const UpdateInfo = () => {
       user.phoneNumber = phoneNumber;
       user.userName = userName;
 
-      console.log(user);
-
       const response = await updateUserInformation(user).then((res) => {
         return res.data;
       });
@@ -100,7 +104,6 @@ const UpdateInfo = () => {
           setIsClicked(false);
         }
       } else {
-        console.log(response.message);
         Alert.alert("Failed transaction", response.message);
       }
     }
