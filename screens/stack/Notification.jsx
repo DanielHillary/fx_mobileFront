@@ -29,24 +29,14 @@ const NotificationCard = ({ item, updateNoteList }) => {
   };
 
   const checkTradeNotification = async () => {
-    let response = await getTradeAnalysis(item.responseId).then((res) => {
-      return res.data;
-    });
-    if (response.status) {
-      let resp = await removeFromList(item.id).then((res) => {
-        return res.data;
-      });
-      updateNoteList(item);
-      console.log(resp.message);
-      navigation.navigate("TradeReport", { data: response.data });
-    } else {
-      console.log(response.message);
-    }
+    markAsRead();
+    navigation.navigate("TradeReport", { data: item.responseId });
   };
 
   const checkPriceAlert = async() => {
-    navigation.navigate("AlertHistory");
     markAsRead();
+    navigation.navigate("AlertHistory");
+    
   }
 
   const markAsRead = async () => {
@@ -139,6 +129,10 @@ const NotificationCard = ({ item, updateNoteList }) => {
             }
             if(item.notificationCategory === "Limit"){
               navigation.navigate("Plan");
+              markAsRead()
+            }
+            if(item.notificationCategory === "Account Update"){
+              navigation.navigate("Pricing");
               markAsRead()
             }
           }}

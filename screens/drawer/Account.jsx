@@ -185,17 +185,29 @@ const Account = () => {
         )}
       </TouchableOpacity>
 
-      <View style={{ marginTop: 30, gap: SIZES.large, padding: 20 }}>
-        {userAccounts?.map((item) => (
-          <AccountCard
-            item={item}
-            currentAccount={accountDetails}
-            updateAccountDetails={updateAccount}
-            key={item.accountId}
-            handleNavigate={navigation}
-          />
-        ))}
-      </View>
+      {userAccounts.length === 0 ? (
+        <View
+          style={{
+            backgroundColor: COLORS.appBackground,
+            flex: 1,
+            justifyContent: "center",
+          }}
+        >
+          <ActivityIndicator size={"large"} />
+        </View>
+      ) : (
+        <View style={{ marginTop: 30, gap: SIZES.large, padding: 20 }}>
+          {userAccounts?.map((item) => (
+            <AccountCard
+              item={item}
+              currentAccount={accountDetails}
+              updateAccountDetails={updateAccount}
+              key={item.accountId}
+              handleNavigate={navigation}
+            />
+          ))}
+        </View>
+      )}
 
       <AlertModal
         isAlert={alertModal}

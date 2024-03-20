@@ -168,7 +168,7 @@ const Alerts = ({ alerts }) => {
             </View>
           </View>
 
-          <View style={{ width: 120 }}>
+          <View style={{ width: 145 }}>
             <Text
               style={[
                 styles.text,

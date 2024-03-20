@@ -581,11 +581,11 @@ const ExitPlan = () => {
     if (response.status) {
       setExitStrategy(response.data);
       setProfitExits(response.data.profitLevels);
-      if(response.data.profitLevels.length === 0){
+      if (response.data.profitLevels.length === 0) {
         setIsProfitEmpty(true);
       }
       setLossExits(response.data.lossLevels);
-      if(response.data.lossLevels.length === 0){
+      if (response.data.lossLevels.length === 0) {
         setIsLossEmpty(true);
       }
     } else {
@@ -721,13 +721,12 @@ const ExitPlan = () => {
         Note: To break-even, set secure profit percent at 1
       </Text>
 
-
       <View
         style={{
           flexDirection: "row",
           gap: SIZES.small,
           justifyContent: "space-between",
-          marginTop: 30
+          marginTop: 30,
         }}
       >
         <View style={{ flexDirection: "row", gap: SIZES.small }}>
@@ -745,18 +744,36 @@ const ExitPlan = () => {
         </View>
         <Text style={{ color: COLORS.lightWhite }}>Profit level</Text>
       </View>
-      {isProfitEmpty ? <EmptyList message={"You don't have any exit levels"} /> : <ScrollView horizontal>
-        <View style={{ flexDirection: "row", gap: SIZES.medium }}>
-          {profitExits?.map((item) => (
-            <ProfitExits
-              item={item}
-              key={item.exitId}
-              updateChange={updateChange}
-              updateList={updateList}
-            />
-          ))}
+      {(isProfitEmpty === false && profitExits.length === 0) ? (
+        <View
+          style={{
+            backgroundColor: COLORS.appBackground,
+            flex: 1,
+            justifyContent: "center",
+          }}
+        >
+          <ActivityIndicator size={"large"} />
         </View>
-      </ScrollView>}
+      ) : (
+        <View>
+          {isProfitEmpty ? (
+            <EmptyList message={"You don't have any exit levels"} />
+          ) : (
+            <ScrollView horizontal>
+              <View style={{ flexDirection: "row", gap: SIZES.medium }}>
+                {profitExits?.map((item) => (
+                  <ProfitExits
+                    item={item}
+                    key={item.exitId}
+                    updateChange={updateChange}
+                    updateList={updateList}
+                  />
+                ))}
+              </View>
+            </ScrollView>
+          )}
+        </View>
+      )}
 
       <View
         style={{
@@ -782,18 +799,36 @@ const ExitPlan = () => {
         </View>
         <Text style={{ color: COLORS.lightWhite }}>Loss levels</Text>
       </View>
-      {isLossEmpty ? <EmptyList message={"You don't have any exit levels"} /> : <ScrollView horizontal>
-        <View style={{ flexDirection: "row", gap: SIZES.medium }}>
-          {lossExits?.map((item) => (
-            <LossExits
-              item={item}
-              key={item.exitId}
-              updateChange={updateChange}
-              updateList={updateList}
-            />
-          ))}
+      {(isLossEmpty === false && lossExits.length === 0) ? (
+        <View
+          style={{
+            backgroundColor: COLORS.appBackground,
+            flex: 1,
+            justifyContent: "center",
+          }}
+        >
+          <ActivityIndicator size={"large"} />
         </View>
-      </ScrollView>}
+      ) : (
+        <View>
+          {isLossEmpty ? (
+            <EmptyList message={"You don't have any exit levels"} />
+          ) : (
+            <ScrollView horizontal>
+              <View style={{ flexDirection: "row", gap: SIZES.medium }}>
+                {lossExits?.map((item) => (
+                  <LossExits
+                    item={item}
+                    key={item.exitId}
+                    updateChange={updateChange}
+                    updateList={updateList}
+                  />
+                ))}
+              </View>
+            </ScrollView>
+          )}
+        </View>
+      )}
 
       <AlertModal
         message={
@@ -953,5 +988,4 @@ const styles = StyleSheet.create({
     color: "black",
     fontFamily: FONT.bold,
   },
-  
 });

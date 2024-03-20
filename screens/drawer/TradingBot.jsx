@@ -29,7 +29,11 @@ import {
   useRoute,
 } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { executeAdvancedOrder, executeTrade, voiceTradeOrder } from "../../api/placeTradeApi";
+import {
+  executeAdvancedOrder,
+  executeTrade,
+  voiceTradeOrder,
+} from "../../api/placeTradeApi";
 import Toast from "react-native-toast-message";
 import _ from "lodash";
 import { getAllUserAccounts } from "../../api/accountApi";
@@ -434,8 +438,6 @@ const TradingBot = () => {
     setAccountUp();
   }, []);
 
-  
-
   const setModalVisible = (value) => {
     setIsModalVisible(value);
     navigation.navigate("Home");
@@ -556,7 +558,7 @@ const TradingBot = () => {
 
   const navigation = useNavigation();
 
-  const placeVoiceOrder = async(request) =>{
+  const placeVoiceOrder = async (request) => {
     if (!account.hasRiskManagement) {
       Alert.alert(
         "Strict Account",
@@ -571,19 +573,18 @@ const TradingBot = () => {
       orderText: request,
       metaAccountId: account.metaApiAccountId,
       tradingPlanId: account.planId,
-    }
+    };
 
     const response = await voiceTradeOrder(body).then((res) => {
-      return res.data
-    })
-    if(response.status){
+      return res.data;
+    });
+    if (response.status) {
       setIsModalVisible(true);
-    }else{
+    } else {
       Alert.alert("", response.message);
     }
     setIsClicked(false);
-    
-  }
+  };
 
   const placeOrderForTrade = (ignoreEntries, confirmEntries, percentEntry) => {
     if (account.strict & !account.hasRiskManagement) {
@@ -591,8 +592,8 @@ const TradingBot = () => {
         "Strict Account",
         "Please create a risk register, else you would not be allowed to trade"
       );
-    } else if (stopLoss.length === 0 & takeProfit.length === 0) {
-      console.log("It is empty indeed")
+    } else if ((stopLoss.length === 0) & (takeProfit.length === 0)) {
+      console.log("It is empty indeed");
       if (account.strict & !account.hasRiskManagement) {
         Alert.alert(
           "Strict Account",
@@ -887,21 +888,35 @@ const TradingBot = () => {
         >
           Attention!!: Please note that if you do not specify a volume, we would
           open each trade using the recommended volume for each account based on
-          your risk management plan. If you do not have a risk register, a default
-          volume of 1.0 will be used.
+          your risk management plan. If you do not have a risk register, a
+          default volume of 1.0 will be used.
         </Text>
       )}
-      {userAccounts?.map((item) => (
-        <Account
-          item={item}
-          key={item.accountId}
-          increaserCount={increaser}
-          decreaserCount={decreaser}
-          updateList={updateArray}
-          updateArrayForVolume={updateArrayForVolume}
-          updateListForAccount={updateArrayForAccount}
-        />
-      ))}
+      {userAccounts.length === 0 ? (
+        <View
+          style={{
+            backgroundColor: COLORS.appBackground,
+            flex: 1,
+            justifyContent: "center",
+          }}
+        >
+          <ActivityIndicator size={"large"} />
+        </View>
+      ) : (
+        <View>
+          {userAccounts?.map((item) => (
+            <Account
+              item={item}
+              key={item.accountId}
+              increaserCount={increaser}
+              decreaserCount={decreaser}
+              updateList={updateArray}
+              updateArrayForVolume={updateArrayForVolume}
+              updateListForAccount={updateArrayForAccount}
+            />
+          ))}
+        </View>
+      )}
       {account.accountName != "PsyDStarter" ? (
         <Text
           style={{
@@ -976,7 +991,7 @@ const TradingBot = () => {
         </TouchableOpacity>
       )}
       <Toast />
-      <Speech placeAudioOrder={placeVoiceOrder}/>
+      <Speech placeAudioOrder={placeVoiceOrder} />
       <Modal
         visible={isModalVisible}
         onRequestClose={() => {
@@ -1025,7 +1040,9 @@ const TradingBot = () => {
           setEntryAlert(false);
           placeOrderForTrade(true, false, 0);
         }}
-        message={"You do not have a registerd entry strategy. Are you sure you want to proceed with this trade?"}
+        message={
+          "You do not have a registerd entry strategy. Are you sure you want to proceed with this trade?"
+        }
         showCancelButton={true}
         showConfirmButton={true}
         title={"Action required"}

@@ -507,7 +507,7 @@ const TradeAnalysis = ({ screenProps }) => {
                   // console.log(res.data);
                   navigate("RiskAnalysis", { data: res.data });
                 } else {
-                  console.log(res.message);
+                  Alert.alert("Failed", res.message)
                 }
               });
             }

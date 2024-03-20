@@ -23,8 +23,8 @@ const SignIn = () => {
   const [isPFocused, setIsPFocused] = useState(false);
   const [isEFocused, setIsEFocused] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
-  const [email, setEmail] = useState(null);
-  const [password, setPassword] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [hide, setHide] = useState(true);
 
   const { userInfo, updateAccount } = useContext(AuthContext);
@@ -134,17 +134,21 @@ const SignIn = () => {
 
       <TouchableOpacity
         onPress={async () => {
-          setIsClicked(true);
-          let account = await AsyncStorage.getItem("accountInfo");
-          const response = await login(email, password);
-          setIsClicked(false);
-          if(account === null || account === ""){
-            updateAccount(response.data.account) 
+          if(email.length === 0 | password.length === 0){
+            Alert.alert("", "Please enter your username and password");
           }else{
-            console.log(response);
+            setIsClicked(true);
+            let account = await AsyncStorage.getItem("accountInfo");
+            const response = await login(email, password);
+            setIsClicked(false);
+            if(account === null || account === ""){
+              updateAccount(response.data.account) 
+            }else{
+              console.log(response);
+              setIsClicked(false);
+            }
             setIsClicked(false);
           }
-          setIsClicked(false);
         }}
         style={styles.button}
       >

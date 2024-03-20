@@ -209,7 +209,7 @@ const RecordOutline = ({ notes }) => {
                     {details.tradeScore}%
                   </Text>
                 </View>
-                <Text style={styles.info}>Trade Score</Text>
+                <Text style={styles.info}>PsyD Score</Text>
               </View>
             </View>
           </View>

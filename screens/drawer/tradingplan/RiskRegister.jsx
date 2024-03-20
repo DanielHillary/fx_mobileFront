@@ -3,6 +3,7 @@ import {
   Text,
   View,
   TextInput,
+  ActivityIndicator,
   TouchableOpacity,
   Alert,
   ScrollView,
@@ -71,7 +72,7 @@ const RiskRegister = () => {
   const [riskManager, setRiskManager] = useState({});
   const [isChanged, setIsChanged] = useState(false);
   const [timing, setTiming] = useState("AM");
-  const [hasRisk, setHasRisk] = useState(false);
+  const [hasRisk, setHasRisk] = useState(true);
 
   const navigation = useNavigation();
 
@@ -93,7 +94,6 @@ const RiskRegister = () => {
       setHasRisk(true);
     } else {
       setHasRisk(false);
-      console.log(response.message);
     }
   };
 
@@ -163,7 +163,21 @@ const RiskRegister = () => {
     }
   };
 
-  if (!hasRisk) {
+  if(riskManager.length === 0 && hasRisk === true){
+    return (
+      <View
+        style={{
+          backgroundColor: COLORS.appBackground,
+          flex: 1,
+          justifyContent: "center",
+        }}
+      >
+        <ActivityIndicator size={"large"} />
+      </View>
+    )
+  }
+
+  if (hasRisk === false) {
     return (
       <View
         style={{

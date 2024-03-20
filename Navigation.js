@@ -72,6 +72,7 @@ import HistoryDetails from "./screens/tabs/PriceAlert/HistoryDetails";
 import VerifyEmail from "./components/onboarding/forgotpassword/VerifyEmail";
 import UpdateInfo from "./screens/stack/UpdateInfo";
 import VerifyUpdateEmail from "./screens/stack/VerifyUpdateEmail";
+import Recommendation from "./screens/drawer/Recommendation";
 
 const Tab = createBottomTabNavigator();
 
@@ -208,7 +209,7 @@ const DrawerNavigation = () => {
         }}
       />
       <Drawer.Screen
-        name="Account"
+        name="Accounts"
         component={Account}
         options={{
           headerShown: true,
@@ -239,7 +240,7 @@ const DrawerNavigation = () => {
       />
 
       <Drawer.Screen
-        name="AutoTrade"
+        name="AutoTrader"
         component={TradingBot}
         options={{
           headerShown: true,
@@ -285,6 +286,22 @@ const DrawerNavigation = () => {
           headerTitleAlign: "center",
           drawerIcon: ({ color, focused, size }) => {
             let iconName = "cash-outline";
+            return (
+              <Ionicons name={iconName} size={size} color={COLORS.lightWhite} />
+            );
+          },
+        }}
+      />
+
+      <Drawer.Screen
+        name="PsyD Recommendation"
+        component={Recommendation}
+        options={{
+          headerShown: true,
+          headerShadowVisible: false,
+          headerStyle: styles.header,
+          drawerIcon: ({ color, focused, size }) => {
+            let iconName = "newspaper-outline";
             return (
               <Ionicons name={iconName} size={size} color={COLORS.lightWhite} />
             );

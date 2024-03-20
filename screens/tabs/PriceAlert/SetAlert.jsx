@@ -38,8 +38,8 @@ const SetAlert = () => {
 
   const options = [
     { label: "Email", value: "Email" },
-    { label: "Push Notification", value: "PushNotification" },
-    { label: "Call", value: "Call" },
+    { label: "WhatsApp msg", value: "WhatsApp" },
+    { label: "Telegram msg", value: "Telegram" },
   ];
 
   const positions = [
@@ -257,7 +257,7 @@ const SetAlert = () => {
           // width: 150,
         }}
       >
-        <Text style={[styles.text]}>send me a</Text>
+        <Text style={[styles.text]}>send me an</Text>
         <View style={{ width: "60%", marginLeft: SIZES.large }}>
           <DropDownPicker
             listMode="SCROLLVIEW"
@@ -266,7 +266,7 @@ const SetAlert = () => {
             setOpen={() => setOptionOpen(!optionOpen)}
             value={option}
             setValue={(val) => setOption(val)}
-            placeholder="Push"
+            placeholder="Email"
             placeholderStyle={{ fontSize: 20, fontWeight: "bold" }}
             style={{
               backgroundColor: "#111",

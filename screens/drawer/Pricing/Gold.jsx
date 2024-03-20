@@ -143,6 +143,7 @@ const Gold = () => {
       </View>
 
       {makePayment && <Paystack
+        // paystackKey="pk_live_19dbd6da797c938132efe2a1a3333ed265f3230b"
         paystackKey="pk_test_4e398e23afb4e1d0be0eb53139b09596290fc2bc"
         billingEmail="danielibetohillary@gmail.com"
         amount={amount}
@@ -162,6 +163,7 @@ const Gold = () => {
         currency="NGN"
         refNumber={generateRefNumber(20)}
         phone="09024253488"
+        channels={['card', 'bank', 'mobile_money', 'bank_transfer']}
       />}
     </View>
   );

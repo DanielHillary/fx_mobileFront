@@ -16,7 +16,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { ScrollView } from "react-native-gesture-handler";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { executeAdvancedOrder, executeTrade, } from "../../api/placeTradeApi";
+import { executeAdvancedOrder, executeTrade } from "../../api/placeTradeApi";
 import Toast from "react-native-toast-message";
 import { AuthContext } from "../../context/AuthContext";
 import { getAllUserAccounts } from "../../api/accountApi";
@@ -336,10 +336,9 @@ const AutoTrader = () => {
         setIsModalVisible(true);
       } else {
         setAlert(true);
-        console.log(response.message);
         Alert.alert(
           "Failed transaction",
-          "Something went wrong, please try again."
+          response.message
         );
       }
     } catch (error) {
@@ -547,21 +546,35 @@ const AutoTrader = () => {
             marginTop: SIZES.small,
           }}
         >
-          Attention!!!: Please note that if you do not specify a volume, we would
-          open each trade using the recommended volume for each account based on
-          your risk management plan. If you do not have a risk register, a default
-          volume of 1.0 will be used.
+          Attention!!!: Please note that if you do not specify a volume, we
+          would open each trade using the recommended volume for each account
+          based on your risk management plan. If you do not have a risk
+          register, a default volume of 1.0 will be used.
         </Text>
       )}
-      {userAccounts?.map((item) => (
-        <Account
-          item={item}
-          key={item.accountId}
-          totalCount={totalCounter}
-          decreaserCount={decreaser}
-          updateList={updateArray}
-        />
-      ))}
+      {userAccounts.length === 0 ? (
+        <View
+          style={{
+            backgroundColor: COLORS.appBackground,
+            flex: 1,
+            justifyContent: "center",
+          }}
+        >
+          <ActivityIndicator size={"large"} />
+        </View>
+      ) : (
+        <View>
+          {userAccounts?.map((item) => (
+            <Account
+              item={item}
+              key={item.accountId}
+              totalCount={totalCounter}
+              decreaserCount={decreaser}
+              updateList={updateArray}
+            />
+          ))}
+        </View>
+      )}
       {accountDetails.accountName != "PsyDStarter" ? (
         <Text
           style={{
@@ -664,7 +677,7 @@ const AutoTrader = () => {
         </TouchableOpacity>
       )}
 
-      {/* <Speech placeAudioOrder={placeVoiceOrder}/> */} 
+      {/* <Speech placeAudioOrder={placeVoiceOrder}/> */}
       <Toast />
       <Modal
         visible={isModalVisible}

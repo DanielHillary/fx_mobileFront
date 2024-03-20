@@ -78,7 +78,7 @@ const ConfirmEntry = () => {
       setEntries(response.data);
       setEntryNum(response.data.length);
     } else {
-      if(response.data.length === 0){
+      if (response.data.length === 0) {
         setIsEmpty(true);
       }
     }
@@ -139,11 +139,23 @@ const ConfirmEntry = () => {
       )}
       {!isEmpty && <Text style={styles.indic}>Indicators</Text>}
 
-      <View style={styles.optionContainer}>
-        {entries?.map((item) => (
-          <Options key={item.id} option={item} updateList={updateList} />
-        ))}
-      </View>
+      {entries.length === 0 ? (
+        <View
+          style={{
+            backgroundColor: COLORS.appBackground,
+            flex: 1,
+            justifyContent: "center",
+          }}
+        >
+          <ActivityIndicator size={"large"} />
+        </View>
+      ) : (
+        <View style={styles.optionContainer}>
+          {entries?.map((item) => (
+            <Options key={item.id} option={item} updateList={updateList} />
+          ))}
+        </View>
+      )}
 
       {isEmpty ? (
         <TouchableOpacity

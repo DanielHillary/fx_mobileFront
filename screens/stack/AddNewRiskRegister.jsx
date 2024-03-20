@@ -46,43 +46,49 @@ const AddNewRiskManager = () => {
   const tradingPlan = route.params?.tradingPlan || null;
 
   const finishPlanRegistration = async () => {
-    if(defaultVolume === 0 | lossPerDay === 0 | minProfitPerTrade === 0 |
-      minRRR === 0 | lossPerTrade === 0 | targetProfit === 0){
-        Alert.alert("", "Please fill out all the positions");
-        return;
-    }
-    setIsClicked(true);
-    const body = {
-      accountId: accountInfo.accountId,
-      accountNumber: accountInfo.accountNumber,
-      allowedLossLevelPercentage: lossPerTrade,
-      defaultVolume: defaultVolume,
-      maxRiskPercentPerTrade: lossPerTrade,
-      minAcceptedScore: 100,
-      minProfitPercentPerTrade: minProfitPerTrade,
-      riskRewardRatio: minRRR,
-      totalPercentRiskPerDay: lossPerDay,
-      totalProfitPercentPerDay: targetProfit,
-      tradingPlanId:
-        accountInfo.planId === null ? tradingPlan.planId : accountInfo.planId,
-      metaApiAccountId: accountInfo.metaApiAccountId,
-      userId: accountInfo.userId,
-      dailyResetTime: date,
-      dayInHour: hours,
-      dayInMinute: minutes,
-    };
-
-    const response = await createRiskRegister(body).then((res) => {
-      return res.data;
-    });
-
-    if (response.status) {
-      console.log(response.message);
-      updateCompleted(true);
-      setIsModalVisible(true);
+    if (
+      (defaultVolume === 0) |
+      (lossPerDay === 0) |
+      (minProfitPerTrade === 0) |
+      (minRRR === 0) |
+      (lossPerTrade === 0) |
+      (targetProfit === 0)
+    ) {
+      Alert.alert("", "Please fill out all the positions");
     } else {
-      console.log(response.message);
-      Alert.alert("Failed transaction", response.message)
+      setIsClicked(true);
+      const body = {
+        accountId: accountInfo.accountId,
+        accountNumber: accountInfo.accountNumber,
+        allowedLossLevelPercentage: lossPerTrade,
+        defaultVolume: defaultVolume,
+        maxRiskPercentPerTrade: lossPerTrade,
+        minAcceptedScore: 100,
+        minProfitPercentPerTrade: minProfitPerTrade,
+        riskRewardRatio: minRRR,
+        totalPercentRiskPerDay: lossPerDay,
+        totalProfitPercentPerDay: targetProfit,
+        tradingPlanId:
+          accountInfo.planId === null ? tradingPlan.planId : accountInfo.planId,
+        metaApiAccountId: accountInfo.metaApiAccountId,
+        userId: accountInfo.userId,
+        dailyResetTime: date,
+        dayInHour: hours,
+        dayInMinute: minutes,
+      };
+
+      const response = await createRiskRegister(body).then((res) => {
+        return res.data;
+      });
+
+      if (response.status) {
+        console.log(response.message);
+        updateCompleted(true);
+        setIsModalVisible(true);
+      } else {
+        console.log(response.message);
+        Alert.alert("Failed transaction", response.message);
+      }
     }
     setIsClicked(false);
   };
@@ -267,9 +273,9 @@ const AddNewRiskManager = () => {
           { marginTop: 30, fontStyle: "italic", color: COLORS.darkyellow },
         ]}
       >
-        Note: If you do not provide a time, the default time would be set
-        to 12:00AM of your local time. We use your daily start time to reset
-        daily limits eg. Max Account loss % per day...
+        Note: If you do not provide a time, the default time would be set to
+        12:00AM of your local time. We use your daily start time to reset daily
+        limits eg. Max Account loss % per day...
       </Text>
 
       <Modal
@@ -285,6 +291,7 @@ const AddNewRiskManager = () => {
 
       <TouchableOpacity
         onPress={() => {
+          setIsClicked(true);
           finishPlanRegistration();
         }}
         style={styles.buttonContinue}

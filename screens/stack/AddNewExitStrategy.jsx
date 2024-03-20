@@ -124,7 +124,7 @@ const AddNewExitStrategy = () => {
       metaAccountId: account.metaApiAccountId,
       original: true,
       slPlacementPercentIsForProfit: slLossValue == 0 ? true : false,
-      slplacementPercentAfterProfit: slProfitValue == 0 ? 1 : slProfitValue,
+      slplacementPercentAfterProfit: slProfitValue == 0 ? slLossValue : slProfitValue,
       tradingPlanId: tradingPlan.planId,
     };
 

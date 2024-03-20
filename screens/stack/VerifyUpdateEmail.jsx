@@ -87,6 +87,7 @@ import { AuthContext } from "../../context/AuthContext";
           <TextInput
             placeholder="1234"
             placeholderTextColor={COLORS.gray}
+            keyboardType="numeric"
             onFocus={() => {
               setIsFocused(true);
             }}

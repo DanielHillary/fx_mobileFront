@@ -33,7 +33,7 @@ const OrderModal = ({ setVisibility, text, submitCommand }) => {
           <View style={{ alignItems: "center", marginTop: SIZES.small }}>
             <Text style={[styles.note, { fontSize: 30, justifyContent: 'center', padding: 20, textAlign: "center"}]}>
               {" "}
-              Please be audible enough for the microphone record your request.
+              Please be audible enough for the microphone to capture your request.
             </Text>
 
             <TouchableOpacity

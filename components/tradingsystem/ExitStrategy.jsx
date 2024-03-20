@@ -137,7 +137,7 @@ const ExitStrategy = () => {
       metaAccountId: account.metaApiAccountId,
       original: true,
       slPlacementPercentIsForProfit: slLossValue == 0 ? true : false,
-      slplacementPercentAfterProfit: slProfitValue == 0 ? 1 : slProfitValue,
+      slplacementPercentAfterProfit: slProfitValue == 0 ? slLossValue : slProfitValue,
       tradingPlanId: tradingPlan.planId,
     };
 
@@ -149,6 +149,7 @@ const ExitStrategy = () => {
       setProfitLotSize(0);
       setSlProfitValue(0);
       setTpValue(0);
+      setSlLossValue(0)
     } else {
       Alert.alert("Transaction failed", response.message);
     }

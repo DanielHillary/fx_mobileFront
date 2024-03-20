@@ -1,10 +1,10 @@
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, ActivityIndicator } from "react-native";
 import React, { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { COLORS, FONT, SIZES } from "../../constants";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { getResponseRemarks } from "../../api/tradeAnalysisApi";
+import { getResponseRemarks, getTradeAnalysis } from "../../api/tradeAnalysisApi";
 
 const Remark = ({ status, hasTradingPlan, remarks }) => {
   return (
@@ -69,13 +69,25 @@ const Remark = ({ status, hasTradingPlan, remarks }) => {
 const TradeReport = () => {
   const { navigate } = useNavigation();
   const [remarks, setRemarks] = useState([]);
+  const [tradeDetails, setTradeDetails] = useState(null);
 
   const route = useRoute();
 
-  const tradeDetails = route.params?.data || null;
+  const data = route.params?.data || null;
+
+  const checkTradeAnalysis = async () => {
+    let response = await getTradeAnalysis(data).then((res) => {
+      return res.data;
+    });
+    if (response.status) {
+      setTradeDetails(response.data);
+    } else {
+      console.log(response.message);
+    }
+  };
 
   const getRemarks = async () => {
-    const response = await getResponseRemarks(tradeDetails.responseId).then(
+    const response = await getResponseRemarks(data).then(
       (res) => {
         return res.data;
       }
@@ -88,8 +100,23 @@ const TradeReport = () => {
   };
 
   useEffect(() => {
+    checkTradeAnalysis();
     getRemarks();
   }, []);
+
+  if (tradeDetails === null) {
+    return (
+      <View
+        style={{
+          backgroundColor: COLORS.appBackground,
+          flex: 1,
+          justifyContent: "center",
+        }}
+      >
+        <ActivityIndicator size={"large"} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.baseContainer}>

@@ -46,9 +46,6 @@ const ActiveAlert = ({ empty, activeAlerts }) => {
   //   });
   // }, []);
 
-  let text1 = "History";
-  let text2 = "Show all";
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -58,7 +55,7 @@ const ActiveAlert = ({ empty, activeAlerts }) => {
               navigate("PriceAlert");
           }}
         >
-          <Text style={styles.headerBtn}>{!isEmpty ? text1 : text2}</Text>
+          <Text style={styles.headerBtn}>View all</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.cardsContainer}>

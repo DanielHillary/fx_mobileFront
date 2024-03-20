@@ -77,21 +77,12 @@ const RiskAnalysis = () => {
   const tradeDetails = route.params?.data || null;
 
   const getRemarks = async () => {
-    const response = await getResponseRemarks(tradeDetails.responseId).then(
-      (res) => {
-        return res.data;
-      }
-    );
-    if (response.status) {
-      setRemarks(response.data);
-    } else {
-      console.log(response.message);
-    }
+    setRemarks(tradeDetails.rems);
   };
 
-  // useEffect(() => {
-  //   getRemarks();
-  // }, []);
+  useEffect(() => {
+    getRemarks();
+  }, []);
 
   return (
     <ScrollView style={styles.baseContainer}>

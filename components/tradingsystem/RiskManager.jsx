@@ -40,7 +40,7 @@ const RiskManager = () => {
     setIsModalVisible(val);
     setIsClicked(false);
     navigation.navigate("SignIn");
-  }
+  };
 
   const route = useRoute();
 
@@ -48,42 +48,49 @@ const RiskManager = () => {
   const tradingPlan = route.params?.tradingPlan || null;
 
   const finishPlanRegistration = async () => {
-    if(defaultVolume === 0 | lossPerDay === 0 | minProfitPerTrade === 0 |
-      minRRR === 0 | lossPerTrade === 0 | targetProfit === 0){
-        Alert.alert("", "Please fill out all the positions");
-        return;
-    }
-    setIsClicked(true);
-    const body = {
-      accountId: accountInfo.accountId,
-      accountNumber: accountInfo.accountNumber,
-      allowedLossLevelPercentage: lossPerTrade,
-      defaultVolume: defaultVolume,
-      maxRiskPercentPerTrade: lossPerTrade,
-      minAcceptedScore: 100,
-      minProfitPercentPerTrade: minProfitPerTrade,
-      riskRewardRatio: minRRR,
-      totalPercentRiskPerDay: lossPerDay,
-      totalProfitPercentPerDay: targetProfit,
-      tradingPlanId: tradingPlan.planId,
-      metaApiAccountId: accountInfo.metaApiAccountId,
-      userId: accountInfo.userId,
-      dailyResetTime: date,
-      dayInHour: hours,
-      dayInMinute: minutes,
-    };
-
-    const response = await createRiskRegister(body).then((res) => {
-      return res.data;
-    });
-
-    if (response.status) {
-      updateCompleted(true);
-      setIsModalVisible(true);
+    if (
+      (defaultVolume === 0) |
+      (lossPerDay === 0) |
+      (minProfitPerTrade === 0) |
+      (minRRR === 0) |
+      (lossPerTrade === 0) |
+      (targetProfit === 0)
+    ) {
+      Alert.alert("", "Please fill out all the positions");
     } else {
-      console.log(response.message);
-      Alert.alert("Failed", response.message);
+      setIsClicked(true);
+      const body = {
+        accountId: accountInfo.accountId,
+        accountNumber: accountInfo.accountNumber,
+        allowedLossLevelPercentage: lossPerTrade,
+        defaultVolume: defaultVolume,
+        maxRiskPercentPerTrade: lossPerTrade,
+        minAcceptedScore: 100,
+        minProfitPercentPerTrade: minProfitPerTrade,
+        riskRewardRatio: minRRR,
+        totalPercentRiskPerDay: lossPerDay,
+        totalProfitPercentPerDay: targetProfit,
+        tradingPlanId: accountInfo.planId === null ? tradingPlan.planId : accountInfo.planId,
+        metaApiAccountId: accountInfo.metaApiAccountId,
+        userId: accountInfo.userId,
+        dailyResetTime: date,
+        dayInHour: hours,
+        dayInMinute: minutes,
+      };
+
+      const response = await createRiskRegister(body).then((res) => {
+        return res.data;
+      });
+
+      if (response.status) {
+        updateCompleted(true);
+        setIsModalVisible(true);
+      } else {
+        console.log(response.message);
+        Alert.alert("Failed", response.message);
+      }
     }
+
     setIsClicked(false);
   };
 
@@ -268,9 +275,9 @@ const RiskManager = () => {
           { marginTop: 30, fontStyle: "italic", color: COLORS.darkyellow },
         ]}
       >
-        Note: If you do not provide a time, the default time would be set
-        to 12:00AM of your local time. We use your daily start time to reset
-        daily limits eg. Max Account loss % per day...
+        Note: If you do not provide a time, the default time would be set to
+        12:00AM of your local time. We use your daily start time to reset daily
+        limits eg. Max Account loss % per day...
       </Text>
 
       <TouchableOpacity
@@ -294,10 +301,12 @@ const RiskManager = () => {
           alignSelf: "center",
           gap: 2,
           bottom: 5,
-          alignItems: "center"
+          alignItems: "center",
         }}
       >
-        <Text style={[styles.text, {marginTop: 4}]}>Don't have a entry plan yet? </Text>
+        <Text style={[styles.text, { marginTop: 4 }]}>
+          Don't have a entry plan yet?{" "}
+        </Text>
         <TouchableOpacity
           onPress={() => {
             navigation.navigate("SignIn");
@@ -310,14 +319,14 @@ const RiskManager = () => {
       </View>
 
       <Modal
-       visible={isModalVisible}
-       onRequestClose={() => {
-         setIsModalVisible(false);
-       }}
-       animationType="slide"
-       transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setIsModalVisible(false);
+        }}
+        animationType="slide"
+        transparent={true}
       >
-        <SuccessModal setVisibility={setVisibility}/>
+        <SuccessModal setVisibility={setVisibility} />
       </Modal>
     </ScrollView>
   );
