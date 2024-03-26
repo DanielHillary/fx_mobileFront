@@ -11,15 +11,21 @@ import React from "react";
 import { useNavigation } from "@react-navigation/native";
 
 const Recommendation = () => {
-
   const navigation = useNavigation();
   return (
     <ScrollView style={styles.container}>
       <View>
         <Text style={styles.text}>
           Below is the PsydTrader recommendation for setting up a profitable
-          trading plan. This plan also guides the rules of engagement as it
-          pertains to our refund policy.
+          trading plan. This recommendation also states the <Text
+            style={[
+              styles.text,
+              { fontSize: SIZES.medium + 2, color: COLORS.darkyellow },
+            ]}
+          >
+            mandated
+          </Text>{" "}
+          rules of engagement for the refund policy.
         </Text>
       </View>
       <View
@@ -50,8 +56,9 @@ const Recommendation = () => {
             style={{ height: 15, width: 15 }}
           />
           <Text style={styles.subtext}>
-            Entry Strategies are optional and the absence of a registered entry plan
-            would only affect your PsyDScore but not your refund eligibility.
+            Entry Strategies are optional and the absence of a registered entry
+            plan would only affect your PsyDScore but not your refund
+            eligibility.
           </Text>
         </View>
         <View
@@ -148,7 +155,7 @@ const Recommendation = () => {
             source={require("../../assets/icons/bulleting.png")}
             style={{ height: 15, width: 15 }}
           />
-          <Text style={styles.subtext}>
+          <Text style={[styles.subtext, { color: COLORS.darkyellow }]}>
             Do not interfere with any trade outside of your preset exit level.
             This would lead to automatic disqualification from being refunded.
             If you do not have exit strategies in place, refrain from
@@ -182,7 +189,7 @@ const Recommendation = () => {
             source={require("../../assets/icons/bulleting.png")}
             style={{ height: 15, width: 15 }}
           />
-          <Text style={styles.subtext}>
+          <Text style={[styles.subtext, { color: COLORS.darkyellow }]}>
             A risk register is a compulsory requirement for refund eligibility
             and directly impacts your PsyD Score per trade.
           </Text>
@@ -198,7 +205,7 @@ const Recommendation = () => {
             source={require("../../assets/icons/bulleting.png")}
             style={{ height: 15, width: 15 }}
           />
-          <Text style={styles.subtext}>
+          <Text style={[styles.subtext, { color: COLORS.darkyellow }]}>
             You are not allowed to risk more than 1% of your trading account
             balance on any trade.
           </Text>
@@ -214,7 +221,7 @@ const Recommendation = () => {
             source={require("../../assets/icons/bulleting.png")}
             style={{ height: 15, width: 15 }}
           />
-          <Text style={styles.subtext}>
+          <Text style={[styles.subtext, { color: COLORS.darkyellow }]}>
             You are not allowed to lose more than 5% of your daily starting
             account balance in a day.
           </Text>
@@ -230,14 +237,23 @@ const Recommendation = () => {
             source={require("../../assets/icons/bulleting.png")}
             style={{ height: 15, width: 15 }}
           />
-          <Text style={styles.subtext}>
+          <Text style={[styles.subtext, { color: COLORS.darkyellow }]}>
             You are not allowed to buy/sell multiple positions of an asset or
             pair risking more than 2% of your account at any time.
           </Text>
         </View>
         <Text style={styles.text}>
-          Defaulting in any of the above stated guidelines will result in
-          automatic disqualification from the refund benefits
+          Defaulting in any of the above{" "}
+          <Text
+            style={[
+              styles.text,
+              { fontSize: SIZES.medium + 2, color: COLORS.darkyellow },
+            ]}
+          >
+            mandated
+          </Text>{" "}
+          guidelines will result in automatic disqualification from the refund
+          benefits
         </Text>
       </View>
 

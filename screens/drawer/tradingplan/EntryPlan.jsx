@@ -357,7 +357,7 @@ const EntryPlan = () => {
         onPress={() => {
           setIsEdit(!isEdit)
         }}
-        style={[styles.buttonContinue, {position: "absolute", bottom: 40}]}
+        style={[styles.buttonContinue, {position: "relative", bottom: -200}]}
       >
         {isClicked ? (
           <ActivityIndicator size="large" colors={"black"} />

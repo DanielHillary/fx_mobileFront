@@ -528,14 +528,14 @@ const AutoTrader = () => {
           />
         </View>
       </View>
-      {accountDetails.accountName != "PsyDStarter" && (
+      {account.accountName != "PsyDStarter" && (
         <Text
           style={[styles.text, { marginLeft: 30, marginTop: SIZES.medium }]}
         >
           Choose trading account(s)
         </Text>
       )}
-      {accountDetails.accountName != "PsyDStarter" && (
+      {account.accountName != "PsyDStarter" && (
         <Text
           style={{
             color: COLORS.lightWhite,
@@ -575,7 +575,7 @@ const AutoTrader = () => {
           ))}
         </View>
       )}
-      {accountDetails.accountName != "PsyDStarter" ? (
+      {account.accountName != "PsyDStarter" ? (
         <Text
           style={{
             color: COLORS.lightWhite,
@@ -620,7 +620,7 @@ const AutoTrader = () => {
         </View>
       )}
 
-      {accountDetails.accountName != "PsyDStarter" && (
+      {account.accountName != "PsyDStarter" && (
         <View
           style={{ flexDirection: "row", alignItems: "center", marginTop: 30 }}
         >
@@ -656,7 +656,7 @@ const AutoTrader = () => {
         </View>
       )}
 
-      {accountDetails.accountName != "PsyDStarter" && (
+      {account.accountName != "PsyDStarter" && (
         <TouchableOpacity
           onPress={() => {
             if (acctList.length === 0) {

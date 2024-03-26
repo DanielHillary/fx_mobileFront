@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAlert } from "../../../api/priceAlertApi";
 import SuccessModal from "../../../components/modal/SuccessModal";
 import AlertModal from "../../../components/modal/AlertModal";
+import { useNavigation } from "@react-navigation/native";
 
 const DownArrow = () => {
   return (
@@ -43,8 +44,8 @@ const SetAlert = () => {
   ];
 
   const positions = [
-    { label: "above", value: "above" },
-    { label: "below", value: "below" },
+    { label: "above", value: "Above" },
+    { label: "below", value: "Below" },
   ];
 
   const [asset, setAsset] = useState("");
@@ -68,8 +69,11 @@ const SetAlert = () => {
 
   const { accountDetails, userInfo } = useContext(AuthContext);
 
+  const navigation = useNavigation();
+
   const setVisibility = (val) => {
     setIsModalVisible(val);
+    navigation.goBack();
   }
 
   const getAccountInfo = async () => {
@@ -359,7 +363,7 @@ const SetAlert = () => {
         {isLoading ? (
             <ActivityIndicator size="large" colors={"black"} />
           ) : (
-            <Text style={styles.buttonText}>Calculate</Text>
+            <Text style={styles.buttonText}>Set Alert</Text>
           )}
       </TouchableOpacity>
 

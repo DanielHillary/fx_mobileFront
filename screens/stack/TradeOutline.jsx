@@ -107,7 +107,7 @@ const Remark = ({ status, hasTradingPlan, remarks }) => {
               },
             ]}
           >
-            Warning: This trade defiles your trading plan!
+            Warning: This trade violates some aspects of your trading plan!
           </Text>
         )}
       </View>

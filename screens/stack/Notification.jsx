@@ -113,27 +113,35 @@ const NotificationCard = ({ item, updateNoteList }) => {
               checkTradeNotification();
             }
             if (item.notificationCategory == "Entry"){
-              navigation.navigate("ConfirmEntry", { tradeDetail : item.metaOrderId });
               markAsRead();
+              navigation.navigate("ConfirmEntry", { tradeDetail : item.metaOrderId });
+              
             }
             if(item.notificationCategory == "Price Alert"){
               checkPriceAlert()
             }
             if(item.notificationCategory == "Exit Level"){
-              navigation.navigate("Home")
               markAsRead();
+              navigation.navigate("Home")
+              
+            }
+            if(item.notificationCategory == "Closed Trade"){
+              markAsRead();
+              navigation.navigate("TradingJournal")
             }
             if(item.notificationCategory == "Telegram"){
               openURL("https://t.me/PsyDTradingBot")
               markAsRead();
             }
             if(item.notificationCategory === "Limit"){
-              navigation.navigate("Plan");
               markAsRead()
+              navigation.navigate("Plan");
+              
             }
             if(item.notificationCategory === "Account Update"){
-              navigation.navigate("Pricing");
               markAsRead()
+              navigation.navigate("Pricing");
+              
             }
           }}
         >

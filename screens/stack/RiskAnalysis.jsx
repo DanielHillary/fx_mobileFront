@@ -4,7 +4,6 @@ import { ScrollView } from "react-native";
 import { COLORS, FONT, SIZES } from "../../constants";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { getResponseRemarks } from "../../api/tradeAnalysisApi";
 
 const Remark = ({ status, hasTradingPlan, remarks }) => {
   return (
@@ -45,7 +44,7 @@ const Remark = ({ status, hasTradingPlan, remarks }) => {
               },
             ]}
           >
-            Warning: This trade defiles your trading plan!
+            Warning: This trade violates some aspects of your trading plan!
           </Text>
         )}
       </View>
@@ -58,7 +57,7 @@ const Remark = ({ status, hasTradingPlan, remarks }) => {
         ) : (
           <View style={{rowGap: SIZES.medium, marginBottom: 5}}>
             {remarks?.map((item) => (
-              <Text key={item.id} style={[styles.text, { marginHorizontal: 30 }]}>{item.remark}</Text>
+              <Text key={item.remark} style={[styles.text, { marginHorizontal: 30 }]}>{item.remark}</Text>
             ))}
           </View>
         )}

@@ -163,9 +163,9 @@ const RecordOutline = ({ notes }) => {
               </View>
 
               <View>
-                <Text style={[styles.info, { marginLeft: 30 }]}>Duration</Text>
-                <Text style={[styles.infodetail, { marginLeft: 30 }]}>
-                  {details.tradeDuration} {details.tradeInMinutes ? "mins" : details.tradeInSeconds ? "sec" : "hrs"}
+                <Text style={[styles.info, { marginLeft: 40 }]}>Exit Price</Text>
+                <Text style={[styles.infodetail, { marginLeft: 40 }]}>
+                  {details.exitPrice}
                 </Text>
               </View>
             </View>
@@ -210,6 +210,13 @@ const RecordOutline = ({ notes }) => {
                   </Text>
                 </View>
                 <Text style={styles.info}>PsyD Score</Text>
+              </View>
+
+              <View>
+                <Text style={[styles.info, { marginLeft: 30 }]}>Duration</Text>
+                <Text style={[styles.infodetail, { marginLeft: 30 }]}>
+                  {details.tradeDuration} {details.tradeInMinutes ? "mins" : details.tradeInSeconds ? "sec" : "hrs"}
+                </Text>
               </View>
             </View>
           </View>

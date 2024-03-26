@@ -124,6 +124,11 @@ const Bronze = () => {
       stat: true,
       detail: "Account analysis for trades",
     },
+    {
+      id: 9,
+      stat: true,
+      detail: "Voice command functionality",
+    },
   ];
 
   return (

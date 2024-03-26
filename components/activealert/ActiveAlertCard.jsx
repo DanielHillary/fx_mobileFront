@@ -25,7 +25,7 @@ const ActiveAlertCard = ({ item, handleCardPress }) => {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            gap: SIZES.xSmall,
+            gap: SIZES.xSmall - 5,
           }}
         >
           <TouchableOpacity style={styles.logoContainer}>
@@ -48,7 +48,7 @@ const ActiveAlertCard = ({ item, handleCardPress }) => {
             {/* Below */}
           </Text>
           <Text style={styles.alertprice}>
-            ${item.watchPrice}
+            {item.watchPrice}
             {/* 23443.76 */}
           </Text>
         </View>
