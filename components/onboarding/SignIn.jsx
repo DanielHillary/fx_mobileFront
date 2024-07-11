@@ -14,6 +14,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AuthContext, AuthProvider } from "../../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { forgotUserPassword } from "../../api/userApi";
 
 const SignIn = () => {
   const navigation = useNavigation();
@@ -115,8 +116,16 @@ const SignIn = () => {
         </View>
 
         <TouchableOpacity
-          onPress={() => {
-            navigation.navigate("ForgotPassword")
+          onPress={async() => {
+            if(email.length === 0 ){
+              Alert.alert("","Please enter your valid userName");
+            }else{
+              const response = await forgotUserPassword(email).then((res) => {
+                return res;
+              })
+              navigation.navigate("ForgotPassword")
+            }
+            
           }}
         >
           <Text

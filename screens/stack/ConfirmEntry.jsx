@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { COLORS, FONT, SIZES } from "../../constants";
-import { getEntryTechniques } from "../../api/tradingplanApi";
+import { getEntryTechniques, registerTradeSetup } from "../../api/tradingplanApi";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { confirmEntries } from "../../api/placeTradeApi";
@@ -112,7 +112,8 @@ const ConfirmEntry = () => {
       if (entryNum !== 0) {
         percentEntry = (chosen.length / entryNum) * 100;
       }
-      const response = await confirmEntries(details, percentEntry).then(
+      let chosenList = chosen.map((item) => item.indicatorName).join(",");
+      const response = await confirmEntries(details, percentEntry, chosenList).then(
         (res) => {
           return res;
         }

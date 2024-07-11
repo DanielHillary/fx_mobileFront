@@ -30,7 +30,7 @@ const AccountReport = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [report, setReport] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [reportRange, setReportRange] = useState("Last 7 days");
+  const [reportRange, setReportRange] = useState("Last 30 days");
   const [positions, setPositions] = useState([]);
   const [assets, setAssets] = useState([]);
   const [frequency, setFrequency] = useState([]);
@@ -119,7 +119,7 @@ const AccountReport = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    getWeekOrMonthReport(7);
+    getWeekOrMonthReport(30);
     setIsLoading(false);
   }, []);
 

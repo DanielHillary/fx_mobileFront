@@ -73,6 +73,7 @@ const RiskRegister = () => {
   const [isChanged, setIsChanged] = useState(false);
   const [timing, setTiming] = useState("AM");
   const [hasRisk, setHasRisk] = useState(true);
+  const [drawDown, setDrawDown] = useState(0);
 
   const navigation = useNavigation();
 
@@ -91,6 +92,8 @@ const RiskRegister = () => {
       setLossPerDay(risk.totalPercentRiskPerDay);
       setTargetProfit(risk.totalProfitPercentPerDay);
       setMinRRR(risk.riskRewardRatio);
+      setDrawDown(risk.overallDrawDown);
+      setDate(risk.dailyResetTime)
       setHasRisk(true);
     } else {
       setHasRisk(false);
@@ -129,10 +132,6 @@ const RiskRegister = () => {
         : lossPerTrade),
       (riskManager.defaultVolume =
         defaultVolume == "" ? riskManager.defaultVolume : defaultVolume),
-      (riskManager.maxRiskPercentPerTrade =
-        lossPerTrade == ""
-          ? riskManager.allowedLossLevelPercentage
-          : lossPerTrade),
       (riskManager.minProfitPercentPerTrade =
         minProfitPerTrade == ""
           ? riskManager.minProfitPercentPerTrade
@@ -145,6 +144,10 @@ const RiskRegister = () => {
         targetProfit == ""
           ? riskManager.totalProfitPercentPerDay
           : targetProfit),
+      (riskManager.overallDrawDown =
+        drawDown == ""
+          ? riskManager.overallDrawDown
+          : drawDown),
       (riskManager.dayInHour = hours),
       (riskManager.dayInMinute = minutes),
       (riskManager.dailyResetTime = date);
@@ -159,6 +162,10 @@ const RiskRegister = () => {
       );
       setEditMode(false);
     } else {
+      Alert.alert(
+        "Failed transaction",
+        response.message
+      );
       console.log(response.message);
     }
   };
@@ -232,7 +239,7 @@ const RiskRegister = () => {
       <View style={styles.infocontainer}>
         <View style={styles.infoEntry}>
           <Text
-            style={{ color: "white", width: 120, fontSize: SIZES.medium - 3 }}
+            style={{ color: "white", width: 100, fontSize: SIZES.medium - 3 }}
           >
             Max Acct% loss per trade
           </Text>
@@ -252,7 +259,7 @@ const RiskRegister = () => {
             />
           ) : (
             <Text style={styles.textInput}>
-              {riskManager.maxRiskPercentPerTrade}%
+              {riskManager.allowedLossLevelPercentage}%
             </Text>
           )}
           <View style={styles.line(editMode)} />
@@ -260,7 +267,7 @@ const RiskRegister = () => {
 
         <View style={[styles.infoEntry, { marginLeft: 15 }]}>
           <Text
-            style={{ color: "white", width: 120, fontSize: SIZES.medium - 3 }}
+            style={{ color: "white", width: 100, fontSize: SIZES.medium - 3 }}
           >
             Max Acct% loss per day
           </Text>
@@ -397,6 +404,60 @@ const RiskRegister = () => {
         </View>
       </View>
 
+      <View style={styles.infocontainer}>
+        <View style={styles.infoEntry}>
+          <Text
+            style={{ color: "white", width: 120, fontSize: SIZES.medium - 3 }}
+          >
+            Overall Account Drawdown Limit
+          </Text>
+
+          {editMode ? (
+            <TextInput
+              placeholderTextColor={"gray"}
+              // placeholder="0.0%"
+              keyboardType="numeric"
+              numberOfLines={1}
+              style={[styles.input]}
+              onChangeText={(text) => {
+                setDrawDown(text);
+              }}
+              value={drawDown}
+            />
+          ) : (
+            <Text style={styles.textInput}>{riskManager.overallDrawDown}%</Text>
+          )}
+          <View style={styles.line(editMode)} />
+        </View>
+
+        {/* <View style={[styles.infoEntry, { marginLeft: 15 }]}>
+          <Text
+            style={{ color: "white", width: 100, fontSize: SIZES.medium - 3 }}
+          >
+            Daily Acct % profit target
+          </Text>
+
+          {editMode ? (
+            <TextInput
+              placeholderTextColor={"gray"}
+              // placeholder="0.0"
+              keyboardType="numeric"
+              numberOfLines={1}
+              style={[styles.input]}
+              onChangeText={(text) => {
+                setTargetProfit(text);
+              }}
+              value={targetProfit}
+            />
+          ) : (
+            <Text style={styles.textInput}>
+              {riskManager.totalProfitPercentPerDay}%
+            </Text>
+          )}
+          <View style={styles.line(editMode)} />
+        </View> */}
+      </View>
+
       <View style={{ marginTop: SIZES.xxLarge + 5, flexDirection: "row" }}>
         <Text style={[styles.text, { alignSelf: "flex-end", marginBottom: 5 }]}>
           Your daily reset time:
@@ -431,6 +492,24 @@ const RiskRegister = () => {
           </View>
         </TouchableOpacity>
       </View>
+
+      <Text
+        style={[
+          styles.text,
+          {
+            marginTop: 30,
+            fontStyle: "italic",
+            color: COLORS.white,
+            textAlign: "center",
+            fontSize: SIZES.small
+          },
+        ]}
+      >
+        NOTE!!!: We calculate your drawdown from the starting balance on the first
+        trade your losing streak. For strict accounts, if you hit your overall
+        drawdown limit, you would not be able to place any trades on your
+        account for a period of 3 trading days.
+      </Text>
 
       <AlertModal
         message={
@@ -541,6 +620,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     position: "relative",
     width: "auto",
+    marginTop: 10,
   },
   alertMessage: {
     color: COLORS.white,
@@ -581,7 +661,8 @@ const styles = StyleSheet.create({
     backgroundColor: edit ? "green" : COLORS.darkyellow,
     borderRadius: 10,
     width: 100,
-    marginTop: 100,
+    marginTop: 65,
+    marginBottom: 40,
     alignSelf: "center",
   }),
   button: {

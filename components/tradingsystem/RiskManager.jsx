@@ -31,6 +31,7 @@ const RiskManager = () => {
   const [isClicked, setIsClicked] = useState(false);
   const [timing, setTiming] = useState("AM");
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [drawDown, setDrawDown] = useState(0);
 
   const navigation = useNavigation();
 
@@ -54,7 +55,8 @@ const RiskManager = () => {
       (minProfitPerTrade === 0) |
       (minRRR === 0) |
       (lossPerTrade === 0) |
-      (targetProfit === 0)
+      (targetProfit === 0) |
+      (drawDown === 0)
     ) {
       Alert.alert("", "Please fill out all the positions");
     } else {
@@ -70,12 +72,14 @@ const RiskManager = () => {
         riskRewardRatio: minRRR,
         totalPercentRiskPerDay: lossPerDay,
         totalProfitPercentPerDay: targetProfit,
-        tradingPlanId: accountInfo.planId === null ? tradingPlan.planId : accountInfo.planId,
+        tradingPlanId:
+          accountInfo.planId === null ? tradingPlan.planId : accountInfo.planId,
         metaApiAccountId: accountInfo.metaApiAccountId,
         userId: accountInfo.userId,
         dailyResetTime: date,
         dayInHour: hours,
         dayInMinute: minutes,
+        overallDrawDown: drawDown,
       };
 
       const response = await createRiskRegister(body).then((res) => {
@@ -222,7 +226,7 @@ const RiskManager = () => {
           <View style={styles.line} />
         </View>
 
-        <View style={styles.infoEntry}>
+        <View style={[styles.infoEntry, { marginLeft: 15 }]}>
           <Text style={{ color: "white", width: 80, fontSize: SIZES.xSmall }}>
             Daily Acct% profit target
           </Text>
@@ -240,6 +244,45 @@ const RiskManager = () => {
           />
           <View style={styles.line} />
         </View>
+      </View>
+
+      <View style={styles.infocontainer}>
+        <View style={styles.infoEntry}>
+          <Text style={{ color: "white", width: 80, fontSize: SIZES.xSmall }}>
+            Overall Account drawdown limit
+          </Text>
+
+          <TextInput
+            placeholderTextColor={"gray"}
+            placeholder="0.0%"
+            keyboardType="numeric"
+            numberOfLines={1}
+            style={[styles.input]}
+            onChangeText={(text) => {
+              setDrawDown(text);
+            }}
+            value={drawDown}
+          />
+          <View style={styles.line} />
+        </View>
+        {/* <View style={[styles.infoEntry, { marginLeft: 15 }]}>
+          <Text style={{ color: "white", width: 90, fontSize: SIZES.xSmall }}>
+            Min Acct% profit per trade
+          </Text>
+
+          <TextInput
+            placeholderTextColor={"gray"}
+            placeholder="0.0%"
+            numberOfLines={1}
+            keyboardType="numeric"
+            style={[styles.input]}
+            onChangeText={(text) => {
+              setMinProfitPerTrade(text);
+            }}
+            value={minProfitPerTrade}
+          />
+          <View style={styles.line} />
+        </View> */}
       </View>
 
       <View style={{ marginTop: SIZES.medium, flexDirection: "row" }}>
@@ -280,42 +323,62 @@ const RiskManager = () => {
         limits eg. Max Account loss % per day...
       </Text>
 
-      <TouchableOpacity
-        onPress={() => {
-          setIsClicked(true);
-          finishPlanRegistration();
-        }}
-        style={styles.buttonContinue}
+      <Text
+        style={[
+          styles.text,
+          {
+            marginTop: 30,
+            fontStyle: "italic",
+            color: COLORS.white,
+            textAlign: "center",
+          },
+        ]}
       >
-        {isClicked ? (
-          <ActivityIndicator size="large" colors={"black"} />
-        ) : (
-          <Text style={styles.buttonText}>Finish</Text>
-        )}
-      </TouchableOpacity>
+        NOTE: We calculate your drawdown from your starting balance of the first
+        trade on your losing streak. For strict accounts, if you hit your overall
+        drawdown limit, you would not be able to place any trades on your
+        account for a period of 3 trading days.
+      </Text>
 
       <View
         style={{
-          flexDirection: "row",
           padding: SIZES.small,
           alignSelf: "center",
           gap: 2,
-          bottom: 5,
+          marginTop: 10,
+          bottom: 30,
           alignItems: "center",
         }}
       >
-        <Text style={[styles.text, { marginTop: 4 }]}>
-          Don't have a entry plan yet?{" "}
-        </Text>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate("SignIn");
+            setIsClicked(true);
+            finishPlanRegistration();
           }}
+          style={styles.buttonContinue}
         >
-          <Text style={{ color: COLORS.darkyellow, fontSize: SIZES.large }}>
-            Skip
-          </Text>
+          {isClicked ? (
+            <ActivityIndicator size="large" colors={"black"} />
+          ) : (
+            <Text style={styles.buttonText}>Finish</Text>
+          )}
         </TouchableOpacity>
+
+        <View style={{ flexDirection: "row", marginTop: 10}}>
+          <Text style={[styles.text, { marginTop: 7 }]}>
+            Don't have a risk register yet?{" "}
+          </Text>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("SignIn");
+            }}
+            style={{marginBottom: 25}}
+          >
+            <Text style={{ color: COLORS.darkyellow, fontSize: SIZES.large }}>
+              Skip
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Modal
@@ -393,7 +456,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.darkyellow,
     borderRadius: 10,
     width: 200,
-    marginTop: 130,
+    marginTop: 60,
     alignSelf: "center",
   },
   buttonText: {

@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 import {
   StyleSheet,
@@ -24,6 +24,9 @@ import { useRoute } from "@react-navigation/native";
 import { getTradeNotes } from "../../api/journalApi";
 
 const RecordOutline = ({ notes }) => {
+
+  // const [tradeSetup, setTradeSetup] = useState([])
+
   useEffect(() => {
     loadCustomFont();
     loadThemeCustomFont();
@@ -38,6 +41,8 @@ const RecordOutline = ({ notes }) => {
 
   const tradeType = details.tradeType == "BUY INSTANT" ? "buy" : "sell";
 
+  let setup = details.tradeSetup === null || details.tradeSetup === "" ? "No Setup" : details.tradeSetup.split(',').map(item => item.trim());
+  
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -67,14 +72,20 @@ const RecordOutline = ({ notes }) => {
             </Text>
           </View>
         </View>
-        <View style={{ flexDirection: "row", alignContent: 'center', gap: SIZES.xxLarge }}>
-          <View style={{ flexDirection: "row", alignItems: 'center' }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignContent: "center",
+            gap: SIZES.xxLarge,
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={styles.text}>Open: </Text>
             <View>
               <Text style={styles.time}>{details.open}</Text>
             </View>
           </View>
-          <View style={{ flexDirection: "row", alignItems: 'center' }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={styles.text}>Close:</Text>
             <View>
               <Text style={styles.time}> {details.close}</Text>
@@ -138,35 +149,20 @@ const RecordOutline = ({ notes }) => {
               </View>
             </View>
 
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                width: "60%",
-                padding: 15,
-                marginRight: 80,
-              }}
-            >
+            <View style={styles.headingInfo}>
               <View>
                 <Text style={styles.info}>Opening bal</Text>
                 <Text style={styles.infodetail}>{details.openingBalance}</Text>
               </View>
 
               <View>
-                <Text style={[styles.info, { marginLeft: 55 }]}>
-                  Closing balance
-                </Text>
-                <Text style={[styles.infodetail, { marginLeft: 55 }]}>
-                  {details.closingBalance}
-                </Text>
+                <Text style={styles.info}>Closing balance</Text>
+                <Text style={styles.infodetail}>{details.closingBalance}</Text>
               </View>
 
               <View>
-                <Text style={[styles.info, { marginLeft: 40 }]}>Exit Price</Text>
-                <Text style={[styles.infodetail, { marginLeft: 40 }]}>
-                  {details.exitPrice}
-                </Text>
+                <Text style={styles.info}>Exit Price</Text>
+                <Text style={styles.infodetail}>{details.exitPrice}</Text>
               </View>
             </View>
 
@@ -215,11 +211,32 @@ const RecordOutline = ({ notes }) => {
               <View>
                 <Text style={[styles.info, { marginLeft: 30 }]}>Duration</Text>
                 <Text style={[styles.infodetail, { marginLeft: 30 }]}>
-                  {details.tradeDuration} {details.tradeInMinutes ? "mins" : details.tradeInSeconds ? "sec" : "hrs"}
+                  {details.tradeDuration}{" "}
+                  {details.tradeInMinutes
+                    ? "mins"
+                    : details.tradeInSeconds
+                    ? "sec"
+                    : "hrs"}
                 </Text>
               </View>
             </View>
           </View>
+
+          <View style={{ padding: 9}}>
+            <Text style={[styles.text, {fontSize: SIZES.medium, textAlign: "center"}]}>Trade Setup</Text>
+          </View>
+
+          <ScrollView contentContainerStyle={styles.gridContainer}>
+            {setup !== "No Setup" ? (setup.map((item, index) => (
+              <Text key={index} style={styles.gridItem}>
+                {item}
+              </Text>
+            ))) : (
+              <Text style={styles.gridItem}>
+                No Trade Setup
+              </Text>
+            )}
+          </ScrollView>
 
           <View style={{ paddingHorizontal: SIZES.large }}>
             <Text style={styles.note}>Trade Notes</Text>
@@ -322,6 +339,21 @@ const styles = StyleSheet.create({
     // ...SHADOWS.medium,
     shadowColor: COLORS.white,
   },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+  },
+  gridItem: {
+    backgroundColor: COLORS.darkyellow,
+    padding: 8,
+    margin: 4,
+    borderRadius: 8,
+    textAlign: 'center',
+    width: '45%',
+    fontSize: SIZES.medium,
+    fontFamily: FONT.bold
+  },
   buy: {
     fontFamily: FONT.bold,
     alignSelf: "flex-start",
@@ -338,7 +370,8 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: SIZES.medium,
     alignSelf: "center",
-    padding: SIZES.small,
+    padding: SIZES.small, 
+    fontFamily: FONT.medium
   },
   logImage: {
     width: "10%",

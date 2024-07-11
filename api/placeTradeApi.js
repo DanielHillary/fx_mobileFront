@@ -21,10 +21,10 @@ export const voiceTradeOrder = async (body) =>{
   return response;
 }
 
-export const confirmEntries = async (orderId, percent) => {
+export const confirmEntries = async (orderId, percent, setupList) => {
   const apiAxios = await createAxiosInstance();
   const response = await apiAxios.get("/trade/confirmentries", {
-    params: { metaOrderId: orderId, compliance: percent },
+    params: { metaOrderId: orderId, compliance: percent, setupList: setupList },
   });
   return response;
 };

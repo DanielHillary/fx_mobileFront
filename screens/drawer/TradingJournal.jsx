@@ -26,6 +26,7 @@ import {
   searchForSymbol,
 } from "../../api/journalApi";
 import JournalCard from "../../components/JournalCard";
+import { getPDFReport } from "../../api/accountApi";
 
 const CustomDate = ({ getStartDate, getEndDate, getRangeData }) => {
   const [startDate, setStartDate] = useState(false);
@@ -151,6 +152,7 @@ const TradingJournal = () => {
   const [tradeRecords, setTradeRecords] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [isClicked, setIsClicked] = useState(false);
 
   const setStartDateValue = (start) => {
     setStartDate(start);
@@ -159,6 +161,24 @@ const TradingJournal = () => {
   const setEndDateValue = (end) => {
     setEndDate(end);
   };
+
+  const generateReport = async () => {
+    try {
+      const response = await getPDFReport(accountDetails.accountId).then((res) => {
+        return res.data;
+      })
+
+      if(response.status){
+        Alert.alert("Hurray!!", response.message);
+      }else{
+        Alert.alert("Error", response.message);
+        
+      }
+      setIsClicked(false);
+    } catch (error) {
+      setIsClicked(false);
+    }
+  }
 
   const { accountDetails } = useContext(AuthContext);
 
@@ -559,6 +579,20 @@ const TradingJournal = () => {
         />
       )}
       {/* </View> */}
+
+      <TouchableOpacity
+          onPress={() => {
+            setIsClicked(true);
+            generateReport();
+          }}
+          style={styles.button}
+        >
+          {isClicked ? (
+            <ActivityIndicator size="large" colors={"black"} />
+          ) : (
+            <Text style={styles.buttontext}>Generate Report</Text>
+          )}
+        </TouchableOpacity>
       {custom && (
         <CustomDate
           getStartDate={setStartDateValue}

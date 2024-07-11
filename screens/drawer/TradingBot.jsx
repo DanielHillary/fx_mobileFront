@@ -314,10 +314,10 @@ const Account = ({
               fontSize: SIZES.small + 2,
               fontFamily: FONT.regular,
               color: COLORS.lightWhite,
-              marginLeft: 5,
+              marginLeft: 4,
             }}
           >
-            Vol
+            Volume
           </Text>
           <TextInput
             placeholderTextColor={"gray"}
@@ -586,29 +586,31 @@ const TradingBot = () => {
     setIsClicked(false);
   };
 
-  const placeOrderForTrade = (ignoreEntries, confirmEntries, percentEntry) => {
-    if (account.strict & !account.hasRiskManagement) {
+  const placeOrderForTrade = (ignoreEntries, confirmEntries, percentEntry, chosen) => {
+    if (account.strict && !account.hasRiskManagement) {
       Alert.alert(
         "Strict Account",
-        "Please create a risk register, else you would not be allowed to trade"
+        "Please create a risk register, else you would not be allowed to trade based on the strict mode policy."
       );
-    } else if ((stopLoss.length === 0) & (takeProfit.length === 0)) {
-      console.log("It is empty indeed");
-      if (account.strict & !account.hasRiskManagement) {
+    }else if ((stopLoss.length === 0) || (takeProfit.length === 0)) {
+      if (account.strict && !account.hasRiskManagement) {
         Alert.alert(
           "Strict Account",
           "Please create a risk register, else you need to provide your SL/TP prices"
         );
       } else {
-        placeTradeOrder(ignoreEntries, confirmEntries, percentEntry);
+        placeTradeOrder(ignoreEntries, confirmEntries, percentEntry, chosen);
       }
+    }else{
+      placeTradeOrder(ignoreEntries, confirmEntries, percentEntry, chosen);
     }
   };
 
   const placeTradeOrder = async (
     ignoreEntries,
     confirmEntries,
-    percentEntry
+    percentEntry,
+    chosen
   ) => {
     setIsClicked(true);
     const tradeOrder = {
@@ -630,6 +632,7 @@ const TradingBot = () => {
       ignoreEntries: ignoreEntries,
       confirmEntries: confirmEntries,
       entryPercent: percentEntry,
+      tradeSetup: chosen,
     };
 
     console.log(acctList);
@@ -888,8 +891,7 @@ const TradingBot = () => {
         >
           Attention!!: Please note that if you do not specify a volume, we would
           open each trade using the recommended volume for each account based on
-          your risk management plan. If you do not have a risk register, a
-          default volume of 1.0 will be used.
+          your risk management plan.
         </Text>
       )}
       {userAccounts.length === 0 ? (
@@ -1019,9 +1021,11 @@ const TradingBot = () => {
       <AlertModal
         isAlert={alertModal}
         handleCancel={() => {
+          setAlertModal(false);
           navigation.navigate("Home");
         }}
         handleConfirm={() => {
+          setAlertModal(false);
           navigation.navigate("Pricing");
         }}
         message={"Please renew your subscription to continue usage"}

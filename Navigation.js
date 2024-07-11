@@ -73,6 +73,10 @@ import VerifyEmail from "./components/onboarding/forgotpassword/VerifyEmail";
 import UpdateInfo from "./screens/stack/UpdateInfo";
 import VerifyUpdateEmail from "./screens/stack/VerifyUpdateEmail";
 import Recommendation from "./screens/drawer/Recommendation";
+import ChoosePlan from "./screens/stack/ChoosePlan";
+import Price from "./screens/stack/Price";
+import StrategyAnalyzer from "./screens/stack/StrategyAnalyzer";
+import StrategyAnalysisReport from "./screens/stack/StrategyAnalysisReport";
 
 const Tab = createBottomTabNavigator();
 
@@ -92,6 +96,8 @@ const AuthStack = () => {
       <AuthenticationStack.Screen name="SignIn" component={SignIn} />
       <AuthenticationStack.Screen name="SignUp" component={SignUp} />
       <AuthenticationStack.Screen name="AddAccount" component={AddAccount} />
+      <AuthenticationStack.Screen name="ChoosePlan" component={ChoosePlan} />
+      <AuthenticationStack.Screen name="Pricing" component={Price} />
       <AuthenticationStack.Screen
         name="EntryStrategy"
         component={EntryStrategy}
@@ -640,6 +646,28 @@ const StackNavigation = () => {
       <Stack.Screen
         name="AccountReport"
         component={AccountReport}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="StrategyAnalysis"
+        component={StrategyAnalyzer}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <Stack.Screen
+        name="PlanReport"
+        component={StrategyAnalysisReport}
         options={{
           presentation: "modal",
           headerStyle: styles.header,

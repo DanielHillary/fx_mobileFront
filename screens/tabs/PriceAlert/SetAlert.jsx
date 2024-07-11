@@ -10,7 +10,13 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import { COLORS, Currencies, FONT, SIZES, Synthetics } from "../../../constants";
+import {
+  COLORS,
+  Currencies,
+  FONT,
+  SIZES,
+  Synthetics,
+} from "../../../constants";
 import React, { useContext, useEffect, useState } from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 import { AuthContext } from "../../../context/AuthContext";
@@ -66,6 +72,8 @@ const SetAlert = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [alertModal, setAlertModal] = useState(false);
+  const [waiting, setWaiting] = useState(false);
+  const [payModal, setPayModal] = useState(false);
 
   const { accountDetails, userInfo } = useContext(AuthContext);
 
@@ -74,25 +82,42 @@ const SetAlert = () => {
   const setVisibility = (val) => {
     setIsModalVisible(val);
     navigation.goBack();
-  }
+  };
 
-  const getAccountInfo = async () => {
-    const account = AsyncStorage.getItem("accountInfo").then((res) => {
+  const setAccountUp = async () => {
+    let account = await AsyncStorage.getItem("accountInfo").then((res) => {
       return JSON.parse(res);
     });
-    setAccountInfo(account);
+
+    if (account === null && accountDetails === null) {
+      setWaiting(true);
+    }
+    if (accountDetails === null || accountDetails.length === 0) {
+      if (!account.paidAccount) {
+        setPayModal(true);
+      }
+      setAccountInfo(account);
+      setWaiting(false);
+    } else {
+      if (!accountDetails.paidAccount) {
+        setPayModal(true);
+      }
+      setAccountInfo(accountDetails);
+      setWaiting(false);
+    }
   };
+
   useEffect(() => {
-    getAccountInfo();
+    setAccountUp();
   }, []);
 
   const body = {
-    accountId: accountDetails.accountId,
+    accountId: accountInfo.accountId,
     active: true,
     alertMedium: option,
     fireBaseToken: userInfo.user.firebaseToken,
     forATrade: false,
-    planId: accountDetails.planId,
+    planId: accountInfo.planId,
     position: position,
     reason: "Price alert",
     recurrent: !isPressed,
@@ -104,23 +129,23 @@ const SetAlert = () => {
     forProfit: true,
   };
 
-  const addToWatchList = async() =>{
-    setIsLoading(true)
-    try{
+  const addToWatchList = async () => {
+    setIsLoading(true);
+    try {
       const response = await createAlert(body).then((res) => {
         return res.data;
-      })
-      if(response.status){
+      });
+      if (response.status) {
         setIsModalVisible(true);
-      }else{
-        setAlertModal(true)
+      } else {
+        setAlertModal(true);
         setMessage(response.message);
       }
-    }catch(error){
+    } catch (error) {
       console.log(error);
     }
     setIsLoading(false);
-  }
+  };
   return (
     <ScrollView style={styles.base}>
       <View style={{ paddingHorizontal: 80 }}>
@@ -131,10 +156,10 @@ const SetAlert = () => {
           setOpen={() => setIsOpen(!isOpen)}
           value={currentValue}
           setValue={(val) => {
-            setCurrentValue(val)
-            if(val() == "Synthetic"){
+            setCurrentValue(val);
+            if (val() == "Synthetic") {
               setIsCurrencies(false);
-            }else {
+            } else {
               setIsCurrencies(true);
             }
           }}
@@ -318,7 +343,7 @@ const SetAlert = () => {
               color: COLORS.white,
               fontFamily: FONT.medium,
               paddingHorizontal: SIZES.small - 4,
-              height: '50%',
+              height: "50%",
             }}
             onChangeText={(num) => setNote(num)}
             value={note}
@@ -356,37 +381,55 @@ const SetAlert = () => {
         onPress={() => {
           //   navigate("AutoTrader");
           console.log(accountDetails.accountId);
-          addToWatchList()
+          addToWatchList();
         }}
         style={styles.button}
       >
         {isLoading ? (
-            <ActivityIndicator size="large" colors={"black"} />
-          ) : (
-            <Text style={styles.buttonText}>Set Alert</Text>
-          )}
+          <ActivityIndicator size="large" colors={"black"} />
+        ) : (
+          <Text style={styles.buttonText}>Set Alert</Text>
+        )}
       </TouchableOpacity>
 
       <Modal
-         visible={isModalVisible}
-         onRequestClose={() => {
-           setIsModalVisible(false);
-         }}
-         animationType="slide"
-         transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setIsModalVisible(false);
+        }}
+        animationType="slide"
+        transparent={true}
       >
         <SuccessModal setVisibility={setVisibility} />
       </Modal>
 
-      <AlertModal 
+      <AlertModal
         isAlert={alertModal}
         handleCancel={() => {
+          setAlertModal(false);
           navigation.goBack();
         }}
         handleConfirm={() => {
+          setAlertModal(false);
           navigation.navigate("Pricing");
         }}
         message={message}
+        showCancelButton={true}
+        showConfirmButton={true}
+        title={"Action required"}
+      />
+
+      <AlertModal
+        isAlert={payModal}
+        handleCancel={() => {
+          setPayModal(false);
+          navigation.goBack();
+        }}
+        handleConfirm={() => {
+          setPayModal(false);
+          navigation.navigate("Pricing");
+        }}
+        message={"Please renew your subscription to continue usage"}
         showCancelButton={true}
         showConfirmButton={true}
         title={"Action required"}

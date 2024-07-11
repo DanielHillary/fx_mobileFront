@@ -222,6 +222,22 @@ const Recommendation = () => {
             style={{ height: 15, width: 15 }}
           />
           <Text style={[styles.subtext, { color: COLORS.darkyellow }]}>
+            You are not allowed to enter a trade with a Risk to Reward Ratio 
+            of less than 2.
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: SIZES.small,
+          }}
+        >
+          <Image
+            source={require("../../assets/icons/bulleting.png")}
+            style={{ height: 15, width: 15 }}
+          />
+          <Text style={[styles.subtext, { color: COLORS.darkyellow }]}>
             You are not allowed to lose more than 5% of your daily starting
             account balance in a day.
           </Text>

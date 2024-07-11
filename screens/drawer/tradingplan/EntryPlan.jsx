@@ -25,35 +25,14 @@ import EmptyList from "../../../components/EmptyList";
 const Options = ({ item }) => {
   return (
     <ScrollView
-      horizontal
-      style={{
-        paddingBottom: SIZES.large,
-        columnGap: SIZES.large,
-      }}
+      
+      contentContainerStyle={styles.gridContainer}
     >
       {item?.map((value) => (
         <View
           key={value}
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: SIZES.large,
-          }}
         >
-          <View style={styles.asset}>
-            <Text
-              style={{
-                color: COLORS.lightWhite,
-                fontSize: SIZES.medium + 2,
-                fontFamily: FONT.medium,
-                textAlign: "center",
-                paddingHorizontal: SIZES.small,
-              }}
-            >
-              {value}
-            </Text>
-          </View>
+          <Text style={styles.gridItem}>{value}</Text>
         </View>
       ))}
     </ScrollView>
@@ -186,7 +165,7 @@ const EntryPlan = () => {
     setIsClicked(false);
   };
 
-  if(entryValue.length === 0){
+  if (entryValue.length === 0) {
     return (
       <View
         style={{
@@ -353,18 +332,23 @@ const EntryPlan = () => {
         </View>
       )} */}
 
-      {isEdit && <TouchableOpacity
-        onPress={() => {
-          setIsEdit(!isEdit)
-        }}
-        style={[styles.buttonContinue, {position: "relative", bottom: -200}]}
-      >
-        {isClicked ? (
-          <ActivityIndicator size="large" colors={"black"} />
-        ) : (
-          <Text style={styles.buttonText}>Cancel</Text>
-        )}
-      </TouchableOpacity>}
+      {isEdit && (
+        <TouchableOpacity
+          onPress={() => {
+            setIsEdit(!isEdit);
+          }}
+          style={[
+            styles.buttonContinue,
+            { position: "relative", bottom: -200 },
+          ]}
+        >
+          {isClicked ? (
+            <ActivityIndicator size="large" colors={"black"} />
+          ) : (
+            <Text style={styles.buttonText}>Cancel</Text>
+          )}
+        </TouchableOpacity>
+      )}
 
       <AlertModal
         isAlert={isEmpty}
@@ -404,7 +388,7 @@ const styles = StyleSheet.create({
   baseContainer: {
     backgroundColor: COLORS.appBackground,
     flex: 1,
-    padding: SIZES.medium,
+    padding: SIZES.medium - 2,
   },
   intro: {
     color: COLORS.lightWhite,
@@ -437,6 +421,22 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     borderColor: COLORS.darkyellow,
     borderWidth: 0.3,
+  },
+  gridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
+  },
+  gridItem: {
+    backgroundColor: COLORS.componentbackground,
+    padding: 8,
+    margin: 4,
+    borderRadius: 8,
+    textAlign: "center",
+    width: "100%",
+    fontSize: SIZES.medium + 2,
+    fontFamily: FONT.bold,
+    color: COLORS.lightWhite
   },
   text: {
     color: COLORS.lightWhite,
@@ -475,8 +475,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.darkyellow,
     borderRadius: 10,
     width: 80,
-    marginTop: 10,
-    alignSelf: edit ? "flex-end" : "center",
+    marginTop: 20,
+    alignSelf: "flex-end",
     marginRight: edit ? SIZES.large + 10 : 0,
   }),
   buttonContinue: {

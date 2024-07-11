@@ -4,11 +4,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // const authToken = await AsyncStorage.getItem("jwtToken");
 
-// export const localHost = "http://192.168.43.131:8080/api";
-export const localHost = "https://psydtrader.uc.r.appspot.com/api";
+export const localHost = "http://192.168.43.131:8080/api";
+// export const localHost = "https://psydtrader.uc.r.appspot.com/api";
 
-// const host = "http://192.168.43.131:8080/auth/login";
-const host = "https://psydtrader.uc.r.appspot.com/auth/login"
+const host = "http://192.168.43.131:8080/auth/login";
+// const host = "https://psydtrader.uc.r.appspot.com/auth/login";
 
 const headers = {
   "Content-Type": "application/json",
@@ -26,6 +26,16 @@ export const registerNewUser = async (body) => {
   const response = await axios.post(
     `${localHost}/registration/registerNewUser`,
     body
+  );
+  return response;
+};
+
+export const forgotUserPassword = async (userName) => {
+  const response = await axios.get(
+    `${localHost}/registration/forgotpassword`,
+    {
+      params: { email: userName },
+    }
   );
   return response;
 };

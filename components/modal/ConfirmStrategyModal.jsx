@@ -10,7 +10,7 @@ import {
 import React, { useState, useContext, useEffect } from "react";
 import { COLORS, SIZES, FONT } from "../../constants";
 import { AuthContext } from "../../context/AuthContext";
-import { getEntryTechniques } from "../../api/tradingplanApi";
+import { getEntryTechniques, registerTradeSetup } from "../../api/tradingplanApi";
 
 const Options = ({ option, updateList }) => {
   const [entry, setEntry] = useState(false);
@@ -90,13 +90,14 @@ const ConfirmStrategyModal = ({ setVisibility, openTrade }) => {
       if (entryNum !== 0) {
         percentEntry = (chosen.length / entryNum) * 100;
       }
-      openTrade(false, true, percentEntry);
+      let chosenList = chosen.map((item) => item.indicatorName).join(",");
+      openTrade(false, true, percentEntry, chosenList);
     }
   };
 
   const ignoreEntries = async () => {
     setVisibility(false);
-    openTrade(true, false, 0);
+    openTrade(true, false, 0, chosen);
   };
 
 

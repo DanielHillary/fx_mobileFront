@@ -34,6 +34,17 @@ export const getEntryTechniques = async (accountId) => {
   return response;
 };
 
+export const registerTradeSetup = async (accountId, setupList) => {
+  const apiAxios = await createAxiosInstance();
+  const response = await apiAxios.post(
+    "/entrystrategy/registertradesetup",
+    {
+      params: { accountId: accountId, setupList: setupList },
+    }
+  );
+  return response;
+};
+
 export const registerLossExitStrategy = async (body) => {
   const response = await axios.post(
     `${localHost}/general/createexitstrategyforloss`,
@@ -144,5 +155,12 @@ export const updateRiskRegister = async (body) => {
     "/riskmanagement/updateriskmanagement",
     body
   );
+  return response;
+};
+
+
+export const analyzeTradingPlan = async (body) => {
+  const apiAxios = await createAxiosInstance();
+  const response = await apiAxios.post("/tradingplan/analyzestrategy", body);
   return response;
 };

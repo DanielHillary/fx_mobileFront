@@ -253,7 +253,10 @@ const AddAccount = () => {
         "accountInfo",
         JSON.stringify(response.data.account)
       );
-      navigation.navigate("SetUpTradingPlan", {
+      // navigation.navigate("SetUpTradingPlan", {
+      //   account: response.data.account,
+      // });
+      navigation.navigate("ChoosePlan", {
         account: response.data.account,
       });
     } else {

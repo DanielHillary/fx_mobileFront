@@ -10,6 +10,7 @@ import {
   Alert,
   Modal,
 } from "react-native";
+import _ from "lodash";
 import React, { useContext, useEffect, useState } from "react";
 import { COLORS, FONT, SIZES } from "../../constants";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -35,14 +36,22 @@ const DownArrow = () => {
   );
 };
 
-const Increment = ({ item, getTotalCount, decreaseTotalCount, isPart }) => {
+const Increment = ({
+  item,
+  increaseTotalCount,
+  decreaseTotalCount,
+  isPart,
+}) => {
   const [numOfTrades, setNumOfTrades] = useState(0);
 
   const incrementCounter = () => {
-    setNumOfTrades((prev) => prev + 1);
-    getTotalCount(item.accountId, numOfTrades, isPart);
+    if (!isPart) {
+      setNumOfTrades(0);
+    } else {
+      setNumOfTrades((prev) => prev + 1);
+      increaseTotalCount(item.accountId, numOfTrades, isPart);
+    }
   };
-
   const decreaseCounter = () => {
     if (numOfTrades != 0) {
       setNumOfTrades((prev) => prev - 1);
@@ -104,9 +113,17 @@ const Increment = ({ item, getTotalCount, decreaseTotalCount, isPart }) => {
   );
 };
 
-const Account = ({ item, totalCount, decreaserCount, updateList }) => {
+const Account = ({
+  item,
+  increaserCount,
+  decreaserCount,
+  lotSize,
+  updateListForAccount,
+  updateArrayForVolume,
+}) => {
   const [isPressed, setIsPressed] = useState(false);
   const [tradeNumber, setTradeNumber] = useState(0);
+  const [volume, setVolume] = useState("");
 
   const removeFromList = () => {
     updateList(item.accountId, isPressed);
@@ -115,6 +132,17 @@ const Account = ({ item, totalCount, decreaserCount, updateList }) => {
   const updateNumber = (data) => {
     setTradeNumber(data);
   };
+
+  const handleDebouncedChange = _.debounce((value) => {
+    // Use debounced value here
+    updateArrayForVolume(item.accountId, isPressed, value);
+  }, 300);
+
+  useEffect(() => {
+    // setIsPressed(false); 
+    setVolume(lotSize);
+    updateArrayForVolume(item.accountId, isPressed, lotSize);
+  }, []);
 
   return (
     <View>
@@ -128,8 +156,8 @@ const Account = ({ item, totalCount, decreaserCount, updateList }) => {
         <TouchableOpacity
           onPress={() => {
             setIsPressed(!isPressed);
-            updateList(item.accountId, isPressed);
-            console.log(isPressed);
+            updateListForAccount(item.accountId, !isPressed, lotSize);
+            setVolume(lotSize);
           }}
         >
           <View>
@@ -152,14 +180,56 @@ const Account = ({ item, totalCount, decreaserCount, updateList }) => {
           </Text>
         </View>
 
-        <View style={{ width: 100, alignItems: "flex-start" }}>
+        {/* <View style={{ width: 100, alignItems: "flex-start" }}>
           <Text style={[styles.text]}>{item.server}</Text>
+        </View> */}
+
+        <View
+          style={{
+            marginLeft: SIZES.xxLarge,
+            width: 50,
+            alignSelf: "flex-end",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: SIZES.small + 2,
+              fontFamily: FONT.regular,
+              color: COLORS.lightWhite,
+              marginLeft: 4,
+            }}
+          >
+            Volume
+          </Text>
+          <TextInput
+            placeholderTextColor={"gray"}
+            placeholder={`${lotSize}`}
+            keyboardType="numeric"
+            numberOfLines={1}
+            style={[styles.options, { width: "auto" }]}
+            onChangeText={(num) => {
+              if (isPressed) {
+                setVolume(num);
+                handleDebouncedChange(num);
+                // body.entryPrice = entry;
+              } else {
+                alert("Please select account so you can input volume");
+                setVolume("");
+              }
+            }}
+            value={volume}
+            onFocus={() => {
+              if (!isPressed) {
+                alert("Please select account so you can input volume");
+              }
+            }}
+          />
         </View>
 
         <Increment
           item={item}
           isPart={isPressed}
-          getTotalCount={totalCount}
+          increaseTotalCount={increaserCount}
           decreaseTotalCount={decreaserCount}
           updateNumber={updateNumber}
         />
@@ -282,7 +352,60 @@ const AutoTrader = () => {
     }
   };
 
-  const totalCounter = (id, value, isPart) => {
+  const updateArrayForAccount = (id, isPart, lot) => {
+    const alreadyExists = acctList.findIndex((obj) => obj.accountId === id);
+
+    if (alreadyExists !== -1) {
+      if (isPart) {
+        acctList[alreadyExists] = {
+          ...acctList[alreadyExists],
+          accountId: id,
+        };
+      } else {
+        const newArray = acctList.filter((obj) => obj.accountId !== id);
+
+        setAcctList(newArray);
+      }
+    } else {
+      if (isPart) {
+        const foundObjId = id;
+        const newObj = {
+          accountId: foundObjId,
+          tradeAmount: 0,
+          lotSize: lot,
+        };
+        setAcctList((prevList) => [...prevList, newObj]);
+      }
+    }
+  };
+
+  const updateArrayForVolume = (id, isPart, volume) => {
+    const alreadyExists = acctList.findIndex((obj) => obj.accountId === id);
+
+    if (alreadyExists !== -1) {
+      if (isPart) {
+        acctList[alreadyExists] = {
+          ...acctList[alreadyExists],
+          lotSize: parseFloat(volume),
+        };
+      } else {
+        const newArray = acctList.filter((obj) => obj.accountId !== id);
+        setAcctList(newArray);
+      }
+    } else {
+      if (isPart) {
+        const foundObjId = id;
+        const newObj = {
+          accountId: foundObjId,
+          lotSize: parseFloat(volume),
+          tradeAmount: 0,
+        };
+        setAcctList((prevList) => [...prevList, newObj]);
+      }
+    }
+  };
+
+  const increaser = (id, value, isPart) => {
     updateArray(id, value + 1, isPart);
     console.log(acctList);
   };
@@ -301,7 +424,8 @@ const AutoTrader = () => {
   const placeTradeOrder = async (
     ignoreEntries,
     confirmEntries,
-    percentEntry
+    percentEntry,
+    chosen
   ) => {
     setIsClicked(true);
     try {
@@ -325,6 +449,7 @@ const AutoTrader = () => {
         ignoreEntries: ignoreEntries,
         confirmEntries: confirmEntries,
         entryPercent: percentEntry,
+        tradeSetup: chosen,
       };
 
       const response = await executeAdvancedOrder(tradeOrder).then((res) => {
@@ -336,10 +461,7 @@ const AutoTrader = () => {
         setIsModalVisible(true);
       } else {
         setAlert(true);
-        Alert.alert(
-          "Failed transaction",
-          response.message
-        );
+        Alert.alert("Failed transaction", response.message);
       }
     } catch (error) {
       console.log(error.message);
@@ -546,10 +668,10 @@ const AutoTrader = () => {
             marginTop: SIZES.small,
           }}
         >
-          Attention!!!: Please note that if you do not specify a volume, we
-          would open each trade using the recommended volume for each account
-          based on your risk management plan. If you do not have a risk
-          register, a default volume of 1.0 will be used.
+          Attention!!!: For strict accounts, please note that you do not need to
+          specify the volume for each account, we would calculate the
+          appropriate lotSize based on your SL/TP parameters and your Risk
+          Register.
         </Text>
       )}
       {userAccounts.length === 0 ? (
@@ -568,8 +690,11 @@ const AutoTrader = () => {
             <Account
               item={item}
               key={item.accountId}
-              totalCount={totalCounter}
+              increaserCount={increaser}
               decreaserCount={decreaser}
+              lotSize={details.lotSize}
+              updateArrayForVolume={updateArrayForVolume}
+              updateListForAccount={updateArrayForAccount}
               updateList={updateArray}
             />
           ))}
@@ -707,9 +832,11 @@ const AutoTrader = () => {
       <AlertModal
         isAlert={alertModal}
         handleCancel={() => {
+          setAlertModal(false);
           navigation.goBack();
         }}
         handleConfirm={() => {
+          setAlertModal(false);
           navigation.navigate("Pricing");
         }}
         message={
@@ -811,7 +938,8 @@ const styles = StyleSheet.create({
   },
   increment: {
     flexDirection: "row",
-    marginLeft: SIZES.xLarge,
+    marginLeft: SIZES.xLarge * 2,
+    marginTop: SIZES.xSmall - 4,
     alignItems: "center",
     backgroundColor: COLORS.componentbackground,
     borderColor: COLORS.darkyellow,

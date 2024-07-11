@@ -42,6 +42,14 @@ export const updateAccountMode = async(accountId, mode) => {
   return response;
 }
 
+export const updateAccountAutoMode = async(accountId, mode, state) => {
+  const apiAxios = await createAxiosInstance();
+  const response = await apiAxios.get("/account/updateautomode", {
+    params: { accountId: accountId, implement: mode, forProfit: state},
+  })
+  return response;
+}
+
 export const getTodayReport = async(accountId) => {
   const apiAxios = await createAxiosInstance();
   const response = await apiAxios.get("/account/generatedailyreport", {
@@ -54,6 +62,14 @@ export const getWeeklyReport = async(accountId, val) => {
   const apiAxios = await createAxiosInstance();
   const response = await apiAxios.get("/account/generatereportpertime", {
     params: { accountId : accountId, range : val}
+  })
+  return response;
+}
+
+export const getPDFReport = async(accountId) => {
+  const apiAxios = await createAxiosInstance();
+  const response = await apiAxios.get("/account/generatepdfreport", {
+    params: { accountId : accountId}
   })
   return response;
 }

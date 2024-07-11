@@ -212,9 +212,11 @@ const Account = () => {
       <AlertModal
         isAlert={alertModal}
         handleCancel={() => {
+          setAlertModal(false);
           navigation.goBack();
         }}
         handleConfirm={() => {
+          setAlertModal(false);
           navigation.navigate("Pricing");
         }}
         message={"Please renew your subscription to view all your accounts"}

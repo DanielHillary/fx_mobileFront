@@ -166,7 +166,7 @@ const Profile = () => {
     }
     if (accountDetails === null || accountDetails.length === 0) {
       setAccount(account);
-      setIsStrict(account.strict)
+      setIsStrict(account.strict);
       setWaiting(false);
     } else {
       setAccount(accountDetails);
@@ -264,7 +264,7 @@ const Profile = () => {
           onPress={() => {
             navigation.navigate("UpdateInfo");
           }}
-          style={{marginTop: 10, marginLeft: 20}}
+          style={{ marginTop: 10, marginLeft: 20 }}
         >
           <Image
             source={require("../../assets/icons/edit.png")}
@@ -398,6 +398,12 @@ const Profile = () => {
             option={"Account Report"}
             nav={"AccountReport"}
           />
+
+          <Options
+            image={images.strategy}
+            option={"Strategy Analysis"}
+            nav={"StrategyAnalysis"}
+          />
           <Options
             image={images.upgrade}
             option={"Upgrade Account"}
@@ -453,6 +459,7 @@ const images = {
   reporting: require("../../assets/icons/reporting.png"),
   upgrade: require("../../assets/icons/upgrade.png"),
   logout: require("../../assets/icons/logout1.png"),
+  strategy: require("../../assets/icons/Strategy.png"),
 };
 
 export default Profile;

@@ -1,4 +1,4 @@
-import apiAxios, { createAxiosInstance } from "./axios.config"
+import { createAxiosInstance } from "./axios.config"
 
 
 export const getExitLevelsForTrade = async(tradeId) => {
@@ -8,3 +8,11 @@ export const getExitLevelsForTrade = async(tradeId) => {
     })
     return response;
 }
+
+export const executeExitLevel = async(item) => {
+    const apiAxios = await createAxiosInstance();
+    const response = await apiAxios.post("/trade/executeexitlevel", item);
+
+    return response;
+}
+

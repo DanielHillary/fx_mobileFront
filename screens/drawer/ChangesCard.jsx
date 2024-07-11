@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView } from "react-native";
 import { Button } from "react-native";
 
 import { COLORS, SIZES, FONT } from "../../constants";
@@ -16,7 +16,7 @@ const ChangesCard = ({ item, handleNavigate }) => {
           <Text style={styles.at} numberOfLines={1}>
             At
           </Text>
-          <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large}}>{item.priceAtChange}</Text>
+          <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large - 3}}>{item.priceAtChange}</Text>
         </View>
 
         
@@ -29,10 +29,18 @@ const ChangesCard = ({ item, handleNavigate }) => {
         </View>}
 
         {item.stopLossChange != 0 && <View>
-          <Text style={styles.jobType}>Set stopLoss</Text>
+          <Text style={styles.jobType}>set stopLoss</Text>
           <View style={{flexDirection: 'row'}}>
              <Text style={{color: COLORS.lightWhite,  marginTop: 3}}>at</Text>
-             <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large, marginLeft: 6, alignSelf: 'flex-end'}}>{item?.stopLossChange}</Text>
+             <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large - 3, marginLeft: 6, alignSelf: 'flex-end'}}>{item?.stopLossChange}</Text>
+          </View>
+        </View>}
+
+        {item.takeProfitChange != 0 && <View>
+          <Text style={styles.jobType}>set takeProfit</Text>
+          <View style={{flexDirection: 'row'}}>
+             <Text style={{color: COLORS.lightWhite,  marginTop: 3}}>at</Text>
+             <Text style={{color: COLORS.darkyellow, fontSize: SIZES.large - 2 , marginLeft: 6, alignSelf: 'flex-end'}}>{item?.takeProfitChange}</Text>
           </View>
         </View>}
       </View> 

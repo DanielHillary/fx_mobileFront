@@ -2,15 +2,16 @@ import {
   StyleSheet,
   Text,
   View,
-  ActivityIndicator,
+  ScrollView,
   Image,
+  ActivityIndicator,
   FlatList,
   TouchableOpacity,
 } from "react-native";
 import React, { useState, useRef, useContext } from "react";
 import { COLORS, FONT, SIZES } from "../../../constants";
-import { Paystack, paystackProps } from "react-native-paystack-webview";
 import AlertModal from "../../../components/modal/AlertModal";
+import { Paystack, paystackProps } from "react-native-paystack-webview";
 import { updateAcccountPaymentStatus } from "../../../api/accountApi";
 import { AuthContext } from "../../../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
@@ -38,16 +39,32 @@ const Details = ({ item }) => {
     </View>
   );
 };
-const Bronze = () => {
-  const [amount, setAmount] = useState(13000);
+const GoldPrice = () => {
+  const [amount, setAmount] = useState(19500);
   const [alertModal, setAlertModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [successAlert, setSuccessAlert] = useState(false);
   const [makePayment, setMakePayment] = useState(false);
 
-  const { accountDetails } = useContext(AuthContext);
-
   const navigation = useNavigation();
+
+  const { accountDetails, updatePaymentStatus } = useContext(AuthContext);
+
+  const updateAccountPayment = async (data) => {
+    try {
+      const response = await updateAcccountPaymentStatus(
+        accountDetails.accountId,
+        15
+      ).then((res) => {
+        return res.data;
+      });
+      if (response.status) {
+        updatePaymentStatus(true);
+        setIsLoading(false);
+        setSuccessAlert(true);
+      }
+    } catch (error) {}
+  };
 
   function generateRefNumber(length) {
     const characters =
@@ -64,127 +81,95 @@ const Bronze = () => {
     return refNumber;
   }
 
-  const updateAccountPayment = async (data) => {
-    try {
-      const response = await updateAcccountPaymentStatus(
-        accountDetails.accountId,
-        10
-      ).then((res) => {
-        return res.data;
-      });
-      if (response.status) {
-        setIsLoading(false);
-        setSuccessAlert(true);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const paystackWebViewRef = useRef(paystackProps.PayStackRef);
 
   const data = [
     {
-      id: 1,
       stat: true,
-      detail: "Risk Analyzer",
+      detail: "Limited price alerts (100/month)",
     },
     {
-      id: 2,
       stat: true,
-      detail: "PsyDTrader Trade Appraisal",
+      detail: "Auto alerts on TakeProfit and StopLoss levels",
     },
     {
-      id: 3,
       stat: true,
-      detail: "Open Multiple Trades for multiple accounts",
+      detail: "Alert options: WhatsApp, Telegram",
     },
     {
-      id: 4,
       stat: true,
-      detail: "Alert medium: Push Notification, email",
+      detail: "Automatic execution of all exit levels",
     },
     {
-      id: 5,
       stat: true,
-      detail: "Refund Eligible",
+      detail: "Auto alerts on all exit",
     },
     {
-      id: 6,
       stat: true,
-      detail: "Automatic Trade journaling",
-    },
-    {
-      id: 7,
-      stat: true,
-      detail: "Limited alerts on all asset (50/month)",
-    },
-    {
-      id: 8,
-      stat: true,
-      detail: "Account analysis for trades",
-    },
-    {
-      id: 9,
-      stat: true,
-      detail: "Voice command functionality",
+      detail: "Seamless trading without parameters",
     },
   ];
 
   return (
     <View style={styles.container}>
       <View>
-        <Text style={styles.price}>$10/Month</Text>
+        <Text style={styles.price}>$15/Month</Text>
+      </View>
+
+      <View style={{ marginTop: SIZES.medium, margin: SIZES.small }}>
+        <Text style={styles.plus}>Everything from Bronze package Plus...</Text>
       </View>
 
       <FlatList
         data={data}
         renderItem={({ item }) => <Details item={item} />}
-        keyExtractor={(item) => item?.id}
+        keyExtractor={(item) => item?.detail}
         contentContainerStyle={{ columnGap: SIZES.small - 5 }}
         showsVerticalScrollIndicator={false}
       />
-
-      {makePayment && <Paystack
-        paystackKey="pk_test_4e398e23afb4e1d0be0eb53139b09596290fc2bc"
-        // paystackKey="pk_live_19dbd6da797c938132efe2a1a3333ed265f3230b"
-        billingEmail="danielibetohillary@gmail.com"
-        amount={amount}
-        billingName="Daniel Ibeto"
-        onCancel={(e) => {
-          setAlertModal(true);
-          setIsLoading(false);
-          setMakePayment(false);
-        }}
-        onSuccess={(res) => {
-          updateAccountPayment(res.data);
-          setMakePayment(false);
-          console.log("Payment successful")
-        }}
-        ref={paystackWebViewRef}
-        autoStart={true}
-        currency="NGN"
-        refNumber={generateRefNumber(20)}
-        phone="09024253488"
-        channels={['card', 'bank', 'mobile_money', 'bank_transfer']}
-      />}
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.buttonStyle}
           onPress={() => {
-            setMakePayment(true);
             // paystackWebViewRef.current.startTransaction();
             setIsLoading(true);
+            setMakePayment(true);
           }}
         >
           {isLoading ? (
             <ActivityIndicator size="large" colors={"black"} />
           ) : (
-            <Text style={styles.buttonText}>Make payment</Text>
+            <Text style={styles.buttonText}>Make Payment</Text>
           )}
         </TouchableOpacity>
       </View>
+
+      {makePayment && (
+        <Paystack
+          // paystackKey="pk_live_19dbd6da797c938132efe2a1a3333ed265f3230b"
+          paystackKey="pk_test_4e398e23afb4e1d0be0eb53139b09596290fc2bc"
+          billingEmail="danielibetohillary@gmail.com"
+          amount={amount}
+          billingName="Daniel Ibeto"
+          onCancel={(e) => {
+            setAlertModal(true);
+            setIsLoading(false);
+            setMakePayment(false);
+          }}
+          onSuccess={(res) => {
+            updateAccountPayment(res.data);
+            setMakePayment(false);
+            console.log("Payment successful");
+          }}
+          ref={paystackWebViewRef}
+          autoStart={true}
+          currency="NGN"
+          refNumber={generateRefNumber(20)}
+          phone="09024253488"
+          channels={["card", "bank", "mobile_money", "bank_transfer"]}
+        />
+      )}
 
       <AlertModal
         isAlert={alertModal}
@@ -208,7 +193,7 @@ const Bronze = () => {
           setSuccessAlert(false);
         }}
         handleConfirm={() => {
-          navigation.navigate("Home")
+            navigation.navigate("SetUpTradingPlan")
         }}
         message={
           "Congratulations, your payment was successful!. Enjoy your stay"
@@ -221,7 +206,7 @@ const Bronze = () => {
   );
 };
 
-export default Bronze;
+export default GoldPrice;
 
 const styles = StyleSheet.create({
   container: {
@@ -241,6 +226,30 @@ const styles = StyleSheet.create({
     color: COLORS.lightWhite,
     fontFamily: FONT.regular,
   },
+  plus: {
+    color: COLORS.darkyellow,
+    fontFamily: FONT.regular,
+    fontSize: SIZES.medium - 4,
+    fontStyle: "italic",
+  },
+  button: {
+    // margin: 80,
+    height: 40,
+    backgroundColor: COLORS.darkyellow,
+    borderRadius: 10,
+    width: 300,
+    marginTop: 6,
+    alignSelf: "center",
+  },
+  buttonText: {
+    flex: 1,
+    alignSelf: "center",
+    marginTop: 10,
+    fontSize: SIZES.large,
+    color: "black",
+    fontFamily: FONT.bold,
+  },
+
   buttonStyle: {
     backgroundColor: COLORS.darkyellow,
     borderColor: COLORS.darkyellow,
@@ -267,13 +276,5 @@ const styles = StyleSheet.create({
     fontSize: SIZES.large,
     color: "black",
     fontFamily: FONT.bold,
-  },
-  choose: {
-    borderColor: COLORS.darkyellow,
-    borderWidth: 0.5,
-    borderRadius: SIZES.small,
-    width: 200,
-    alignSelf: "flex-start",
-    marginLeft: SIZES.medium,
   },
 });
