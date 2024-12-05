@@ -234,6 +234,11 @@ const Account = ({
   const [tradeNumber, setTradeNumber] = useState(0);
   const [volume, setVolume] = useState("");
 
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  });
+
   const removeFromList = () => {
     setVolume("");
   };
@@ -294,7 +299,7 @@ const Account = ({
               {item.login}
             </Text>
             <Text style={[styles.text, { fontSize: SIZES.small - 2 }]}>
-              ${item.accountBalance}
+              {formatter.format(item.accountBalance)}
             </Text>
             <Text style={[styles.text, { fontSize: SIZES.small }]}>
               {item.server}
@@ -586,6 +591,29 @@ const TradingBot = () => {
     setIsClicked(false);
   };
 
+  const checkValidTrade = () => {
+    let valid = true;
+    if(tradeType.startsWith("SELL") || tradeType.endsWith("SELL")){
+      if(stopLoss < takeProfit){
+        valid = false;
+        Alert.alert(
+          "Invalid stop levels",
+          "For a SELL position, your stopLoss level is less than your take profit level. Please select the appropriate trade type"
+        );
+      }
+    }else{
+      if(stopLoss > takeProfit && takeProfit.length !== 0){
+        valid = false
+        Alert.alert(
+          "Invalid stop levels",
+          "For a BUY position, your stopLoss level is greater than your take profit level. Please select the appropriate trade type"
+        );
+      }
+    }
+
+    return valid;
+  }
+
   const placeOrderForTrade = (ignoreEntries, confirmEntries, percentEntry, chosen) => {
     if (account.strict && !account.hasRiskManagement) {
       Alert.alert(
@@ -637,7 +665,7 @@ const TradingBot = () => {
 
     console.log(acctList);
 
-    const response = await executeAdvancedOrder(tradeOrder).then((res) => {
+    const response = await executeTrade(tradeOrder).then((res) => {
       return res.data;
     });
     setIsClicked(false);
@@ -979,7 +1007,7 @@ const TradingBot = () => {
               Alert.alert("", "Please choose the number of positions to place");
             } else if (!account.hasEntryStrategy) {
               setEntryAlert(true);
-            } else {
+            } else if(checkValidTrade()) {
               setIsEntryModalVisible(true);
             }
           }}

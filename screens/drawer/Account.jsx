@@ -22,6 +22,11 @@ const AccountCard = ({
 }) => {
   const [hasTrade, setHasTrade] = useState(true);
 
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  });
+
   let accountDesc =
     "PsyDTrader account representaion of your metatrader account.";
 
@@ -91,7 +96,7 @@ const AccountCard = ({
             padding: 7,
           }}
         >
-          ${item.accountBalance}
+          {formatter.format(item.accountBalance)}
         </Text>
         {currentAccount.accountId != item.accountId && (
           <TouchableOpacity

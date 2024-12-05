@@ -20,7 +20,7 @@ const ExitLevel = ({ details, isEmpty }) => {
   const { accountDetails, userInfo } = useContext(AuthContext);
 
   useEffect(() => {
-    setIsAuto(accountDetails.autoExecuteLossLevels);
+    setIsAuto(accountDetails.autoExecuteAllExitLevels);
   }, [])
 
   const implementAutoMode = async(mode) => {

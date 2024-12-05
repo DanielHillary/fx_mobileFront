@@ -371,7 +371,7 @@ const AccountReport = () => {
         />
         {report.successFactor < 1 ? (
           <Text style={styles.note}>
-            On average, you are loosing{" "}
+            On average, you are losing{" "}
             <Text style={styles.info}>${report.avgLosingTrades}</Text> per
             trade. That's <Text style={styles.info}>${report.winLossDiff}</Text>{" "}
             ({report.winLossDiffRatio}%) more than you gain on average for a win
@@ -407,6 +407,7 @@ const AccountReport = () => {
           <Text style={styles.info}> ${report.changeInAccount}</Text>.
         </Text>
       </View>
+
 
       <Text
         style={[
@@ -504,6 +505,62 @@ const AccountReport = () => {
             {report.percentageLossByMostUnprofitableAsset}%
           </Text>{" "}
           of your total losses.
+        </Text>
+      </View>
+
+      <View
+        style={{
+          flexDirection: "row",
+          padding: SIZES.xSmall,
+          gap: SIZES.medium,
+          marginLeft: SIZES.medium
+        }}
+      >
+        <View style={[styles.powerPoints]}>
+          <Text style={styles.pointText}>Profit Exit Ratio/Profit</Text>
+          <Text style={[styles.balanceText, { color: "green", marginTop: SIZES.xSmall }]}>
+            {report.profitExitLevelPercent}%
+          </Text>
+        </View>
+        <View style={[styles.powerPoints]}>
+          <Text style={styles.pointText}>Loss Exit Ratio/Loss</Text>
+          <Text style={[styles.balanceText, { color: "red", marginTop: SIZES.xSmall }]}>
+          {report.lossExitLevelPercent}%
+          </Text>
+        </View>
+      </View>
+
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: SIZES.small,
+        }}
+      >
+        <Image
+          source={require("../../assets/icons/bulleting.png")}
+          style={{ height: 15, width: 15 }}
+        />
+        <Text style={styles.note}>
+          Your Profit exit Ratio/Profit indicates the number of times your
+          profitable trades were affected by your profit exit strategy(s).
+        </Text>
+      </View>
+
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: SIZES.small,
+        }}
+      >
+        <Image
+          source={require("../../assets/icons/bulleting.png")}
+          style={{ height: 15, width: 15 }}
+        />
+        <Text style={styles.note}>
+          Your Loss exit Ratio/Loss indicates the number of times your
+          unprofitable trades were affected by your loss exit strategy(s).
         </Text>
       </View>
 

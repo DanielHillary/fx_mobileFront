@@ -29,7 +29,7 @@ const ExitLevelForProfit = ({ details, isEmpty }) => {
   }
 
   useEffect(() => {
-    setIsAuto(accountDetails.autoExecuteProfitLevels);
+    setIsAuto(accountDetails.autoExecuteAllExitLevels);
   }, [])
 
   const { navigate } = useNavigation();

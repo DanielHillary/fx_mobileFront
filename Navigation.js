@@ -284,6 +284,38 @@ const DrawerNavigation = () => {
       />
 
       <Drawer.Screen
+        name="Strategy Analyzer"
+        component={StrategyAnalyzer}
+        options={{
+          headerShown: true,
+          headerStyle: styles.header,
+          headerTitleAlign: "center",
+          drawerIcon: ({ color, focused, size }) => {
+            let iconName = "analytics-outline";
+            return (
+              <Ionicons name={iconName} size={size} color={COLORS.lightWhite} />
+            );
+          },
+        }}
+      />
+
+      <Drawer.Screen
+        name="Price Alert"
+        component={SetAlert}
+        options={{
+          headerShown: true,
+          headerStyle: styles.header,
+          headerTitleAlign: "center",
+          drawerIcon: ({ color, focused, size }) => {
+            let iconName = "ios-pencil";
+            return (
+              <Ionicons name={iconName} size={size} color={COLORS.lightWhite} />
+            );
+          },
+        }}
+      />
+
+      <Drawer.Screen
         name="Pricing"
         component={Pricing}
         options={{

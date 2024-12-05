@@ -46,7 +46,7 @@ const RecordDetails = () => {
     if(resp.status){
       setTradeNotes(resp.data.note);
     }else{
-      console.log(resp.message);
+      // console.log(resp.message);
     }
 
     if (response.status) {

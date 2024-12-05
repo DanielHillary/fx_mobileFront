@@ -19,6 +19,7 @@ import {
   updateRiskRegister,
 } from "../../../api/tradingplanApi";
 import EmptyList from "../../../components/EmptyList";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AlertModal = ({
   title,
@@ -86,22 +87,74 @@ const RiskRegister = () => {
     if (response.status) {
       setRiskManager(response.data);
       let risk = response.data;
-      setDefaultVolume(risk.defaultVolume);
-      setMinProfitPerTrade(risk.minProfitPercentPerTrade);
-      setLossPerTrade(risk.allowedLossLevelPercentage);
-      setLossPerDay(risk.totalPercentRiskPerDay);
-      setTargetProfit(risk.totalProfitPercentPerDay);
-      setMinRRR(risk.riskRewardRatio);
-      setDrawDown(risk.overallDrawDown);
-      setDate(risk.dailyResetTime)
       setHasRisk(true);
+
+      await AsyncStorage.setItem("LPT", JSON.stringify(risk.allowedLossLevelPercentage));
+      await AsyncStorage.setItem("LPD", JSON.stringify(risk.totalPercentRiskPerDay));
+      await AsyncStorage.setItem("RRR", JSON.stringify(risk.riskRewardRatio));
+      await AsyncStorage.setItem("PPT", JSON.stringify(risk.minProfitPercentPerTrade))
+      await AsyncStorage.setItem("DV", JSON.stringify(risk.defaultVolume))
+      await AsyncStorage.setItem("ADL", JSON.stringify(risk.overallDrawDown))
+      await AsyncStorage.setItem("TP", JSON.stringify(risk.totalProfitPercentPerDay))
+      
+      console.log("Risk ID: " + risk.riskId);
     } else {
       setHasRisk(false);
+      return null;
     }
   };
 
   useEffect(() => {
     getRiskRegister();
+    AsyncStorage.getItem("LPT").then((res) => {
+      if (res !== null) {
+        setLossPerTrade(res);
+      } else {
+        getRiskRegister();
+      }
+    });
+    AsyncStorage.getItem("LPD").then((res) => {
+      if (res !== null) {
+        setLossPerDay(res);
+      } else {
+        getRiskRegister();
+      }
+    });
+    AsyncStorage.getItem("RRR").then((res) => {
+      if (res !== null) {
+        setMinRRR(res);
+      } else {
+        getRiskRegister();
+      }
+    });
+    AsyncStorage.getItem("PPT").then((res) => {
+      if (res !== null) {
+        setMinProfitPerTrade(res);
+      } else {
+        getRiskRegister();
+      }
+    });
+    AsyncStorage.getItem("DV").then((res) => {
+      if (res !== null) {
+        setDefaultVolume(res);
+      } else {
+        getRiskRegister();
+      }
+    });
+    AsyncStorage.getItem("TP").then((res) => {
+      if (res !== null) {
+        setTargetProfit(res);
+      } else {
+        getRiskRegister();
+      }
+    });
+    AsyncStorage.getItem("ADL").then((res) => {
+      if (res !== null) {
+        setDrawDown(res);
+      } else {
+        getRiskRegister();
+      }
+    });
   }, [accountDetails]);
 
   const onChange = (e, selectedDate) => {
@@ -126,6 +179,9 @@ const RiskRegister = () => {
   const inputRef = useRef(null);
 
   const handleSave = async () => {
+
+    riskManager.accountId = accountDetails.accountId;
+
     (riskManager.allowedLossLevelPercentage =
       lossPerTrade == ""
         ? riskManager.allowedLossLevelPercentage
@@ -145,9 +201,7 @@ const RiskRegister = () => {
           ? riskManager.totalProfitPercentPerDay
           : targetProfit),
       (riskManager.overallDrawDown =
-        drawDown == ""
-          ? riskManager.overallDrawDown
-          : drawDown),
+        drawDown == "" ? riskManager.overallDrawDown : drawDown),
       (riskManager.dayInHour = hours),
       (riskManager.dayInMinute = minutes),
       (riskManager.dailyResetTime = date);
@@ -162,15 +216,12 @@ const RiskRegister = () => {
       );
       setEditMode(false);
     } else {
-      Alert.alert(
-        "Failed transaction",
-        response.message
-      );
+      Alert.alert("Failed transaction", response.message);
       console.log(response.message);
     }
   };
 
-  if(riskManager.length === 0 && hasRisk === true){
+  if (riskManager.length === 0 && hasRisk === true) {
     return (
       <View
         style={{
@@ -181,7 +232,7 @@ const RiskRegister = () => {
       >
         <ActivityIndicator size={"large"} />
       </View>
-    )
+    );
   }
 
   if (hasRisk === false) {
@@ -228,12 +279,13 @@ const RiskRegister = () => {
           {
             fontSize: SIZES.small,
             color: COLORS.darkyellow,
+            marginTop: SIZES.medium,
             fontStyle: "italic",
           },
         ]}
       >
-        Please Ensure that you want to make a change before you hit the edit
-        button
+        Note: You can only change your exit levels if you haven't taken any
+        trades with them or you have taken more than 10 trades with them.
       </Text>
 
       <View style={styles.infocontainer}>
@@ -248,18 +300,18 @@ const RiskRegister = () => {
             <TextInput
               ref={inputRef}
               placeholderTextColor={"gray"}
-              // placeholder="0.0%"
               keyboardType="numeric"
               numberOfLines={1}
               style={[styles.input]}
               onChangeText={(text) => {
                 setLossPerTrade(text);
+                AsyncStorage.setItem("LPT", text);
               }}
               value={lossPerTrade}
             />
           ) : (
             <Text style={styles.textInput}>
-              {riskManager.allowedLossLevelPercentage}%
+              {lossPerTrade}%
             </Text>
           )}
           <View style={styles.line(editMode)} />
@@ -275,18 +327,18 @@ const RiskRegister = () => {
           {editMode ? (
             <TextInput
               placeholderTextColor={"gray"}
-              // placeholder="0.0%"
               keyboardType="numeric"
               numberOfLines={1}
               style={[styles.input]}
               onChangeText={(num) => {
                 setLossPerDay(num);
+                AsyncStorage.setItem("LPD", num);
               }}
               value={lossPerDay}
             />
           ) : (
             <Text style={styles.textInput}>
-              {riskManager.totalPercentRiskPerDay}%
+              {lossPerDay}%
             </Text>
           )}
           <View style={styles.line(editMode)} />
@@ -310,11 +362,12 @@ const RiskRegister = () => {
               style={[styles.input]}
               onChangeText={(text) => {
                 setMinRRR(text);
+                AsyncStorage.setItem("RRR", text);
               }}
               value={minRRR}
             />
           ) : (
-            <Text style={styles.textInput}>{riskManager.riskRewardRatio}</Text>
+            <Text style={styles.textInput}>{minRRR}</Text>
           )}
           <View style={styles.line(editMode)} />
         </View>
@@ -334,6 +387,7 @@ const RiskRegister = () => {
               style={[styles.input]}
               onChangeText={(text) => {
                 setMinProfitPerTrade(text);
+                AsyncStorage.setItem("PPT", text);
               }}
               value={minProfitPerTrade}
               // selection={{
@@ -343,7 +397,7 @@ const RiskRegister = () => {
             />
           ) : (
             <Text style={styles.textInput}>
-              {riskManager.minProfitPercentPerTrade}%
+              {minProfitPerTrade}%
             </Text>
           )}
           <View style={styles.line(editMode)} />
@@ -367,11 +421,12 @@ const RiskRegister = () => {
               style={[styles.input]}
               onChangeText={(text) => {
                 setDefaultVolume(text);
+                AsyncStorage.setItem("DV", text);
               }}
               value={defaultVolume}
             />
           ) : (
-            <Text style={styles.textInput}>{riskManager.defaultVolume}</Text>
+            <Text style={styles.textInput}>{defaultVolume}</Text>
           )}
           <View style={styles.line(editMode)} />
         </View>
@@ -392,12 +447,13 @@ const RiskRegister = () => {
               style={[styles.input]}
               onChangeText={(text) => {
                 setTargetProfit(text);
+                AsyncStorage.setItem("TP", text);
               }}
               value={targetProfit}
             />
           ) : (
             <Text style={styles.textInput}>
-              {riskManager.totalProfitPercentPerDay}%
+              {targetProfit}%
             </Text>
           )}
           <View style={styles.line(editMode)} />
@@ -421,11 +477,12 @@ const RiskRegister = () => {
               style={[styles.input]}
               onChangeText={(text) => {
                 setDrawDown(text);
+                AsyncStorage.setItem("ADL", text);
               }}
               value={drawDown}
             />
           ) : (
-            <Text style={styles.textInput}>{riskManager.overallDrawDown}%</Text>
+            <Text style={styles.textInput}>{drawDown}%</Text>
           )}
           <View style={styles.line(editMode)} />
         </View>
@@ -501,14 +558,14 @@ const RiskRegister = () => {
             fontStyle: "italic",
             color: COLORS.white,
             textAlign: "center",
-            fontSize: SIZES.small
+            fontSize: SIZES.small,
           },
         ]}
       >
-        NOTE!!!: We calculate your drawdown from the starting balance on the first
-        trade your losing streak. For strict accounts, if you hit your overall
-        drawdown limit, you would not be able to place any trades on your
-        account for a period of 3 trading days.
+        NOTE!!!: We calculate your drawdown from the starting balance on the
+        first trade your losing streak. For strict accounts, if you hit your
+        overall drawdown limit, you would not be able to place any trades on
+        your account for a period of 3 trading days.
       </Text>
 
       <AlertModal

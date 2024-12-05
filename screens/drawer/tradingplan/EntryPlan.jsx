@@ -24,14 +24,9 @@ import EmptyList from "../../../components/EmptyList";
 
 const Options = ({ item }) => {
   return (
-    <ScrollView
-      
-      contentContainerStyle={styles.gridContainer}
-    >
+    <ScrollView contentContainerStyle={styles.gridContainer}>
       {item?.map((value) => (
-        <View
-          key={value}
-        >
+        <View key={value}>
           <Text style={styles.gridItem}>{value}</Text>
         </View>
       ))}
@@ -155,7 +150,10 @@ const EntryPlan = () => {
           "You have successfully updated you entry plan"
         );
       } else {
-        console.log(response.message);
+        Alert.alert(
+          "Update Failed",
+          response.message
+        );
       }
     } catch (error) {
       console.error("Update Failed:", error.message);
@@ -218,15 +216,23 @@ const EntryPlan = () => {
                   analyze every trade before entry and stick to an entry
                   strategy.
                 </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    { color: COLORS.darkyellow, fontStyle: "italic" },
-                  ]}
-                >{`Please ensure that you really want to make a change before you click the "Edit" button`}</Text>
               </View>
             )}
           </View>
+
+          <Text
+            style={[
+              styles.text,
+              {
+                color: COLORS.darkyellow,
+                marginTop: SIZES.medium,
+                fontStyle: "italic",
+              },
+            ]}
+          >
+            Note: You can only change your exit levels if you haven't taken any
+            trades with them or you have taken more than 10 trades with them.
+          </Text>
         </View>
 
         {isEdit && (
@@ -258,7 +264,7 @@ const EntryPlan = () => {
         )}
 
         {number !== 0 ? (
-          <View style={{ alignItems: "center" }}>
+          <View style={{ alignItems: "center", marginTop: SIZES.large * 2 }}>
             {!isEdit && (
               <Text
                 style={{
@@ -339,7 +345,7 @@ const EntryPlan = () => {
           }}
           style={[
             styles.buttonContinue,
-            { position: "relative", bottom: -200 },
+            { position: "relative", bottom: -120 },
           ]}
         >
           {isClicked ? (
@@ -436,7 +442,7 @@ const styles = StyleSheet.create({
     width: "100%",
     fontSize: SIZES.medium + 2,
     fontFamily: FONT.bold,
-    color: COLORS.lightWhite
+    color: COLORS.lightWhite,
   },
   text: {
     color: COLORS.lightWhite,

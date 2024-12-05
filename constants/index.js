@@ -11,13 +11,13 @@ export const Synthetics = [
     { label: "v50", value: "Volatility 50 Index" },
     { label: "v75", value: "Volatility 75 Index" },
     { label: "v100", value: "Volatility 100 Index" },
-    { label: "v10(1s)", value: "Volatility 10 (1s) Index" },
-    { label: "v25(1s)", value: "Volatility 25 (1s) Index" },
-    { label: "v50(1s)", value: "Volatility 50 (1s) Index" },
-    { label: "v75(1s)", value: "Volatility 75 (1s) Index" },
-    { label: "v100(1s)", value: "Volatility 100 (1s) Index" },
-    { label: "v150(1s)", value: "Volatility 150 (1s) Index" },
-    { label: "v250(1s)", value: "Volatility 250 (1s) Index" },
+    { label: "v10_1S", value: "Volatility 10 (1s) Index" },
+    { label: "v25_1S", value: "Volatility 25 (1s) Index" },
+    { label: "v50_1S", value: "Volatility 50 (1s) Index" },
+    { label: "v75_1S", value: "Volatility 75 (1s) Index" },
+    { label: "v100_1S", value: "Volatility 100 (1s) Index" },
+    { label: "v150_1S", value: "Volatility 150 (1s) Index" },
+    { label: "v250_1S", value: "Volatility 250 (1s) Index" },
     { label: "J10", value: "Jump 10 Index" },
     { label: "J25", value: "Jump 25 Index" },
     { label: "J50", value: "Jump 50 Index" },
@@ -45,6 +45,7 @@ export const Currencies = [
   { label: "NZDJPY", value: "NZDJPY" },
   { label: "NZDUSD", value: "NZDUSD" },
   { label: "NZDCAD", value: "NZDCAD" },
+  { label: "XAUUSD", value: "XAUUSD" },
 ]
 
 export const tradeTypelist = [

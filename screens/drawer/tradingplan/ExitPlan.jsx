@@ -76,10 +76,35 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
 
   const inputRef = useRef(null);
 
+  useEffect(() => {
+    AsyncStorage.getItem("tpValue" + item.exitId).then((value) => {
+      if (value !== null && item.inTradeProfitLevel.length === 0) {
+        setTpValue(value);
+      } else {
+        setTpValue(String(item.inTradeProfitLevel));
+      }
+    });
+
+    AsyncStorage.getItem("slProfitValue" + item.exitId).then((value) => {
+      if (value !== null && item.slplacementPercentAfterProfit.length === 0) {
+        setSlProfitValue(value);
+      } else {
+        setSlProfitValue(String(item.slplacementPercentAfterProfit));
+      }
+    });
+
+    AsyncStorage.getItem("profitLotSize" + item.exitId).then((value) => {
+      if (value !== null && item.lotSizePercentWhenTradeInProfit.length === 0) {
+        setProfitLotSize(value);
+      } else {
+        setProfitLotSize(String(item.lotSizePercentWhenTradeInProfit));
+      }
+    });
+  }, []);
+
   const { accountDetails } = useContext(AuthContext);
 
   const updateExitLevels = async () => {
-    console.log("We are here");
     setEditMode(false);
     setIsChanged(true);
 
@@ -87,8 +112,6 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
     item.inTradeProfitLevel = tpValue;
     item.lotSizePercentWhenTradeInProfit = profitLotSize;
     item.slplacementPercentAfterProfit = slProfitValue;
-
-    // console.log(item);
 
     const response = await updateProfitExitStrategies(item).then((res) => {
       return res.data;
@@ -127,34 +150,31 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
       <View style={styles.contain}>
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.levelText}>At</Text>
-          {editMode ? (
-            <TextInput
-              ref={inputRef}
-              placeholder="0"
-              placeholderTextColor={COLORS.gray}
-              style={styles.email(tpFocused)}
-              numberOfLines={1}
-              keyboardType="numeric"
-              onChangeText={(text) => {
-                setTpValue(text);
-              }}
-              value={tpValue}
-              onFocus={() => {
-                setTpFocused(true);
-              }}
-              onBlur={() => {
-                setTpFocused(false);
-              }}
-              // selection={{
-              //   start: item.inTradeProfitLevel,
-              //   end: item.inTradeProfitLevel,
-              // }}
-            />
-          ) : (
+          {/* {editMode ? ( */}
+          <TextInput
+            ref={inputRef}
+            placeholder="0"
+            placeholderTextColor={COLORS.gray}
+            style={styles.email(tpFocused)}
+            numberOfLines={1}
+            keyboardType="numeric"
+            onChangeText={(text) => {
+              setTpValue(text);
+              AsyncStorage.setItem("tpValue" + item.exitId, text);
+            }}
+            value={tpValue}
+            onFocus={() => {
+              setTpFocused(true);
+            }}
+            onBlur={() => {
+              setTpFocused(false);
+            }}
+          />
+          {/* ) : (
             <Text style={styles.levels}>
               {isChanged ? tpValue : item.inTradeProfitLevel}
             </Text>
-          )}
+          )} */}
 
           <Text style={styles.levelText}>
             % of my profit target, partially close my trade
@@ -163,30 +183,31 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
 
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.levelText}>by</Text>
-          {editMode ? (
-            <TextInput
-              placeholderTextColor={COLORS.gray}
-              placeholder="0"
-              style={styles.email(lotSizeFocused)}
-              numberOfLines={1}
-              keyboardType="numeric"
-              onChangeText={(text) => {
-                setProfitLotSize(text);
-              }}
-              value={profitLotSize}
-              onFocus={() => {
-                setLotSizeFocused(true);
-              }}
-              onBlur={() => {
-                setLotSizeFocused(false);
-              }}
-            />
-          ) : (
+          {/* {editMode ? ( */}
+          <TextInput
+            placeholderTextColor={COLORS.gray}
+            placeholder="0"
+            style={styles.email(lotSizeFocused)}
+            numberOfLines={1}
+            keyboardType="numeric"
+            onChangeText={(text) => {
+              setProfitLotSize(text);
+              AsyncStorage.setItem("profitLotSize" + item.exitId, text);
+            }}
+            value={profitLotSize}
+            onFocus={() => {
+              setLotSizeFocused(true);
+            }}
+            onBlur={() => {
+              setLotSizeFocused(false);
+            }}
+          />
+          {/* ) : (
             <Text style={styles.levels}>
               {" "}
               {isChanged ? profitLotSize : item.lotSizePercentWhenTradeInProfit}
             </Text>
-          )}
+          )} */}
 
           <Text style={styles.levelText}>
             % of my current lotSize
@@ -202,29 +223,32 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
             <Text style={styles.levelText}>
               {!item.slPlacementPercentIsForProfit && " my risk allowance by "}
             </Text>
-            {editMode ? (
-              <TextInput
-                placeholderTextColor={COLORS.gray}
-                placeholder="0"
-                style={[styles.email(slFocused), { marginLeft: 0 }]}
-                keyboardType="numeric"
-                numberOfLines={1}
-                onChangeText={(text) => {
-                  setSlProfitValue(text);
-                }}
-                value={slProfitValue}
-                onFocus={() => {
-                  setSlFocused(true);
-                }}
-                onBlur={() => {
-                  setSlFocused(false);
-                }}
-              />
-            ) : (
+            {/* {editMode ? ( */}
+            <TextInput
+              placeholderTextColor={COLORS.gray}
+              placeholder="0"
+              style={[styles.email(slFocused), { marginLeft: 0 }]}
+              keyboardType="numeric"
+              numberOfLines={1}
+              onChangeText={(text) => {
+                setSlProfitValue(text);
+                AsyncStorage.setItem("slProfitValue" + item.exitId, text);
+              }}
+              value={
+                slProfitValue 
+              }
+              onFocus={() => {
+                setSlFocused(true);
+              }}
+              onBlur={() => {
+                setSlFocused(false);
+              }}
+            />
+            {/* ) : (
               <Text style={styles.levels}>
                 {isChanged ? slProfitValue : item.slplacementPercentAfterProfit}
               </Text>
-            )}
+            )} */}
 
             <Text style={styles.levelText}>
               {item.slPlacementPercentIsForProfit
@@ -242,47 +266,21 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
           marginTop: SIZES.small,
         }}
       >
-        {editMode ? (
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text
-              style={{ color: COLORS.lightWhite, marginRight: SIZES.xSmall }}
-            >
-              Save
-            </Text>
-            <TouchableOpacity
-              onPress={() => {
-                setCheck(true);
-              }}
-            >
-              <Image
-                source={require("../../../assets/icons/save.png")}
-                style={{ height: 25, width: 25, marginRight: SIZES.large }}
-              />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text
-              style={{ color: COLORS.lightWhite, marginRight: SIZES.xSmall }}
-            >
-              Edit
-            </Text>
-            <TouchableOpacity
-              onPress={() => {
-                // setIsLossAlert(true);
-                setEditMode(true);
-                setTpValue(item.inTradeProfitLevel);
-                setProfitLotSize(item.lotSizePercentWhenTradeInProfit);
-                setSlProfitValue(item.slplacementPercentAfterProfit);
-              }}
-            >
-              <Image
-                source={require("../../../assets/icons/EditFirst.png")}
-                style={{ height: 25, width: 25, marginRight: SIZES.large }}
-              />
-            </TouchableOpacity>
-          </View>
-        )}
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={{ color: COLORS.lightWhite, marginRight: SIZES.xSmall }}>
+            Save Edit
+          </Text>
+          <TouchableOpacity
+            onPress={() => {
+              setCheck(true);
+            }}
+          >
+            <Image
+              source={require("../../../assets/icons/save.png")}
+              style={{ height: 25, width: 25, marginRight: SIZES.large }}
+            />
+          </TouchableOpacity>
+        </View>
         <Text style={{ color: COLORS.lightWhite, marginRight: SIZES.xSmall }}>
           Delete
         </Text>
@@ -345,7 +343,27 @@ const LossExits = ({ item, updateChange, updateList }) => {
   const [check, setCheck] = useState(false);
   const [isDeleteAlert, setIsDeleteAlert] = useState(false);
 
-  const navigation = useNavigation();
+  useEffect(() => {
+    AsyncStorage.getItem("slValue" + item.exitId).then((value) => {
+      if (value !== null) {
+        if(item.allowedLossLevelPercentage.length === 0){
+          setSlValue(value)
+        }else{
+          setSlValue(String(item.allowedLossLevelPercentage));
+        }
+      } else {
+        setSlValue(String(item.allowedLossLevelPercentage));
+      }
+    });
+
+    AsyncStorage.getItem("lossLotSize" + item.exitId).then((value) => {
+      if (value !== null && item.lotSizePercentWhenTradeInLoss.length === 0) {
+        setLossLotSize(value);
+      } else {
+        setLossLotSize(String(item.lotSizePercentWhenTradeInLoss));
+      }
+    });
+  }, []);
 
   const updateExitLevels = async () => {
     setEditMode(false);
@@ -365,7 +383,7 @@ const LossExits = ({ item, updateChange, updateList }) => {
         "You have successfully updated this exit level"
       );
     } else {
-      console.log(response.message);
+      Alert.alert("Update Failed", response.message);
     }
   };
 
@@ -379,7 +397,7 @@ const LossExits = ({ item, updateChange, updateList }) => {
       updateList(item);
       Alert.alert("Delete Successful", "Your exit level has been deleted");
     } else {
-      console.log(response.message);
+      Alert.alert("Delete Failed", response.message);
     }
   };
   return (
@@ -387,29 +405,30 @@ const LossExits = ({ item, updateChange, updateList }) => {
       <View style={styles.contain}>
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.levelText}>At</Text>
-          {editMode ? (
-            <TextInput
-              placeholder="0"
-              placeholderTextColor={COLORS.gray}
-              style={styles.email(slFocused)}
-              numberOfLines={1}
-              keyboardType="numeric"
-              onChangeText={(text) => {
-                setSlValue(text);
-              }}
-              value={slValue}
-              onFocus={() => {
-                setSlFocused(true);
-              }}
-              onBlur={() => {
-                setSlFocused(false);
-              }}
-            />
-          ) : (
+          {/* {editMode ? ( */}
+          <TextInput
+            placeholder="0"
+            placeholderTextColor={COLORS.gray}
+            style={styles.email(slFocused)}
+            numberOfLines={1}
+            keyboardType="numeric"
+            onChangeText={(text) => {
+              setSlValue(text);
+              AsyncStorage.setItem("slValue" + item.exitId, text);
+            }}
+            value={slValue}
+            onFocus={() => {
+              setSlFocused(true);
+            }}
+            onBlur={() => {
+              setSlFocused(false);
+            }}
+          />
+          {/* ) : (
             <Text style={styles.levels}>
               {isChanged ? slValue : item.allowedLossLevelPercentage}
             </Text>
-          )}
+          )} */}
 
           <Text style={styles.levelText}>
             % of my risk size, partially close my trade
@@ -418,30 +437,31 @@ const LossExits = ({ item, updateChange, updateList }) => {
 
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.levelText}>by</Text>
-          {editMode ? (
-            <TextInput
-              placeholder="0"
-              placeholderTextColor={COLORS.gray}
-              style={styles.email(lotSizeFocused)}
-              numberOfLines={1}
-              keyboardType="numeric"
-              onChangeText={(text) => {
-                setLossLotSize(text);
-              }}
-              value={lossLotSize}
-              onFocus={() => {
-                setLotSizeFocused(true);
-              }}
-              onBlur={() => {
-                setLotSizeFocused(false);
-              }}
-            />
-          ) : (
+          {/* {editMode ? ( */}
+          <TextInput
+            placeholder="0"
+            placeholderTextColor={COLORS.gray}
+            style={styles.email(lotSizeFocused)}
+            numberOfLines={1}
+            keyboardType="numeric"
+            onChangeText={(text) => {
+              setLossLotSize(text);
+              AsyncStorage.setItem("lossLotSize" + item.exitId, text);
+            }}
+            value={lossLotSize}
+            onFocus={() => {
+              setLotSizeFocused(true);
+            }}
+            onBlur={() => {
+              setLotSizeFocused(false);
+            }}
+          />
+          {/* ) : (
             <Text style={styles.levels}>
               {" "}
               {isChanged ? lossLotSize : item.lotSizePercentWhenTradeInLoss}
             </Text>
-          )}
+          )} */}
 
           <Text style={styles.levelText}>% of current lotSize/volume</Text>
         </View>
@@ -455,45 +475,21 @@ const LossExits = ({ item, updateChange, updateList }) => {
           marginTop: SIZES.small,
         }}
       >
-        {editMode ? (
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text
-              style={{ color: COLORS.lightWhite, marginRight: SIZES.xSmall }}
-            >
-              Save.
-            </Text>
-            <TouchableOpacity
-              onPress={() => {
-                setCheck(true);
-                // setEditMode(false);
-              }}
-            >
-              <Image
-                source={require("../../../assets/icons/save.png")}
-                style={{ height: 25, width: 25, marginRight: SIZES.large }}
-              />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text
-              style={{ color: COLORS.lightWhite, marginRight: SIZES.xSmall }}
-            >
-              Edit
-            </Text>
-            <TouchableOpacity
-              onPress={() => {
-                // setIsLossAlert(true);
-                setEditMode(true);
-              }}
-            >
-              <Image
-                source={require("../../../assets/icons/EditFirst.png")}
-                style={{ height: 25, width: 25, marginRight: SIZES.large }}
-              />
-            </TouchableOpacity>
-          </View>
-        )}
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={{ color: COLORS.lightWhite, marginRight: SIZES.xSmall }}>
+            Save Edit
+          </Text>
+          <TouchableOpacity
+            onPress={() => {
+              setCheck(true);
+            }}
+          >
+            <Image
+              source={require("../../../assets/icons/save.png")}
+              style={{ height: 25, width: 25, marginRight: SIZES.large }}
+            />
+          </TouchableOpacity>
+        </View>
         <Text style={{ color: COLORS.lightWhite, marginRight: SIZES.xSmall }}>
           Delete
         </Text>
@@ -708,17 +704,31 @@ const ExitPlan = () => {
           or mitigate occuring losses.
         </Text>
       </View>
-
+      {/* 
       <Text
         style={[styles.text, { marginTop: SIZES.medium, fontStyle: "italic" }]}
       >
         Click on the numbered space to enter your levels
-      </Text>
+      </Text> */}
 
       <Text
         style={[styles.text, { marginTop: SIZES.medium, fontStyle: "italic" }]}
       >
         Note: To break-even, set secure profit percent at 1
+      </Text>
+
+      <Text
+        style={[
+          styles.text,
+          {
+            color: COLORS.darkyellow,
+            marginTop: SIZES.medium,
+            fontStyle: "italic",
+          },
+        ]}
+      >
+        Note: You can only change your exit levels if you haven't taken any
+        trades with them or you have taken more than 10 trades with them.
       </Text>
 
       <View
@@ -744,7 +754,7 @@ const ExitPlan = () => {
         </View>
         <Text style={{ color: COLORS.lightWhite }}>Profit level</Text>
       </View>
-      {(isProfitEmpty === false && profitExits.length === 0) ? (
+      {isProfitEmpty === false && profitExits.length === 0 ? (
         <View
           style={{
             backgroundColor: COLORS.appBackground,
@@ -799,7 +809,7 @@ const ExitPlan = () => {
         </View>
         <Text style={{ color: COLORS.lightWhite }}>Loss levels</Text>
       </View>
-      {(isLossEmpty === false && lossExits.length === 0) ? (
+      {isLossEmpty === false && lossExits.length === 0 ? (
         <View
           style={{
             backgroundColor: COLORS.appBackground,

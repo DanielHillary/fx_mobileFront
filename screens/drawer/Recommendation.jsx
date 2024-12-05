@@ -254,8 +254,8 @@ const Recommendation = () => {
             style={{ height: 15, width: 15 }}
           />
           <Text style={[styles.subtext, { color: COLORS.darkyellow }]}>
-            You are not allowed to buy/sell multiple positions of an asset or
-            pair risking more than 2% of your account at any time.
+            You are not allowed to buy/sell more than 3 positions of an asset or
+            pair at any time.
           </Text>
         </View>
         <Text style={styles.text}>

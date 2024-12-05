@@ -132,14 +132,22 @@ const SetAlert = () => {
   const addToWatchList = async () => {
     setIsLoading(true);
     try {
-      const response = await createAlert(body).then((res) => {
-        return res.data;
-      });
-      if (response.status) {
-        setIsModalVisible(true);
+      if (
+        watchPrice.length === 0 ||
+        currentAsset.length === 0 ||
+        position.length === 0
+      ) {
+        alert("Please fill the fields completely before placing an alert");
       } else {
-        setAlertModal(true);
-        setMessage(response.message);
+        const response = await createAlert(body).then((res) => {
+          return res.data;
+        });
+        if (response.status) {
+          setIsModalVisible(true);
+        } else {
+          setAlertModal(true);
+          setMessage(response.message);
+        }
       }
     } catch (error) {
       console.log(error);
@@ -286,7 +294,7 @@ const SetAlert = () => {
           // width: 150,
         }}
       >
-        <Text style={[styles.text]}>send me an</Text>
+        <Text style={[styles.text]}>send me a(an)</Text>
         <View style={{ width: "60%", marginLeft: SIZES.large }}>
           <DropDownPicker
             listMode="SCROLLVIEW"

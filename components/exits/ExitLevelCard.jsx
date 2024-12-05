@@ -95,7 +95,7 @@ const ExitLevelCard = ({ item }) => {
           <Text style={styles.at} numberOfLines={1}>
             At
           </Text>
-          <Text style={{ color: COLORS.darkyellow, fontSize: SIZES.xLarge }}>
+          <Text style={{ color: COLORS.darkyellow, fontSize: SIZES.medium + 2 }}>
             {item.inTradeLossLevelPrice}
           </Text>
         </View>
@@ -103,12 +103,11 @@ const ExitLevelCard = ({ item }) => {
         <View>
           <Text style={styles.jobType}>Reduce lotSize</Text>
           <View style={{ flexDirection: "row" }}>
-            <Text style={{ color: COLORS.lightWhite, marginTop: 10 }}>by</Text>
+            <Text style={{ color: COLORS.lightWhite, marginTop: 4 }}>by</Text>
             <Text
               style={{
                 color: COLORS.darkyellow,
-                fontSize: SIZES.large + 2,
-                marginTop: 5,
+                fontSize: SIZES.large,
                 marginLeft: 6,
                 alignSelf: "flex-end",
               }}

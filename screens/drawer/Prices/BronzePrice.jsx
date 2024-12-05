@@ -134,7 +134,7 @@ import {
     return (
       <View style={styles.container}>
         <View>
-          <Text style={styles.price}>$10/Month</Text>
+          <Text style={styles.price}>$12/Month</Text>
         </View>
   
         <FlatList

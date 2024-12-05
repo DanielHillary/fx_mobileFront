@@ -1,8 +1,9 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const localHost = "http://192.168.43.131:8080/api";
-// const localHost = "https://psydtrader.uc.r.appspot.com/api"
+// const localHost = "http://192.168.43.131:8080/api";
+// const localHost = "http://192.168.73.215:8080/api";
+const localHost = "https://fxprodev.onrender.com/api"
 
 // Async function to retrieve JWT token
 const getAuthToken = async () => {

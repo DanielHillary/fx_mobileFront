@@ -39,7 +39,7 @@ const Details = ({ item }) => {
 };
 const Gold = () => {
 
-  const [amount, setAmount] = useState(19500)
+  const [amount, setAmount] = useState(24000)
   const [alertModal, setAlertModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [successAlert, setSuccessAlert] = useState(false);

@@ -39,7 +39,7 @@ const Details = ({ item }) => {
   );
 };
 const Bronze = () => {
-  const [amount, setAmount] = useState(13000);
+  const [amount, setAmount] = useState(19200);
   const [alertModal, setAlertModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [successAlert, setSuccessAlert] = useState(false);
@@ -134,7 +134,7 @@ const Bronze = () => {
   return (
     <View style={styles.container}>
       <View>
-        <Text style={styles.price}>$10/Month</Text>
+        <Text style={styles.price}>$12/Month</Text>
       </View>
 
       <FlatList
@@ -148,7 +148,7 @@ const Bronze = () => {
       {makePayment && <Paystack
         paystackKey="pk_test_4e398e23afb4e1d0be0eb53139b09596290fc2bc"
         // paystackKey="pk_live_19dbd6da797c938132efe2a1a3333ed265f3230b"
-        billingEmail="danielibetohillary@gmail.com"
+        billingEmail={accountDetails.userEmail}
         amount={amount}
         billingName="Daniel Ibeto"
         onCancel={(e) => {

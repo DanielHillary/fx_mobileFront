@@ -76,19 +76,19 @@ const RecordOutline = ({ notes }) => {
           style={{
             flexDirection: "row",
             alignContent: "center",
-            gap: SIZES.xxLarge,
+            gap: SIZES.large,
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={{ flexDirection: "column", alignItems: "center" }}>
             <Text style={styles.text}>Open: </Text>
             <View>
-              <Text style={styles.time}>{details.open}</Text>
+              <Text style={styles.time}>{details.open} {`(${details.openTime})`}</Text>
             </View>
           </View>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={{ flexDirection: "column", alignItems: "center" }}>
             <Text style={styles.text}>Close:</Text>
             <View>
-              <Text style={styles.time}> {details.close}</Text>
+              <Text style={styles.time}> {details.close} {`(${details.closeTime})`}</Text>
             </View>
           </View>
         </View>

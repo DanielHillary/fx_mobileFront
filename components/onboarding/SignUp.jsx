@@ -38,6 +38,8 @@ const SignUp = () => {
   const registerUser = async () => {
     setIsClicked(true);
 
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    
     if (
       email.length === 0 ||
       userName.length === 0 ||
@@ -61,6 +63,7 @@ const SignUp = () => {
         phoneNumber: phoneNumber,
         userName: userName,
         hasMetaAccount: false,
+        userTimeZone: userTimeZone,
         hasCompleteTradingPlan: false,
       };
 

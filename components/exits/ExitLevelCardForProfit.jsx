@@ -87,7 +87,7 @@ const ExitLevelCardForProfit = ({ item }) => {
           <Text style={styles.at} numberOfLines={1}>
             At
           </Text>
-          <Text style={{ color: COLORS.darkyellow, fontSize: SIZES.large }}>
+          <Text style={{ color: COLORS.darkyellow, fontSize: SIZES.medium + 2 }}>
             {item.inTradeProfitLevelPrice}
           </Text>
         </View>
@@ -118,7 +118,7 @@ const ExitLevelCardForProfit = ({ item }) => {
             <Text
               style={{
                 color: COLORS.darkyellow,
-                fontSize: SIZES.large,
+                fontSize: SIZES.medium + 2,
                 marginLeft: 6,
                 alignSelf: "flex-end",
               }}

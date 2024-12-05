@@ -579,7 +579,7 @@ const TradingJournal = () => {
         />
       )}
       {/* </View> */}
-
+{/* 
       <TouchableOpacity
           onPress={() => {
             setIsClicked(true);
@@ -592,7 +592,7 @@ const TradingJournal = () => {
           ) : (
             <Text style={styles.buttontext}>Generate Report</Text>
           )}
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       {custom && (
         <CustomDate
           getStartDate={setStartDateValue}

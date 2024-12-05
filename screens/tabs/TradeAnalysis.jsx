@@ -83,6 +83,11 @@ const TradeAnalysis = ({ screenProps }) => {
 
   const { accountDetails } = useContext(AuthContext);
 
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  });
+
   const setAccountUp = async() => {
     let account = await AsyncStorage.getItem("accountInfo").then((res) => {
       return JSON.parse(res);
@@ -454,7 +459,7 @@ const TradeAnalysis = ({ screenProps }) => {
                   }}
                 />
               ) : (
-                <Text style={styles.textInput}>{balance}</Text>
+                <Text style={styles.textInput}>${balance}</Text>
               )}
             </View>
             <View style={styles.lineText(editMode)} />

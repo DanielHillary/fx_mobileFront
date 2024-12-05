@@ -50,13 +50,13 @@ const RiskManager = () => {
 
   const finishPlanRegistration = async () => {
     if (
-      (defaultVolume === 0) |
-      (lossPerDay === 0) |
-      (minProfitPerTrade === 0) |
-      (minRRR === 0) |
-      (lossPerTrade === 0) |
-      (targetProfit === 0) |
-      (drawDown === 0)
+      (defaultVolume === 0 || "") |
+      (lossPerDay === 0 || "") |
+      (minProfitPerTrade === 0 || "") |
+      (minRRR === 0 || "") |
+      (lossPerTrade === 0 || "") |
+      (targetProfit === 0 || "") |
+      (drawDown === 0 || "")
     ) {
       Alert.alert("", "Please fill out all the positions");
     } else {

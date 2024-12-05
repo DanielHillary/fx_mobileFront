@@ -89,7 +89,7 @@ const JournalCard = ({ item }) => {
             borderWidth: 0.3,
             borderRadius: 17,
             padding: SIZES.xSmall - 6,
-            width: 33.5,
+            width: 40.5,
             alignItems: "center",
           }}
         >
