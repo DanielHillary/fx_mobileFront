@@ -4,11 +4,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // const authToken = await AsyncStorage.getItem("jwtToken");
 
-// export const localHost = "http://192.168.73.215:8080/api";
-export const localHost = "https://fxprodev.onrender.com/api";
+export const localHost = "http://192.168.149.215:8080/api/v1";
+// export const localHost = "https://fxprodev.onrender.com/api";
 
-// const host = "http://192.168.73.215:8080/auth/login";
-const host = "https://fxprodev.onrender.com/auth/login";
+const host = "http://192.168.149.215:8080/api/v1/auth/login";
+// const host = "https://fxprodev.onrender.com/auth/login";
 
 const headers = {
   "Content-Type": "application/json",
@@ -16,8 +16,8 @@ const headers = {
 };
 export const fetchUser = async (userName, password) => {
   const response = await axios.post(host, {
-    userName: userName,
-    userPassword: password,
+    email: userName,
+    password: password,
   });
   return response;
 };
@@ -56,7 +56,7 @@ export const resentOtpCode = async (mail) => {
 
 export const saveFireBaseToken = async (token, accountId) => {
   const apiAxios = await createAxiosInstance();
-  const response = await apiAxios.get("/registration/savefirebasetoken", {
+  const response = await apiAxios.get("/v1/registration/savefirebasetoken", {
     params: { token: token, userId: accountId },
   });
   return response;
@@ -64,13 +64,13 @@ export const saveFireBaseToken = async (token, accountId) => {
 
 export const updateUserInformation = async (body) => {
   const apiAxios = await createAxiosInstance();
-  const response = await apiAxios.put("/registration/updateuserinfo", body);
+  const response = await apiAxios.put("/v1/registration/updateuserinfo", body);
   return response;
 };
 
 export const resetPassword = async (email, password) => {
   const apiAxios = await createAxiosInstance();
-  const response = await apiAxios.get("/registration/resetpassword", {
+  const response = await apiAxios.get("/v1/registration/resetpassword", {
     params: { email: email, newPassword: password },
   });
   return response;

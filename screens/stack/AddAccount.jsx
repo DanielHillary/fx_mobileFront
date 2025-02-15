@@ -243,9 +243,12 @@ const AddAccount = () => {
       defaultAccount: true,
     };
 
+    console.log(account)
+
     const response = await registerNewMetaApiAccount(account).then((res) => {
       return res.data;
     });
+    
     setIsClicked(false);
     if (response.status) {
       updateAccount(response.data.account);
@@ -261,7 +264,7 @@ const AddAccount = () => {
       });
     } else {
       console.log(response.message);
-      Alert.alert("Failed Request", "Something went wrong. Please try again");
+      Alert.alert("Failed Request", response.message);
     }
   };
 

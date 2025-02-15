@@ -10,7 +10,10 @@ import {
 import React, { useState, useContext, useEffect } from "react";
 import { COLORS, SIZES, FONT } from "../../constants";
 import { AuthContext } from "../../context/AuthContext";
-import { getEntryTechniques, registerTradeSetup } from "../../api/tradingplanApi";
+import {
+  getEntryTechniques,
+  registerTradeSetup,
+} from "../../api/tradingplanApi";
 
 const Options = ({ option, updateList }) => {
   const [entry, setEntry] = useState(false);
@@ -97,9 +100,14 @@ const ConfirmStrategyModal = ({ setVisibility, openTrade }) => {
 
   const ignoreEntries = async () => {
     setVisibility(false);
-    openTrade(true, false, 0, chosen);
+    let chosenList;
+    if (chosen.length > 0) {
+      chosenList = chosen.map((item) => item.indicatorName).join(",");
+    } else {
+      chosenList = ""; // Or any default value you prefer
+    }
+    openTrade(true, false, 0, chosenList);
   };
-
 
   return (
     <View style={styles.container}>
@@ -118,32 +126,32 @@ const ConfirmStrategyModal = ({ setVisibility, openTrade }) => {
           </View>
         </ScrollView>
         <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              gap: SIZES.medium * 2,
-              paddingHorizontal: SIZES.medium * 1.5,
-              position: "absolute",
-              bottom: 20
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            gap: SIZES.medium * 2,
+            paddingHorizontal: SIZES.medium * 1.5,
+            position: "absolute",
+            bottom: 20,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              ignoreEntries();
             }}
+            style={styles.button}
           >
-            <TouchableOpacity
-              onPress={() => {
-                ignoreEntries();
-              }}
-              style={styles.button}
-            >
-              <Text style={styles.buttonText}>Ignore</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                confirmEntries();
-              }}
-              style={styles.button}
-            >
-              <Text style={styles.buttonText}>Confirm Entries</Text>
-            </TouchableOpacity>
-          </View>
+            <Text style={styles.buttonText}>Ignore</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              confirmEntries();
+            }}
+            style={styles.button}
+          >
+            <Text style={styles.buttonText}>Confirm Entries</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

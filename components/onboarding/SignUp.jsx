@@ -62,9 +62,8 @@ const SignUp = () => {
         password: passWord,
         phoneNumber: phoneNumber,
         userName: userName,
-        hasMetaAccount: false,
+        role: "User",
         userTimeZone: userTimeZone,
-        hasCompleteTradingPlan: false,
       };
 
       const response = await registerNewUser(newUser).then((res) => {

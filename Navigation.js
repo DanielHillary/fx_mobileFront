@@ -77,6 +77,7 @@ import ChoosePlan from "./screens/stack/ChoosePlan";
 import Price from "./screens/stack/Price";
 import StrategyAnalyzer from "./screens/stack/StrategyAnalyzer";
 import StrategyAnalysisReport from "./screens/stack/StrategyAnalysisReport";
+import CreateNewExit from "./components/tradingsystem/CreatNewExit";
 
 const Tab = createBottomTabNavigator();
 
@@ -134,6 +135,17 @@ const AuthStack = () => {
       <AuthenticationStack.Screen
         name="ExitStrategy"
         component={ExitStrategy}
+        options={{
+          presentation: "modal",
+          headerStyle: styles.header,
+          headerTitleStyle: styles.headertitle,
+          headerTitleAlign: "center",
+        }}
+      />
+
+      <AuthenticationStack.Screen
+        name="CreateNewExit"
+        component={CreateNewExit}
         options={{
           presentation: "modal",
           headerStyle: styles.header,

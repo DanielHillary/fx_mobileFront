@@ -228,12 +228,15 @@ const AddNewExitStrategy = () => {
         <View style={{ flexDirection: "row", gap: SIZES.small }}>
           <Text style={{ color: COLORS.lightWhite }}>Add Profit Level</Text>
           <TouchableOpacity
+            // onPress={() => {
+            //   if (checkEmptyLevelsForProfit()) {
+            //     setIsProfitAlert(true);
+            //   } else {
+            //     setIsContinue(true);
+            //   }
+            // }}
             onPress={() => {
-              if (checkEmptyLevelsForProfit()) {
-                setIsProfitAlert(true);
-              } else {
-                setIsContinue(true);
-              }
+              navigation.navigate("CreateExit", { value: "Edit Profit" });
             }}
           >
             <Image

@@ -15,8 +15,8 @@ import AwesomeAlert from "react-native-awesome-alerts";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-  registerNewLossExitStrategy,
-  registerNewProfitExitStrategy,
+  registerLossExitStrategy,
+  registerProfitExitStrategy,
 } from "../../api/tradingplanApi";
 import SuccessModal from "../modal/SuccessModal";
 import { AuthContext } from "../../context/AuthContext";
@@ -56,7 +56,7 @@ const AlertModal = ({
   );
 };
 
-const CreateExit = () => {
+const CreateNewExit = () => {
   const [tpValue, setTpValue] = useState(0);
   const [slValue, setSlValue] = useState(0);
   const [slProfitValue, setSlProfitValue] = useState(0);
@@ -79,18 +79,19 @@ const CreateExit = () => {
   const [profitSL, setProfitSL] = useState(false);
 
   const setVisibility = (value) => {
+    navigation.goBack()
     setIsModalVisible(value);
   };
 
   const { accountDetails } = useContext(AuthContext);
 
   const getAccount = async () => {
-    // const account = await AsyncStorage.getItem("accountInfo").then((res) => {
-    //   return JSON.parse(res);
-    // });
-    // setAccountInfo(account);
+    const account = await AsyncStorage.getItem("accountInfo").then((res) => {
+      return JSON.parse(res);
+    });
+    setAccountInfo(account);
 
-    setAccountInfo(accountDetails)
+    // setAccountInfo(accountDetails);
   };
 
   useEffect(() => {
@@ -102,6 +103,7 @@ const CreateExit = () => {
   const route = useRoute();
 
   const dataFrom = route?.params.value || null;
+  const tradingPlan = route?.params.tradePlan || null;
 
   const checkEmptyLevelsForProfit = () => {
     if (profitLotSize == 0 && slProfitValue == 0 && slLossValue == 0) {
@@ -118,14 +120,14 @@ const CreateExit = () => {
   };
 
   const handleSave = () => {
-    const isProfit = dataFrom == "Edit Profit" ? "Profit" : "Loss"
-    if(isProfit === "Loss"){
+    const isProfit = dataFrom == "Edit Profit" ? "Profit" : "Loss";
+    if (isProfit === "Loss") {
       if (checkEmptyLevelsForLoss()) {
         setIsLossAlert(true);
       } else {
         setIsContinue(true);
       }
-    }else{
+    } else {
       if (checkEmptyLevelsForProfit()) {
         setIsProfitAlert(true);
       } else {
@@ -152,10 +154,12 @@ const CreateExit = () => {
       original: true,
       slPlacementPercentIsForProfit: slLossValue == 0 ? true : false,
       slplacementPercentAfterProfit: slProfitValue == 0 ? 1 : slProfitValue,
-      tradingPlanId: accountInfo.planId,
+      tradingPlanId: tradingPlan.planId,
     };
 
-    const response = await registerNewProfitExitStrategy(body).then((res) => {
+    console.log(body);
+
+    const response = await registerProfitExitStrategy(body).then((res) => {
       return res.data;
     });
     if (response.status) {
@@ -179,10 +183,10 @@ const CreateExit = () => {
       original: true,
       slPlacementPercentIsForProfit: false,
       slplacementPercentAfterProfit: 100,
-      tradingPlanId: accountInfo.planId,
+      tradingPlanId: tradingPlan.planId,
     };
 
-    const response = await registerNewLossExitStrategy(body).then((res) => {
+    const response = await registerLossExitStrategy(body).then((res) => {
       return res.data;
     });
     if (response.status) {
@@ -500,17 +504,21 @@ const CreateExit = () => {
         isAlert={isCheckLevels}
       />
 
-      <View style={{flexDirection: "row", gap: SIZES.small, alignSelf: "center"}}>
+      <View
+        style={{ flexDirection: "row", gap: SIZES.small, alignSelf: "center" }}
+      >
         <TouchableOpacity
           onPress={() => {
             handleSave();
           }}
-          style={[styles.buttonContinue, {backgroundColor: "green"}]}
+          style={[styles.buttonContinue, { backgroundColor: "green" }]}
         >
           {isClicked ? (
             <ActivityIndicator size="large" colors={"black"} />
           ) : (
-            <Text style={[styles.buttonText, {color: COLORS.lightWhite}]}>Save</Text>
+            <Text style={[styles.buttonText, { color: COLORS.lightWhite }]}>
+              Save
+            </Text>
           )}
         </TouchableOpacity>
 
@@ -543,7 +551,7 @@ const CreateExit = () => {
   );
 };
 
-export default CreateExit;
+export default CreateNewExit;
 
 const styles = StyleSheet.create({
   baseContainer: {

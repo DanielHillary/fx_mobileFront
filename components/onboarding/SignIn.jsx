@@ -44,10 +44,10 @@ const SignIn = () => {
 
       <View style={{ width: "80%", marginTop: SIZES.medium }}>
         <Text style={{ color: COLORS.lightWhite, padding: SIZES.small - 5 }}>
-          Username
+          Email
         </Text>
         <TextInput
-          placeholder="Enter your Username"
+          placeholder="Enter your email"
           placeholderTextColor={COLORS.gray}
           style={styles.email(isEFocused)}
           onFocus={() => {

@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
+import SwiperFlatList from "react-native-swiper-flatlist";
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { COLORS, SIZES, FONT } from "../../../constants";
 import AwesomeAlert from "react-native-awesome-alerts";
@@ -234,9 +235,7 @@ const ProfitExits = ({ item, updateChange, updateList }) => {
                 setSlProfitValue(text);
                 AsyncStorage.setItem("slProfitValue" + item.exitId, text);
               }}
-              value={
-                slProfitValue 
-              }
+              value={slProfitValue}
               onFocus={() => {
                 setSlFocused(true);
               }}
@@ -346,9 +345,9 @@ const LossExits = ({ item, updateChange, updateList }) => {
   useEffect(() => {
     AsyncStorage.getItem("slValue" + item.exitId).then((value) => {
       if (value !== null) {
-        if(item.allowedLossLevelPercentage.length === 0){
-          setSlValue(value)
-        }else{
+        if (item.allowedLossLevelPercentage.length === 0) {
+          setSlValue(value);
+        } else {
           setSlValue(String(item.allowedLossLevelPercentage));
         }
       } else {
@@ -769,18 +768,27 @@ const ExitPlan = () => {
           {isProfitEmpty ? (
             <EmptyList message={"You don't have any exit levels"} />
           ) : (
-            <ScrollView horizontal>
-              <View style={{ flexDirection: "row", gap: SIZES.medium }}>
-                {profitExits?.map((item) => (
-                  <ProfitExits
-                    item={item}
-                    key={item.exitId}
-                    updateChange={updateChange}
-                    updateList={updateList}
-                  />
-                ))}
+            <SwiperFlatList
+            // autoplay
+            autoplayDelay={2}
+            autoplayLoop
+            index={0}
+            showPagination
+            paginationActiveColor={COLORS.darkyellow}
+            paginationStyle={styles.paginate}
+            paginationStyleItem={styles.paginate}
+            data={profitExits}
+            renderItem={({ item }) => (
+              <View style={{gap: SIZES.medium }}>
+                <ProfitExits
+                  item={item}
+                  key={item.exitId}
+                  updateChange={updateChange}
+                  updateList={updateList}
+                />
               </View>
-            </ScrollView>
+            )}
+          />
           )}
         </View>
       )}
@@ -824,18 +832,27 @@ const ExitPlan = () => {
           {isLossEmpty ? (
             <EmptyList message={"You don't have any exit levels"} />
           ) : (
-            <ScrollView horizontal>
-              <View style={{ flexDirection: "row", gap: SIZES.medium }}>
-                {lossExits?.map((item) => (
+            <SwiperFlatList
+              // autoplay
+              autoplayDelay={2}
+              autoplayLoop
+              index={0}
+              showPagination
+              paginationActiveColor={COLORS.darkyellow}
+              paginationStyle={styles.paginate}
+              paginationStyleItem={styles.paginate}
+              data={lossExits}
+              renderItem={({ item }) => (
+                <View style={{gap: SIZES.medium }}>
                   <LossExits
                     item={item}
                     key={item.exitId}
                     updateChange={updateChange}
                     updateList={updateList}
                   />
-                ))}
-              </View>
-            </ScrollView>
+                </View>
+              )}
+            />
           )}
         </View>
       )}
@@ -927,6 +944,11 @@ const ExitPlan = () => {
 export default ExitPlan;
 
 const styles = StyleSheet.create({
+  wrapper: {},
+  paginate: {
+    top: -12,
+    rowGap: SIZES.xSmall/2
+  },
   baseContainer: {
     backgroundColor: COLORS.appBackground,
     flex: 1,

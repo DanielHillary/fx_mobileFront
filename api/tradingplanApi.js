@@ -45,6 +45,16 @@ export const registerTradeSetup = async (accountId, setupList) => {
   return response;
 };
 
+export const getAllExitStrategies = async (accountId) => {
+  const response = await axios.get(
+    `${localHost}/general/getexitstrategiesforaccount`,
+    {
+      params: { accountId: accountId },
+    }
+  );
+  return response;
+};
+
 export const registerLossExitStrategy = async (body) => {
   const response = await axios.post(
     `${localHost}/general/createexitstrategyforloss`,

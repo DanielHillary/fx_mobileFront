@@ -13,6 +13,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../context/AuthContext";
 import { getAllUserAccounts } from "../../api/accountApi";
 import AlertModal from "../../components/modal/AlertModal";
+import EmptyList from "../../components/EmptyList";
 
 const AccountCard = ({
   item,
@@ -22,9 +23,9 @@ const AccountCard = ({
 }) => {
   const [hasTrade, setHasTrade] = useState(true);
 
-  const formatter = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
+  const formatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
   });
 
   let accountDesc =
@@ -164,6 +165,30 @@ const Account = () => {
     }, [accountDetails])
   );
 
+  if (accountDetails.accountName === "PsyDStarter") {
+    return (
+      <View style={styles.basecontainer}>
+        <EmptyList message={"No Real account registered"} />
+        <TouchableOpacity
+          onPress={() => {
+            if (accountDetails.accountName != "PsyDStarter") {
+              navigation.navigate("SetUpTradingPlan", { account: accountInfo });
+            } else {
+              navigation.navigate("AddNewAccount");
+            }
+          }}
+          style={styles.buttonContinue}
+        >
+          {isClicked ? (
+            <ActivityIndicator size="large" colors={"black"} />
+          ) : (
+            <Text style={styles.buttonText}>Register account</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.base}>
       <View
@@ -236,6 +261,11 @@ const Account = () => {
 export default Account;
 
 const styles = StyleSheet.create({
+  basecontainer: {
+    backgroundColor: COLORS.appBackground,
+    flex: 1,
+    justifyContent: "flex-start",
+  },
   base: {
     backgroundColor: COLORS.appBackground,
   },
@@ -245,6 +275,15 @@ const styles = StyleSheet.create({
   image: {
     height: 20,
     width: 20,
+  },
+  buttonContinue: {
+    // margin: 80,
+    height: 40,
+    backgroundColor: COLORS.darkyellow,
+    borderRadius: 10,
+    width: 200,
+    marginTop: 40,
+    alignSelf: "center",
   },
   text: {
     color: COLORS.lightWhite,

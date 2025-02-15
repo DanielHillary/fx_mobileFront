@@ -459,7 +459,7 @@ const TradeAnalysis = ({ screenProps }) => {
                   }}
                 />
               ) : (
-                <Text style={styles.textInput}>${balance}</Text>
+                <Text style={styles.textInput}>{formatter.format(balance)}</Text>
               )}
             </View>
             <View style={styles.lineText(editMode)} />

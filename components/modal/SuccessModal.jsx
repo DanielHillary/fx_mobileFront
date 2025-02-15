@@ -18,7 +18,7 @@ const SuccessModal = ({ setVisibility }) => {
             source={require("../../assets/icons/good.png")}
             style={{ height: 50, width: 50 }}
           />
-          <Text style={styles.note}>Transaction Successful</Text>
+          <Text style={styles.note}>Processing Your Order</Text>
 
           <TouchableOpacity
             onPress={() => {

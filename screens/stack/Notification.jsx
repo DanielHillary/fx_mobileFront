@@ -14,7 +14,11 @@ import React, { useContext, useEffect, useState, useCallback } from "react";
 import { COLORS, FONT, SIZES } from "../../constants";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../context/AuthContext";
-import { getAlertCategory, getNotifications, removeFromList } from "../../api/notificationApi";
+import {
+  getAlertCategory,
+  getNotifications,
+  removeFromList,
+} from "../../api/notificationApi";
 import { getTradeAnalysis } from "../../api/tradeAnalysisApi";
 import EmptyList from "../../components/EmptyList";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -33,22 +37,21 @@ const NotificationCard = ({ item, updateNoteList }) => {
     navigation.navigate("TradeReport", { data: item.responseId });
   };
 
-  const checkPriceAlert = async() => {
+  const checkPriceAlert = async () => {
     markAsRead();
     navigation.navigate("AlertHistory");
-    
-  }
+  };
 
   const markAsRead = async () => {
     let resp = await removeFromList(item.id).then((res) => {
       return res.data;
     });
-    if(resp.status){
+    if (resp.status) {
       updateNoteList(item);
-    }else{
+    } else {
       console.log(resp.message);
     }
-  }
+  };
 
   return (
     <View
@@ -96,57 +99,63 @@ const NotificationCard = ({ item, updateNoteList }) => {
       <Text style={{ color: COLORS.lightWhite, marginLeft: 28 }}>
         {item.content}
       </Text>
-      <View style={{ flexDirection: "row", justifyContent: 'space-between', paddingHorizontal: SIZES.small }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          paddingHorizontal: SIZES.small,
+        }}
+      >
         <TouchableOpacity
           style={styles.read}
           onPress={() => {
-              markAsRead();
+            markAsRead();
           }}
         >
           <Text style={{ color: COLORS.darkyellow }}>Mark as read</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.viewing}
-          onPress={() => {
-            if (item.notificationCategory == "Trades") {
-              checkTradeNotification();
-            }
-            if (item.notificationCategory == "Entry"){
-              markAsRead();
-              navigation.navigate("ConfirmEntry", { tradeDetail : item.metaOrderId });
-              
-            }
-            if(item.notificationCategory == "Price Alert"){
-              checkPriceAlert()
-            }
-            if(item.notificationCategory == "Exit Level"){
-              markAsRead();
-              navigation.navigate("Home")
-              
-            }
-            if(item.notificationCategory == "Closed Trade"){
-              markAsRead();
-              navigation.navigate("TradingJournal")
-            }
-            if(item.notificationCategory == "Telegram"){
-              openURL("https://t.me/PsyDTradingBot")
-              markAsRead();
-            }
-            if(item.notificationCategory === "Limit"){
-              markAsRead()
-              navigation.navigate("Plan");
-              
-            }
-            if(item.notificationCategory === "Account Update"){
-              markAsRead()
-              navigation.navigate("Pricing");
-              
-            }
-          }}
-        >
-          <Text style={{ color: COLORS.darkyellow }}>View</Text>
-        </TouchableOpacity>
+        {item.title !== "Invalid Entry" && (
+          <TouchableOpacity
+            style={styles.viewing}
+            onPress={() => {
+              if (item.notificationCategory == "Trades") {
+                checkTradeNotification();
+              }
+              if (item.notificationCategory == "Entry") {
+                markAsRead();
+                navigation.navigate("ConfirmEntry", {
+                  tradeDetail: item.metaOrderId,
+                });
+              }
+              if (item.notificationCategory == "Price Alert") {
+                checkPriceAlert();
+              }
+              if (item.notificationCategory == "Exit Level") {
+                markAsRead();
+                navigation.navigate("Home");
+              }
+              if (item.notificationCategory == "Closed Trade") {
+                markAsRead();
+                navigation.navigate("TradingJournal");
+              }
+              if (item.notificationCategory == "Telegram") {
+                openURL("https://t.me/PsyDTradingBot");
+                markAsRead();
+              }
+              if (item.notificationCategory === "Limit") {
+                markAsRead();
+                navigation.navigate("Plan");
+              }
+              if (item.notificationCategory === "Account Update") {
+                markAsRead();
+                navigation.navigate("Pricing");
+              }
+            }}
+          >
+            <Text style={{ color: COLORS.darkyellow }}>View</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -167,25 +176,24 @@ const Notification = () => {
 
   const { accountDetails, updateNotification } = useContext(AuthContext);
 
-  const setAccountUp = async() => {
+  const setAccountUp = async () => {
     let account = await AsyncStorage.getItem("accountInfo").then((res) => {
       return JSON.parse(res);
-    })
-    
-    if(account === null && accountDetails === null){
+    });
+
+    if (account === null && accountDetails === null) {
       setWaiting(true);
     }
-    if(accountDetails === null || accountDetails.length === 0){
+    if (accountDetails === null || accountDetails.length === 0) {
       setAccountInfo(account);
-      setWaiting(false)
+      setWaiting(false);
       getAllNotification(account.accountId);
-    }else{
+    } else {
       setAccountInfo(accountDetails);
       setWaiting(false);
       getAllNotification(accountDetails.accountId);
     }
-    
-  }
+  };
 
   const updateList = (item) => {
     const newArray = notification.filter((obj) => obj.id !== item.id);
@@ -201,13 +209,14 @@ const Notification = () => {
     const response = await getNotifications(id).then((res) => {
       return res.data;
     });
-    
+
     if (response.status) {
       if (response.data.length == 0) {
         setError(true);
         updateNotification(false);
       } else {
         setNotification(response.data);
+
         setError(false);
       }
     } else {
@@ -219,18 +228,19 @@ const Notification = () => {
   const getCategoryNotification = async (category) => {
     setIsLoading(true);
     try {
-      const response = await getAlertCategory(accountInfo.accountId, category).then((res) => {
+      const response = await getAlertCategory(
+        accountInfo.accountId,
+        category
+      ).then((res) => {
         return res.data;
       });
       if (response.status) {
         if (response.data.length == 0) {
           setError(true);
           updateNotification(false);
-          
         } else {
           setNotification(response.data);
           setError(false);
-          
         }
       } else {
         console.log(response.message);
@@ -239,7 +249,6 @@ const Notification = () => {
     } catch (error) {
       console.log(error);
     }
-    
   };
 
   useEffect(() => {
@@ -295,7 +304,7 @@ const Notification = () => {
     return search;
   };
 
-  if(waiting || accountInfo === null){
+  if (waiting || accountInfo === null) {
     return (
       <View
         style={{
@@ -307,7 +316,7 @@ const Notification = () => {
       >
         <ActivityIndicator size={"large"} />
       </View>
-    )
+    );
   }
 
   return (
@@ -464,9 +473,9 @@ const styles = StyleSheet.create({
     padding: SIZES.xSmall - 6,
     alignSelf: "center",
   },
-  read:{
+  read: {
     color: "green",
-    alignSelf: 'center'
+    alignSelf: "center",
   },
   viewing: {
     justifyContent: "center",

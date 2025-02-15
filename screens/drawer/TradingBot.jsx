@@ -1070,7 +1070,7 @@ const TradingBot = () => {
         }}
         handleConfirm={() => {
           setEntryAlert(false);
-          placeOrderForTrade(true, false, 0);
+          placeOrderForTrade(true, false, 0, "");
         }}
         message={
           "You do not have a registerd entry strategy. Are you sure you want to proceed with this trade?"

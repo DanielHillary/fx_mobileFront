@@ -75,6 +75,12 @@ const RiskAnalysis = () => {
 
   const tradeDetails = route.params?.data || null;
 
+  
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  });
+
   const getRemarks = async () => {
     setRemarks(tradeDetails.rems);
   };
@@ -189,7 +195,7 @@ const RiskAnalysis = () => {
                   fontSize: SIZES.large,
                 }}
               >
-                ${tradeDetails.accountBalance}
+                {formatter.format(tradeDetails.accountBalance)}
               </Text>
             </Text>
           </View>
